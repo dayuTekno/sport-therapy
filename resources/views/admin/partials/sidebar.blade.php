@@ -109,9 +109,9 @@
 
                                 <li>
                     <a
-                        href="#"
+                        href="{{ route("listpengaju") }}"
                         class="menu-item group flex items-center gap-3
-                        {{ request()->routeIs('admin.pengaju')
+                        {{ request()->routeIs('listpengaju')
                             ? 'menu-item-active'
                             : 'menu-item-inactive' }}"
                     >

@@ -12,9 +12,26 @@ class UserController extends Controller
     {
         $users = User::with('roles')
             ->orderBy('created_at', 'desc')
-            ->paginate(10); // 👈 ini kuncinya
+            ->paginate(1); // 👈 ini kuncinya
 
         return view('admin.pages.users.index', compact('users'));
+    }
+
+    public function listPengaju()
+    {
+        $users = User::with(['dataRegister'])
+                ->role('user') // kalau pakai spatie
+                ->orderBy('created_at', 'desc')
+                ->paginate(10);
+
+        return view('admin.pages.pengaju.index', compact('users'));
+    }
+
+     public function showPengaju(User $user)
+    {
+        $user->load('dataRegister');
+
+        return view('admin.pages.pengaju.detail', compact('user'));
     }
 
     public function create()

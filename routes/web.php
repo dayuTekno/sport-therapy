@@ -17,4 +17,8 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('roles', RoleController::class);
     Route::resource('users', UserController::class);
     Route::resource('news', NewsController::class);
+
+    Route::get('pengaju', [UserController::class, 'listPengaju'])->name('listpengaju');
+    Route::get('pengaju/{user}', [UserController::class, 'showPengaju'])->name('pengaju.show');
+
 });

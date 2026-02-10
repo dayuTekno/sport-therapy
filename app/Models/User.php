@@ -46,4 +46,9 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    public function dataRegister()
+    {
+        return $this->hasOne(DataRegister::class, 'user_id');
+    }
 }
