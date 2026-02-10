@@ -69,10 +69,6 @@
         </button>
       </form>
 
-      <p class="mt-5 text-sm text-gray-700 dark:text-gray-400">
-        Don't have an account?
-        <a href="{{ route('register') }}" class="text-brand-500">Sign Up</a>
-      </p>
     </div>
   </div>
 
