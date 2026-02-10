@@ -6,7 +6,7 @@
 
 <x-breadcrumb :items="[
     ['label' => 'Dashboard', 'url' => route('dashboard')],
-    ['label' => 'Master Data'],
+    ['label' => 'Settings'],
     ['label' => 'Roles'],
 ]" />
 

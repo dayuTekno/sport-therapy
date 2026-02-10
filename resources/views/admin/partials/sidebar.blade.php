@@ -129,9 +129,9 @@
 
                 <li>
                     <a
-                        href="#"
+                        href="{{ route("news.index") }}"
                         class="menu-item group flex items-center gap-3
-                        {{ request()->routeIs('admin.news')
+                        {{ request()->routeIs('news.index')
                             ? 'menu-item-active'
                             : 'menu-item-inactive' }}"
                     >
@@ -296,9 +296,9 @@
 
                                 <li>
                     <a
-                        href="#"
+                        href="{{ route("users.index") }}"
                         class="menu-item group flex items-center gap-3
-                        {{ request()->routeIs('admin.user')
+                        {{ request()->routeIs('users.index')
                             ? 'menu-item-active'
                             : 'menu-item-inactive' }}"
                     >
