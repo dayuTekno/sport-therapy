@@ -6,25 +6,42 @@
            dark:border-gray-800 dark:bg-black lg:static lg:translate-x-0"
 >
     <!-- HEADER -->
-    <div
-        :class="sidebarToggle ? 'justify-center' : 'justify-between'"
-        class="flex items-center gap-2 pt-8 pb-7"
-    >
-        <a href="{{ route('dashboard') }}">
-            <span class="logo" :class="sidebarToggle ? 'hidden' : ''">
-                <img class="dark:hidden"
-                     src="{{ asset('admin/images/logo/logo.svg') }}" />
-                <img class="hidden dark:block"
-                     src="{{ asset('admin/images/logo/logo-dark.svg') }}" />
-            </span>
+   <div
+            :class="sidebarToggle ? 'justify-center' : 'justify-between'"
+            class="flex items-center gap-2 pt-8 pb-7"
+        >
+            <a href="{{ route('dashboard') }}"
+            class="flex items-center gap-3"
+            >
+                {{-- LOGO --}}
+                <img
+                    class="w-[100px] h-[50px] dark:hidden"
+                    src="{{ asset('/storage/images/new-dishub-2.png') }}"
+                    alt="Dishub"
+                />
+                <img
+                    class="w-[100px] h-[50px] hidden dark:block"
+                    src="{{ asset('/storage/images/new-dishub-2.png') }}"
+                    alt="Dishub"
+                />
 
+                {{-- TEXT --}}
+                <span
+                    class="text-base font-semibold whitespace-nowrap"
+                    :class="sidebarToggle ? 'hidden' : ''"
+                >
+                    Sisfo.dishubcirebon
+                </span>
+            </a>
+
+            {{-- ICON SAAT SIDEBAR COLLAPSE --}}
             <img
                 class="logo-icon"
                 :class="sidebarToggle ? 'lg:block' : 'hidden'"
-                src="{{ asset('admin/images/logo/logo-icon.svg') }}"
+                src="{{ asset('/storage/images/logo-icon.svg') }}"
             />
-        </a>
-    </div>
+        </div>
+
 
     <!-- MENU -->
     <div class="flex flex-col overflow-y-auto no-scrollbar">

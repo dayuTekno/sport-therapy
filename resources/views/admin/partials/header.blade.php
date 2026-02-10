@@ -31,7 +31,7 @@
 
         <!-- RIGHT -->
         <div class="flex items-center gap-4">
-
+{{-- 
             <!-- 🔔 NOTIFICATION -->
             <div class="relative">
                 <button
@@ -134,7 +134,7 @@
                         </a>
                     </div>
                 </div>
-            </div>
+            </div> --}}
 
             <!-- 👤 USER DROPDOWN -->
             <div class="relative">

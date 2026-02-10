@@ -82,12 +82,25 @@
   >
     @include('admin.partials.common-grid-shape')
 
-    <div class="flex flex-col items-center max-w-xs">
-      <img src="{{ asset('admin/images/logo/auth-logo.svg') }}" class="mb-4" />
-      <p class="text-center text-gray-400 dark:text-white/60">
-        Free and Open-Source Tailwind CSS Admin Dashboard Template
-      </p>
+<div class="flex flex-col items-center max-w-xs">
+    {{-- LOGO --}}
+    <div class="flex items-center gap-4 mb-4">
+        <img
+            src="{{ asset('/storage/images/new-dishub-2.png') }}"
+            class="w-[200px] h-[100px] object-contain"
+        />
+        <img
+            src="{{ asset('/storage/images/cirebon.png') }}"
+            class="w-[200px] h-[100px] object-contain"
+        />
     </div>
+
+    {{-- TEXT --}}
+    <p class="text-center text-2xl text-gray-400 dark:text-white/60">
+        Sistem Informasi Dinas Perhubungan Angkutan Darat Kota Cirebon
+    </p>
+</div>
+
   </div>
 
   <!-- DARK MODE TOGGLER -->
