@@ -1,6 +1,6 @@
 @extends('admin.layouts.app')
 
-@section('title', 'artikel Management')
+@section('title', 'Artikel Management')
 
 @section('content')
 
@@ -54,7 +54,7 @@
                 </td>
 
                 <td class="px-6 py-4 text-sm text-gray-600">
-                    {{ $artikel['description'] }}
+                    {{ \Illuminate\Support\Str::limit($artikel['description'], 30) }}
                 </td>
 
                 <td class="px-6 py-4 text-sm text-gray-600">

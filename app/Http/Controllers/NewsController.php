@@ -77,7 +77,7 @@ class NewsController extends Controller
         // return redirect()->route('news.index')->with('success', 'User created successfully');
     }
 
-    public function edit(User $user)
+    public function edit()
     {
         return view('admin.pages.news.edit');
     }
