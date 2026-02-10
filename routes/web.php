@@ -4,9 +4,11 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\NewsController;
+use App\Http\Controllers\PengaduanController;
+use App\Http\Controllers\PerizinanController;
 
 
-Route::get('/', [App\Http\Controllers\HomeController::class, 'index']);
+Route::get('/', [App\Http\Controllers\HomeController::class, 'index'])->name('dashboard');;
 
 
 Auth::routes();
@@ -20,5 +22,8 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('pengaju', [UserController::class, 'listPengaju'])->name('listpengaju');
     Route::get('pengaju/{user}', [UserController::class, 'showPengaju'])->name('pengaju.show');
+    Route::get('pengaduan', [PengaduanController::class, 'index'])->name('pengaduan');
+    Route::get('perizinan', [PerizinanController::class, 'index'])->name('perizinan');
+    Route::get('perizinan/{id}', [PerizinanController::class, 'detail'])->name('perizinan.show');
 
 });

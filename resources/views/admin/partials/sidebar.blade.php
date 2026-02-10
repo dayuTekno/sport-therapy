@@ -15,12 +15,12 @@
             >
                 {{-- LOGO --}}
                 <img
-                    class="w-[100px] h-[50px] dark:hidden"
+                    class="w-[50px] h-[50px] dark:hidden"
                     src="{{ asset('/storage/images/new-dishub-2.png') }}"
                     alt="Dishub"
                 />
                 <img
-                    class="w-[100px] h-[50px] hidden dark:block"
+                    class="w-[50px] h-[50px] hidden dark:block"
                     src="{{ asset('/storage/images/new-dishub-2.png') }}"
                     alt="Dishub"
                 />
@@ -78,9 +78,9 @@
                 <!-- CALENDAR -->
                 <li>
                     <a
-                        href="#"
+                        href="{{ route('perizinan') }}"
                         class="menu-item group flex items-center gap-3
-                        {{ request()->routeIs('admin.perizinan')
+                        {{ request()->routeIs('perizinan*')
                             ? 'menu-item-active'
                             : 'menu-item-inactive' }}"
                     >
@@ -98,9 +98,9 @@
 
                  <li>
                     <a
-                        href="#"
+                        href="{{ route('pengaduan') }}"
                         class="menu-item group flex items-center gap-3
-                        {{ request()->routeIs('admin.pengaduan')
+                        {{ request()->routeIs('pengaduan*')
                             ? 'menu-item-active'
                             : 'menu-item-inactive' }}"
                     >
@@ -128,7 +128,7 @@
                     <a
                         href="{{ route("listpengaju") }}"
                         class="menu-item group flex items-center gap-3
-                        {{ request()->routeIs('listpengaju')
+                        {{ request()->routeIs('pengaju*')
                             ? 'menu-item-active'
                             : 'menu-item-inactive' }}"
                     >
@@ -148,7 +148,7 @@
                     <a
                         href="{{ route("news.index") }}"
                         class="menu-item group flex items-center gap-3
-                        {{ request()->routeIs('news.index')
+                        {{ request()->routeIs('news*')
                             ? 'menu-item-active'
                             : 'menu-item-inactive' }}"
                     >
@@ -293,7 +293,7 @@
                     <a
                         href="{{ route("roles.index") }}"
                         class="menu-item group flex items-center gap-3
-                        {{ request()->routeIs('roles.index')
+                        {{ request()->routeIs('roles*')
                             ? 'menu-item-active'
                             : 'menu-item-inactive' }}"
                     >
@@ -315,7 +315,7 @@
                     <a
                         href="{{ route("users.index") }}"
                         class="menu-item group flex items-center gap-3
-                        {{ request()->routeIs('users.index')
+                        {{ request()->routeIs('users*')
                             ? 'menu-item-active'
                             : 'menu-item-inactive' }}"
                     >
