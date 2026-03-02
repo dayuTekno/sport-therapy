@@ -11,18 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('pengaduans', function (Blueprint $table) {
+        Schema::create('master_polyclinics', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')
+            $table->foreignId('clinic_id')
                   ->references('id')
-                  ->on('users')
+                  ->on('master_clinics')
                   ->cascadeOnDelete();
-            $table->string("nama");
-            $table->string("email");
-            $table->string("telp");
-            $table->string("isi_pengaduan");
-            $table->enum("read_st", [0,1])->default(0);
+            $table->string("polyclinic_code");
+            $table->string("name");
             $table->timestamps();
+            $table->boolean('is_active')->default(true);
         });
     }
 
@@ -31,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('pengaduans');
+        Schema::dropIfExists('master_polyclinics');
     }
 };

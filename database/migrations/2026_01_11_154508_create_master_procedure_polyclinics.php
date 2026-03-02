@@ -11,21 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('perizinans', function (Blueprint $table) {
+        Schema::create('master_procedure_polyclinics', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')
+            $table->foreignId('polyclinic_id')
                   ->references('id')
-                  ->on('users')
+                  ->on('master_polyclinics')
                   ->cascadeOnDelete();
-            $table->string("nomor_surat");
-            $table->string("judul_perizinan");
-            $table->foreignId('diapprove_oleh')
+            $table->foreignId('procedure_id')
                   ->references('id')
-                  ->on('users')
+                  ->on('master_procedures')
                   ->cascadeOnDelete();
-            $table->enum("status", ["waiting", "approved", "rejected"]);
-            $table->date("tgl_approval");
-            $table->enum("read_st", [0,1])->default(0);
             $table->timestamps();
         });
     }
@@ -35,6 +30,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('perizinans');
+        Schema::dropIfExists('master_procedure_polyclinics');
     }
 };
