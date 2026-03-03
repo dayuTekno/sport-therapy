@@ -1,0 +1,38 @@
+Master data:
+1. Pasien
+2. Eselon (nama penjamin)
+3. Dokter
+4. Poly klinik
+5. Obat (input manual)
+6. Master ICD (bisa di ambil dari data https://satusehat.kemkes.go.id/platform/docs/id/terminology/icd/icd-10/#:~:text=ICD-10%20adalah%20daftar%20klasifikasi%20medis%20yang%20dikeluarkan%20oleh,Classification%20of%20Diseases%20and%20Related%20Health%20Problems_%20%28ICD%29.)
+7. ICD Poly
+8. Dokter Poly
+9. Jadwal Dokter
+10. Master Tindakan ()
+11. Tindakan Poly
+
+Role Matrix:
+1. Administrator
+2. Dokter
+3. Perawat
+4. Admisi (pendaftaran) 
+5. Apoteker
+6. Pengawas (pengatur master tindakan dan master icd poly)
+
+Permission : 
+1. Administrator
+2. Guest
+
+data yang belum ada :
+1. form register pasien
+2. form anamnesa (igd, gimul, non igd)
+3. daftar obat (done)
+4. daftar ICD 9 dan 10 (done)
+
+
+data penunjang:
+https://chatgpt.com/share/695949e7-4edc-8007-aea0-f0b9bc0e9599
+
+
+catatan : 
+1 pasien bisa memiliki lebih dari 1 pasien
