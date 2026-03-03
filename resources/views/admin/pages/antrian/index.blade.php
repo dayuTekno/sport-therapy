@@ -39,7 +39,7 @@
 
         <!-- Button -->
         <div class="mt-8">
-            <a href="{{ route("update-antrian") }}"
+            <a href="{{ route("antrian-update") }}"
                class="inline-block w-full py-4 text-lg font-semibold bg-blue-600 text-white rounded-xl shadow-md hover:bg-blue-700 active:scale-95 transition">
                 🎟 Ambil Antrian Sekarang
             </a>

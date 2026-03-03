@@ -17,7 +17,7 @@ Auth::routes();
 Route::get('/dashboard', [App\Http\Controllers\HomeController::class, 'index'])->name('dashboard');
 
 Route::get('antrian', [AntrianController::class, 'index'])->name('antrian');
-Route::get('update-antrian', [AntrianController::class, 'update'])->name('update-antrian');
+Route::get('antrian/update', [AntrianController::class, 'update'])->name('antrian-update');
 
 
 Route::middleware(['auth'])->group(function () {
