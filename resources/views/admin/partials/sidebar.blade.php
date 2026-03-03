@@ -75,6 +75,27 @@
                     </a>
                 </li>
 
+                 <li>
+                    <a
+                        href="{{ route('antrian') }}"
+                        class="menu-item group flex items-center gap-3
+                        {{ request()->routeIs('antrian*')
+                            ? 'menu-item-active'
+                            : 'menu-item-inactive' }}"
+                    >
+                    <svg class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M4 7h16v4a2 2 0 010 4v4H4v-4a2 2 0 010-4V7z
+                        M9 11h6
+                        M9 15h4"/>
+                    </svg>
+                        <span class="menu-item-text"
+                              :class="sidebarToggle ? 'lg:hidden' : ''">
+                            Antrian Admisi
+                        </span>
+                    </a>
+                </li>
+
                 <!-- CALENDAR -->
                 <li>
                     <a
