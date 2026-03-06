@@ -13,16 +13,6 @@
     x-init="
         darkMode = JSON.parse(localStorage.getItem('darkMode'));
         $watch('darkMode', value => localStorage.setItem('darkMode', JSON.stringify(value)));
-        
-        @if(session('success'))
-            showAlert = true;
-            alertMessage = '{{ session('success') }}';
-            alertType = 'success';
-        @elseif(session('error'))
-            showAlert = true;
-            alertMessage = '{{ session('error') }}';
-            alertType = 'error';
-        @endif
     "
     :class="{'dark bg-gray-900': darkMode === true}"
 >

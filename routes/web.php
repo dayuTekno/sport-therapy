@@ -6,6 +6,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\NewsController;
 use App\Http\Controllers\PengaduanController;
 use App\Http\Controllers\PerizinanController;
+use App\Http\Controllers\RegistrasiController;
 use App\Http\Controllers\AntrianController;
 
 
@@ -25,6 +26,10 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('users', UserController::class);
     Route::resource('news', NewsController::class);
 
+
+    Route::resource('registrasi', RegistrasiController::class);
+    Route::get('registrasi/check/{nik}', [RegistrasiController::class, 'check'])->name('registrasi.check');
+    Route::get('registrasi/create', [RegistrasiController::class, 'create'])->name('registrasi.create');
 
 
     Route::get('pengaju', [UserController::class, 'listPengaju'])->name('listpengaju');

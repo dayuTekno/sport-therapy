@@ -99,9 +99,9 @@
                 <!-- CALENDAR -->
                 <li>
                     <a
-                        href="{{ route('perizinan') }}"
+                        href="{{ route('registrasi.index') }}"
                         class="menu-item group flex items-center gap-3
-                        {{ request()->routeIs('perizinan*')
+                        {{ request()->routeIs('registrasi*')
                             ? 'menu-item-active'
                             : 'menu-item-inactive' }}"
                     >
