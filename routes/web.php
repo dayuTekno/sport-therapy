@@ -29,7 +29,7 @@ Route::middleware(['auth'])->group(function () {
 
     Route::resource('registrasi', RegistrasiController::class);
     Route::get('registrasi/check/{nik}', [RegistrasiController::class, 'check'])->name('registrasi.check');
-    Route::get('registrasi/create', [RegistrasiController::class, 'create'])->name('registrasi.create');
+    Route::post('registrasi/create', [RegistrasiController::class, 'store'])->name('registrasi.store');
 
 
     Route::get('pengaju', [UserController::class, 'listPengaju'])->name('listpengaju');
