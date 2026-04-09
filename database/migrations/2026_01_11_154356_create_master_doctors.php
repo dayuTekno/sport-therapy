@@ -13,10 +13,6 @@ return new class extends Migration
     {
         Schema::create('master_doctors', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('clinic_id')
-                  ->references('id')
-                  ->on('master_clinics')
-                  ->cascadeOnDelete();
             $table->string("doctor_code");
             $table->string("employee_code");
             $table->string('license_number')->unique();

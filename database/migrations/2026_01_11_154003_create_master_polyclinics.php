@@ -13,10 +13,6 @@ return new class extends Migration
     {
         Schema::create('master_polyclinics', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('clinic_id')
-                  ->references('id')
-                  ->on('master_clinics')
-                  ->cascadeOnDelete();
             $table->string("polyclinic_code");
             $table->string("name");
             $table->timestamps();

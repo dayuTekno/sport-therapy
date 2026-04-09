@@ -119,7 +119,7 @@
 
                                 <li>
                     <a
-                        href="{{ route('perizinan') }}"
+                        href="#"
                         class="menu-item group flex items-center gap-3
                         {{ request()->routeIs('perizinan*')
                             ? 'menu-item-active'
@@ -141,7 +141,7 @@
 
                 <li>
                     <a
-                        href="{{ route('perizinan') }}"
+                        href="#"
                         class="menu-item group flex items-center gap-3
                         {{ request()->routeIs('perizinan*')
                             ? 'menu-item-active'
@@ -164,7 +164,7 @@
 
                 <li>
                     <a
-                        href="{{ route('perizinan') }}"
+                        href="#"
                         class="menu-item group flex items-center gap-3
                         {{ request()->routeIs('perizinan*')
                             ? 'menu-item-active'
@@ -184,7 +184,7 @@
 
                 <li>
                     <a
-                        href="{{ route('perizinan') }}"
+                        href="#"
                         class="menu-item group flex items-center gap-3
                         {{ request()->routeIs('perizinan*')
                             ? 'menu-item-active'
@@ -215,7 +215,7 @@
 
                 <li>
                     <a
-                        href="{{ route("listpengaju") }}"
+                        href="#"
                         class="menu-item group flex items-center gap-3
                         {{ request()->routeIs('pengaju*')
                             ? 'menu-item-active'
@@ -236,7 +236,7 @@
 
                 <li>
                     <a
-                        href="{{ route("listpengaju") }}"
+                        href="#"
                         class="menu-item group flex items-center gap-3
                         {{ request()->routeIs('pengaju*')
                             ? 'menu-item-active'
@@ -271,7 +271,7 @@
 
                 <li>
                     <a
-                        href="{{ route("listpengaju") }}"
+                        href="#"
                         class="menu-item group flex items-center gap-3
                         {{ request()->routeIs('pengaju*')
                             ? 'menu-item-active'
@@ -291,7 +291,7 @@
 
                 <li>
                     <a
-                        href="{{ route("listpengaju") }}"
+                        href="#"
                         class="menu-item group flex items-center gap-3
                         {{ request()->routeIs('pengaju*')
                             ? 'menu-item-active'
@@ -311,7 +311,7 @@
 
                 <li>
                     <a
-                        href="{{ route("listpengaju") }}"
+                        href="#"
                         class="menu-item group flex items-center gap-3
                         {{ request()->routeIs('pengaju*')
                             ? 'menu-item-active'
@@ -331,7 +331,7 @@
 
                 <li>
                     <a
-                        href="{{ route("listpengaju") }}"
+                        href="#"
                         class="menu-item group flex items-center gap-3
                         {{ request()->routeIs('pengaju*')
                             ? 'menu-item-active'
@@ -351,7 +351,7 @@
 
                 <li>
                     <a
-                        href="{{ route("listpengaju") }}"
+                        href="#"
                         class="menu-item group flex items-center gap-3
                         {{ request()->routeIs('pengaju*')
                             ? 'menu-item-active'
@@ -371,7 +371,7 @@
 
                 <li>
                     <a
-                        href="{{ route("listpengaju") }}"
+                        href="#"
                         class="menu-item group flex items-center gap-3
                         {{ request()->routeIs('pengaju*')
                             ? 'menu-item-active'
@@ -610,7 +610,7 @@
 
                  <li>
                     <a
-                        href="{{ route("listpengaju") }}"
+                        href="#"
                         class="menu-item group flex items-center gap-3
                         {{ request()->routeIs('pengaju*')
                             ? 'menu-item-active'

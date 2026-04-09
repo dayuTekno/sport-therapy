@@ -13,16 +13,12 @@ return new class extends Migration
     {
         Schema::create('master_patients', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('clinic_id')
-                  ->references('id')
-                  ->on('master_clinics')
-                  ->cascadeOnDelete();
             $table->string("patient_code");
             $table->string("nik");
             $table->string("full_name");
             $table->date("date_of_birth")->nullable();
             $table->enum("gender", ["male", "female"])->default("male");
-            $table->integer("phone_number")->nullable();
+            $table->string('phone_number', 20)->change();
             $table->string("address")->nullable();
             $table->timestamps();
         });

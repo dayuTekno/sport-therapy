@@ -18,6 +18,7 @@ return new class extends Migration
             $table->text("name");
             $table->string("version");
             $table->timestamps();
+            $table->boolean('is_active')->default(true);
         });
     }
 
