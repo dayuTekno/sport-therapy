@@ -8,6 +8,8 @@ use App\Http\Controllers\PengaduanController;
 use App\Http\Controllers\PerizinanController;
 use App\Http\Controllers\RegistrasiController;
 use App\Http\Controllers\AntrianController;
+use App\Http\Controllers\EselonController;
+use App\Http\Controllers\ProcedureController;
 
 
 Route::get('/', [App\Http\Controllers\HomeController::class, 'index'])->name('dashboard');;
@@ -25,6 +27,9 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('roles', RoleController::class);
     Route::resource('users', UserController::class);
     Route::resource('news', NewsController::class);
+    Route::resource('eselons', EselonController::class);
+    Route::resource('procedures', ProcedureController::class);
+
 
 
     Route::resource('registrasi', RegistrasiController::class);

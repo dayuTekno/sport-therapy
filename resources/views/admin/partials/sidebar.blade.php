@@ -221,27 +221,6 @@
                             ? 'menu-item-active'
                             : 'menu-item-inactive' }}"
                     >
-                    <svg class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M3 21V7a2 2 0 012-2h3V3h8v2h3a2 2 0 012 2v14
-                        M9 21v-4h6v4
-                        M7 9h2M7 13h2M15 9h2M15 13h2"/>
-                    </svg>
-                        <span class="menu-item-text"
-                              :class="sidebarToggle ? 'lg:hidden' : ''">
-                            Klinik
-                        </span>
-                    </a>
-                </li>
-
-                <li>
-                    <a
-                        href="#"
-                        class="menu-item group flex items-center gap-3
-                        {{ request()->routeIs('pengaju*')
-                            ? 'menu-item-active'
-                            : 'menu-item-inactive' }}"
-                    >
  <svg
                                     xmlns="http://www.w3.org/2000/svg"
                                     class="h-5 w-5"
@@ -271,9 +250,9 @@
 
                 <li>
                     <a
-                        href="#"
+                        href="{{ route('eselons.index') }}"
                         class="menu-item group flex items-center gap-3
-                        {{ request()->routeIs('pengaju*')
+                        {{ request()->routeIs('eselons*')
                             ? 'menu-item-active'
                             : 'menu-item-inactive' }}"
                     >
@@ -351,9 +330,9 @@
 
                 <li>
                     <a
-                        href="#"
+                        href="{{ route('procedures.index') }}"
                         class="menu-item group flex items-center gap-3
-                        {{ request()->routeIs('pengaju*')
+                        {{ request()->routeIs('procedures*')
                             ? 'menu-item-active'
                             : 'menu-item-inactive' }}"
                     >

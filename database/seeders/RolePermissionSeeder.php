@@ -24,6 +24,14 @@ class RolePermissionSeeder extends Seeder
             'role.create',
             'role.edit',
             'role.delete',
+            'master-eselon.view',
+            'master-eselon.create',
+            'master-eselon.edit',
+            'master-eselon.delete',
+            'master-procedures.view',
+            'master-procedures.create',
+            'master-procedures.edit',
+            'master-procedures.delete',
         ];
 
         foreach ($permissions as $permission) {
