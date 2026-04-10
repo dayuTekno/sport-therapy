@@ -350,9 +350,9 @@
 
                 <li>
                     <a
-                        href="#"
+                        href="{{ route('polyclinics.index') }}"
                         class="menu-item group flex items-center gap-3
-                        {{ request()->routeIs('pengaju*')
+                        {{ request()->routeIs('polyclinics*')
                             ? 'menu-item-active'
                             : 'menu-item-inactive' }}"
                     >

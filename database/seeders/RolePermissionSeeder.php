@@ -32,6 +32,10 @@ class RolePermissionSeeder extends Seeder
             'master-procedures.create',
             'master-procedures.edit',
             'master-procedures.delete',
+            'master-polyclinic.view',
+            'master-polyclinic.create',
+            'master-polyclinic.edit',
+            'master-polyclinic.delete',
         ];
 
         foreach ($permissions as $permission) {
