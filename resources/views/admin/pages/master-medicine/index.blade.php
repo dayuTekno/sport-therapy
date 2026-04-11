@@ -24,7 +24,7 @@
 
         <!-- Tambah -->
         <a href="{{ route('medicines.create') }}"
-           class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-green-700">
+           class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
             + Tambah Obat
         </a>
 
