@@ -6,9 +6,9 @@
     <div :class="sidebarToggle ? 'justify-center' : 'justify-between'" class="flex items-center gap-2 pt-8 pb-7">
         <a href="{{ route('dashboard') }}" class="flex items-center gap-3">
             {{-- LOGO --}}
-            <img class="w-[50px] h-[50px] dark:hidden" src="{{ asset('/storage/images/klinik-icon.jpg') }}"
+            <img class="w-[50px] h-[50px] dark:hidden" src="{{ asset('storage/icons/hospital.png') }}"
                 alt="Dishub" />
-            <img class="w-[50px] h-[50px] hidden dark:block" src="{{ asset('/storage/images/klinik-icon.jpg') }}"
+            <img class="w-[50px] h-[50px] hidden dark:block" src="{{ asset('storage/icons/hospital.png') }}"
                 alt="Dishub" />
 
             {{-- TEXT --}}
