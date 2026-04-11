@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\MasterMedicine;
 use Illuminate\Http\Request;
+use App\Imports\MedicineImport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class MedicineController extends Controller
 {
@@ -15,10 +17,19 @@ class MedicineController extends Controller
         $this->middleware('permission:master-medicine.delete')->only('destroy');
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        $medicines = MasterMedicine::orderBy('created_at', 'desc')
-            ->paginate(10); // 👈 ini kuncinya
+
+        $query = MasterMedicine::query();
+    
+        if ($request->filled('search')) {
+            $query->where('medicine_name', 'like', '%' . $request->search . '%');
+        }
+    
+        $medicines = $query
+            ->orderBy('medicine_name', 'asc')
+            ->paginate(10)
+            ->withQueryString(); // biar pagination tetap bawa search
 
         return view('admin.pages.master-medicine.index', compact('medicines'));
     }
@@ -71,8 +82,20 @@ class MedicineController extends Controller
             ->with('success', 'Data berhasil diperbarui');
     }
 
-    public function import(){
-        dd('hallo');
+    public function import(Request $request){
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls,csv'
+        ]);
+
+        try {
+            Excel::import(new MedicineImport, $request->file('file'));
+
+            return redirect()->route('medicines.index')
+            ->with('success', 'Data berhasil diimport');
+        } catch (\Exception $e) {
+            dd($e);
+            return redirect()->back()->with('error', 'Gagal import: ' . $e->getMessage());
+        }
     }
 
     public function destroy($id)

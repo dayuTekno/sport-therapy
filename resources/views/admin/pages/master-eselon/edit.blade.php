@@ -19,7 +19,7 @@
     <x-breadcrumb :items="[
         ['label' => 'Master Data', 'url' => ''],
         ['label' => 'Eselon', 'url' => route('eselons.index')],
-        ['label' => 'Edit Tindakan'],
+        ['label' => 'Edit Eselon'],
     ]"/>
 
     <div class="mt-6 w-full bg-white p-6 rounded shadow">

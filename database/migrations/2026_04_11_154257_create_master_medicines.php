@@ -13,7 +13,6 @@ return new class extends Migration
     {
         Schema::create('master_medicines', function (Blueprint $table) {
             $table->id();
-            $table->string("medicine_code");
             $table->string("medicine_name");
             $table->string("medicine_international_name")->nullable();
             $table->decimal('price', 20, 2)->nullable();

@@ -1,35 +1,118 @@
 @extends('admin.layouts.app')
 
-@section('title', 'Poliklinik')
+@section('title', 'Obat')
 
 @section('content')
 
 <x-breadcrumb :items="[
     ['label' => 'Master Data'],
-    ['label' => 'Poliklinik'],
+    ['label' => 'Obat'],
 ]" />
 
 <div class="flex items-center justify-between mb-6">
-    <h1 class="text-xl font-semibold text-gray-800">Poliklinik</h1>
+    <h1 class="text-xl font-semibold text-gray-800">Obat</h1>
 
-    <a href="{{ route('polyclinics.create') }}"
-       class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-        + Tambah Poliklinik
-    </a>
+    <!-- Right Actions -->
+    <div class="flex items-center gap-2" x-data="{ open: false }">
+
+        <!-- Import Button -->
+        <button 
+            @click="open = true"
+            class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+            Import Excel
+        </button>
+
+        <!-- Tambah -->
+        <a href="{{ route('medicines.create') }}"
+           class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-green-700">
+            + Tambah Obat
+        </a>
+
+        <!-- Modal -->
+        <div 
+            x-show="open"
+            class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
+            x-transition
+        >
+            <div class="bg-white w-full max-w-md p-6 rounded-xl shadow-lg">
+
+                <!-- Header -->
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-lg font-semibold">Upload Excel</h2>
+                    <button @click="open = false" class="text-gray-500 hover:text-black">✕</button>
+                </div>
+
+                <!-- Form -->
+                <form action="{{ route('medicines.import') }}" method="POST" enctype="multipart/form-data">
+                    @csrf
+
+                    <input 
+                        type="file" 
+                        name="file"
+                        accept=".xlsx,.xls,.csv"
+                        class="w-full border rounded-lg p-2 mb-4"
+                        required
+                    >
+
+                    <div class="flex justify-end gap-2">
+                        <button 
+                            type="button"
+                            @click="open = false"
+                            class="px-4 py-2 bg-gray-300 rounded-lg">
+                            Batal
+                        </button>
+
+                        <button 
+                            type="submit"
+                            class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                            Upload
+                        </button>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+
+    </div>
 </div>
+
+<form method="GET" action="{{ route('medicines.index') }}" class="mb-4 flex items-center gap-2">
+    
+    <input type="text" 
+           name="search"
+           value="{{ request('search') }}"
+           placeholder="Cari nama obat..."
+           class="w-full md:w-64 px-4 py-2 border rounded-lg focus:ring focus:ring-blue-200">
+
+    <button type="submit"
+            class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+        Cari
+    </button>
+
+    @if(request('search'))
+        <a href="{{ route('medicines.index') }}"
+           class="px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400">
+            Reset
+        </a>
+    @endif
+
+</form>
 
 <div class="bg-white rounded-xl shadow overflow-hidden">
     <table class="min-w-full divide-y divide-gray-200">
         <thead class="bg-gray-50">
         <tr>
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Kode Poliklinik
-            </th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                 Nama
             </th>
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Status
+                Internasional
+            </th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                Harga
+            </th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                Diskon
             </th>
             <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">
                 Aksi
@@ -38,28 +121,27 @@
         </thead>
 
         <tbody class="divide-y divide-gray-200 bg-white">
-        @forelse ($polyclinics as $poly)
+        @forelse ($medicines as $med)
             <tr>
                 <td class="px-6 py-4 font-medium">
-                    {{ $poly->polyclinic_code }}
+                    {{ $med->medicine_name }}
                 </td>
                 <td class="px-6 py-4 font-medium">
-                    {{ $poly->name }}
+                    {{ $med->medicine_international_name }}
                 </td>
 
                 <td class="px-6 py-4 text-sm text-gray-600">
-                    <span class="inline-flex px-2.5 py-1 rounded-md text-xs font-medium
-                        {{ $poly->is_active === 1
-                            ? 'bg-green-100 text-green-700'
-                            : 'bg-yellow-100 text-yellow-700' }}">
-                            {{ $poly->is_active === 1 ? 'Aktif' : 'Non Aktif' }}
-                    </span>
+                    {{ $med->price ?: '-' }}
+                </td>
+
+                <td class="px-6 py-4 text-sm text-gray-600">
+                    {{ $med->discount_from_source ?: '-' }}
                 </td>
 
                 <td class="px-6 py-4 text-right space-x-2">
 
                     {{-- EDIT --}}
-                    <a href="{{ route('polyclinics.edit', $poly->id) }}"
+                    <a href="{{ route('medicines.edit', $med->id) }}"
                     class="inline-flex items-center justify-center
                             w-8 h-8 rounded-lg
                             text-blue-600 hover:bg-blue-50"
@@ -77,7 +159,7 @@
                     </a>
 
                     {{-- DELETE --}}
-                    <form action="{{ route('polyclinics.destroy', $poly->id) }}"
+                    <form action="{{ route('medicines.destroy', $med->id) }}"
                         method="POST"
                         class="inline"
                         onsubmit="return confirm('Yakin hapus data ini?')">
@@ -122,11 +204,13 @@
 </div>
 
 {{-- Pagination --}}
-@if ($polyclinics->hasPages())
+@if ($medicines->hasPages())
     <div class="mt-6">
-        {{ $polyclinics->links() }}
+        {{ $medicines->links() }}
     </div>
 @endif
 
+
+<script src="//unpkg.com/alpinejs" defer></script>
 
 @endsection

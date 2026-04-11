@@ -1,8 +1,9 @@
 @extends('admin.layouts.app')
 
-@section('title', 'Edit Role')
+@section('title', 'Tambah Obat')
 
 @section('content')
+
 
     @php
 
@@ -18,12 +19,11 @@
     {{-- Breadcrumb --}}
     <x-breadcrumb :items="[
         ['label' => 'Master Data', 'url' => ''],
-        ['label' => 'Poliklinik', 'url' => route('polyclinics.index')],
-        ['label' => 'Edit Poliklinik'],
+        ['label' => 'Obat', 'url' => route('medicines.index')],
+        ['label' => 'Tambah Obat'],
     ]" />
-
     <div class="mt-6 w-full bg-white p-6 rounded shadow">
-        <h2 class="text-xl font-semibold mb-4">Edit Poliklinik</h2>
+        <h2 class="text-xl font-semibold mb-4">Tambah Data Obat</h2>
 
         {{-- Error Alert --}}
         @if ($errors->any())
@@ -36,45 +36,52 @@
             </div>
         @endif
 
-        <form action="{{ route('polyclinics.update', $poly->id) }}" method="POST">
+        <form action="{{ route('medicines.store') }}" method="POST">
             @csrf
-            @method('PUT')
-
             <div class="pt-6">
-                <label class="{{ $label }}">Kode Poliklinik</label>
-                <input type="text" name="polyclinic_code"
-                    value="{{ old('polyclinic_code', $poly['polyclinic_code'] ?? '') }}"
-                    class="{{ $field }} @error('polyclinic_code'){{ $fieldErr }}@enderror"
-                    placeholder="Kode Poliklinik">
-                @error('polyclinic_code')
+                <label class="{{ $label }}">Nama Obat</label>
+                <input type="text" name="medicine_name"
+                    value="{{ old('medicine_name', $settings['medicine_name'] ?? '') }}"
+                    class="{{ $field }} @error('medicine_name'){{ $fieldErr }}@enderror" placeholder="Nama Obat">
+                @error('medicine_name')
                     <p class="mt-1.5 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
                 @enderror
             </div>
 
             <div class="pt-6">
-                <label class="{{ $label }}">Nama Poliklinik</label>
-                <input type="text" name="name" value="{{ old('name', $poly['name'] ?? '') }}"
-                    class="{{ $field }} @error('name'){{ $fieldErr }}@enderror" placeholder="Nama Poliklinik">
-                @error('name')
+                <label class="{{ $label }}">Nama Internasional</label>
+                <input type="text" name="medicine_international_name"
+                    value="{{ old('medicine_international_name', $settings['medicine_international_name'] ?? '') }}"
+                    class="{{ $field }} @error('medicine_international_name'){{ $fieldErr }}@enderror"
+                    placeholder="Nama Obat Internasional">
+                @error('medicine_international_name')
                     <p class="mt-1.5 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
                 @enderror
             </div>
 
-            <div class="md:col-span-2 pt-6">
-                <label class="{{ $label }}">Status</label>
-                <select name="is_active" class="select2 w-full @error('is_active'){{ $fieldErr }}@enderror">
-                    <option value="1" {{ $poly->is_active === 1 ? 'SELECTED' : '' }}>Aktif</option>
-                    <option value="0" {{ $poly->is_active === 0 ? 'Selected' : '' }}>Non Aktif</option>
-                </select>
+            <div class="pt-6">
+                <label class="{{ $label }}">Harga</label>
+                <input type="number" name="price" value="{{ old('price', $settings['price'] ?? '') }}"
+                    class="{{ $field }} @error('price'){{ $fieldErr }}@enderror" placeholder="Rp. ...">
+                @error('price')
+                    <p class="mt-1.5 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
+                @enderror
+            </div>
 
-                @error('is_active')
-                    <p class="mt-1.5 text-sm text-red-600">{{ $message }}</p>
+            <div class="pt-6">
+                <label class="{{ $label }}">Diskon</label>
+                <input type="number" name="discount_from_source"
+                    value="{{ old('discount_from_source', $settings['discount_from_source'] ?? '') }}"
+                    class="{{ $field }} @error('discount_from_source'){{ $fieldErr }}@enderror"
+                    placeholder="Rp. ...">
+                @error('discount_from_source')
+                    <p class="mt-1.5 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
                 @enderror
             </div>
 
             {{-- Buttons --}}
             <div class="flex pt-6 items-center justify-between">
-                <a href="{{ route('polyclinics.index') }}"
+                <a href="{{ route('medicines.index') }}"
                     class="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300">
                     Batal
                 </a>
@@ -82,19 +89,7 @@
                     Simpan
                 </button>
             </div>
+        </form>
+    </div>
 
-            <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-            <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-            <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-
-            <script>
-                $(function() {
-                    $('.select2').select2({
-                        placeholder: "Pilih kategori",
-                        allowClear: true,
-                        width: '100%'
-                    });
-                });
-            </script>
-
-        @endsection
+@endsection

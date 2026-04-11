@@ -9,6 +9,7 @@ use App\Http\Controllers\AntrianController;
 use App\Http\Controllers\EselonController;
 use App\Http\Controllers\ProcedureController;
 use App\Http\Controllers\PolyclinicController;
+use App\Http\Controllers\MedicineController;
 
 
 Route::get('/', [App\Http\Controllers\HomeController::class, 'index'])->name('dashboard');;
@@ -29,6 +30,8 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('eselons', EselonController::class);
     Route::resource('procedures', ProcedureController::class);
     Route::resource('polyclinics', PolyclinicController::class);
+    Route::resource('medicines', MedicineController::class);
+    Route::post('medicines.import', [MedicineController::class, 'import'])->name('medicines.import');
     
     Route::resource('registrasi', RegistrasiController::class);
     Route::post('registrasi/check', [RegistrasiController::class, 'check'])->name('registrasi.check');
