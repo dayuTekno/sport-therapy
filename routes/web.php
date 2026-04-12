@@ -10,6 +10,7 @@ use App\Http\Controllers\EselonController;
 use App\Http\Controllers\ProcedureController;
 use App\Http\Controllers\PolyclinicController;
 use App\Http\Controllers\MedicineController;
+use App\Http\Controllers\IcdController;
 
 
 Route::get('/', [App\Http\Controllers\HomeController::class, 'index'])->name('dashboard');;
@@ -32,6 +33,9 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('polyclinics', PolyclinicController::class);
     Route::resource('medicines', MedicineController::class);
     Route::post('medicines.import', [MedicineController::class, 'import'])->name('medicines.import');
+
+    Route::resource('icds', IcdController::class);
+    Route::post('icds.import', [IcdController::class, 'import'])->name('icds.import');
     
     Route::resource('registrasi', RegistrasiController::class);
     Route::post('registrasi/check', [RegistrasiController::class, 'check'])->name('registrasi.check');
