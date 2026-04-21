@@ -1,12 +1,10 @@
 @extends('admin.layouts.app')
 
-@section('title', 'Tambah Obat')
+@section('title', 'Tambah ICD')
 
 @section('content')
 
-
     @php
-
         $field =
             'w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm transition placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-gray-600 dark:bg-gray-900/50 dark:text-white dark:placeholder:text-gray-500 dark:focus:border-blue-400';
         $fieldErr = ' border-red-400 focus:border-red-500 focus:ring-red-500/15';
@@ -19,11 +17,11 @@
     {{-- Breadcrumb --}}
     <x-breadcrumb :items="[
         ['label' => 'Master Data', 'url' => ''],
-        ['label' => 'Obat', 'url' => route('medicines.index')],
-        ['label' => 'Tambah Obat'],
+        ['label' => 'ICD', 'url' => route('icds10.index')],
+        ['label' => 'Tambah ICD'],
     ]" />
     <div class="mt-6 w-full bg-white p-6 rounded shadow">
-        <h2 class="text-xl font-semibold mb-4">Tambah Data Obat</h2>
+        <h2 class="text-xl font-semibold mb-4">Tambah Data ICD</h2>
 
         {{-- Error Alert --}}
         @if ($errors->any())
@@ -36,52 +34,65 @@
             </div>
         @endif
 
-        <form action="{{ route('medicines.store') }}" method="POST">
+        <form action="{{ route('icds10.store') }}" method="POST">
             @csrf
+
             <div class="pt-6">
-                <label class="{{ $label }}">Nama Obat</label>
-                <input type="text" name="medicine_name"
-                    value="{{ old('medicine_name', $settings['medicine_name'] ?? '') }}"
-                    class="{{ $field }} @error('medicine_name'){{ $fieldErr }}@enderror" placeholder="Nama Obat">
-                @error('medicine_name')
+                <label class="{{ $label }}">Kategori ICD</label>
+                <input type="number" name="category"
+                    value="{{ old('category', $category ?? '') }}"
+                    class="{{ $field }} @error('category'){{ $fieldErr }}@enderror" placeholder="Nama ICD">
+                @error('category')
                     <p class="mt-1.5 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
                 @enderror
             </div>
 
             <div class="pt-6">
-                <label class="{{ $label }}">Nama Internasional</label>
-                <input type="text" name="medicine_international_name"
-                    value="{{ old('medicine_international_name', $settings['medicine_international_name'] ?? '') }}"
-                    class="{{ $field }} @error('medicine_international_name'){{ $fieldErr }}@enderror"
-                    placeholder="Nama Obat Internasional">
-                @error('medicine_international_name')
+                <label class="{{ $label }}">Kode ICD</label>
+                <input type="text" name="icd_code"
+                    value="{{ old('icd_code', $settings['icd_code'] ?? '') }}"
+                    class="{{ $field }} @error('icd_code'){{ $fieldErr }}@enderror" placeholder="Kode ICD">
+                @error('icd_code')
                     <p class="mt-1.5 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
                 @enderror
             </div>
 
             <div class="pt-6">
-                <label class="{{ $label }}">Harga</label>
-                <input type="number" name="price" value="{{ old('price', $settings['price'] ?? '') }}"
-                    class="{{ $field }} @error('price'){{ $fieldErr }}@enderror" placeholder="Rp. ...">
-                @error('price')
+                <label class="{{ $label }}">Nama ICD</label>
+                <input type="text" name="name"
+                    value="{{ old('name', $settings['name'] ?? '') }}"
+                    class="{{ $field }} @error('name'){{ $fieldErr }}@enderror" placeholder="Nama ICD">
+                @error('name')
                     <p class="mt-1.5 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
                 @enderror
             </div>
 
             <div class="pt-6">
-                <label class="{{ $label }}">Diskon</label>
-                <input type="number" name="discount_from_source"
-                    value="{{ old('discount_from_source', $settings['discount_from_source'] ?? '') }}"
-                    class="{{ $field }} @error('discount_from_source'){{ $fieldErr }}@enderror"
-                    placeholder="Rp. ...">
-                @error('discount_from_source')
+                <label class="{{ $label }}">Versi</label>
+                <input type="text" name="version"
+                    value="{{ old('version', $settings['version'] ?? '') }}"
+                    class="{{ $field }} @error('version'){{ $fieldErr }}@enderror"
+                    placeholder="Versi">
+                @error('version')
                     <p class="mt-1.5 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
+                @enderror
+            </div>
+
+            <div class="md:col-span-2 pt-6">
+                <label class="{{ $label }}">Status</label>
+                <select name="is_active" class="select2 w-full @error('is_active'){{ $fieldErr }}@enderror">
+                    <option value="1" selected>Aktif</option>
+                    <option value="0">Non Aktif</option>
+                </select>
+
+                @error('is_active')
+                    <p class="mt-1.5 text-sm text-red-600">{{ $message }}</p>
                 @enderror
             </div>
 
             {{-- Buttons --}}
             <div class="flex pt-6 items-center justify-between">
-                <a href="{{ route('medicines.index') }}"
+                <a href="{{ route('icds10.index') }}"
                     class="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300">
                     Batal
                 </a>
@@ -91,5 +102,22 @@
             </div>
         </form>
     </div>
+
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+
+    <script>
+        $(function() {
+            $('.select2').select2({
+                placeholder: "Pilih kategori",
+                allowClear: true,
+                width: '100%'
+            });
+        });
+    </script>
+
 
 @endsection

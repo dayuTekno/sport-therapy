@@ -216,9 +216,9 @@
                 </li>
 
                 <li>
-                    <a href="{{ route('icds.index') }}"
+                    <a href="{{ route('icds9.index') }}"
                         class="menu-item group flex items-center gap-3
-                        {{ request()->routeIs('icds*') ? 'menu-item-active' : 'menu-item-inactive' }}">
+                        {{ request()->routeIs('icds9*') ? 'menu-item-active' : 'menu-item-inactive' }} {{ request()->routeIs('icds10*') ? 'menu-item-active' : 'menu-item-inactive' }}">
                         <svg class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M9 12h6m-3-3v6m-7 4h14a2 2 0 002-2V7l-5-5H7a2 2 0 00-2 2v13a2 2 0 002 2z" />

@@ -11,13 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('master_icds', function (Blueprint $table) {
-            $table->id();
-            $table->enum('category', ['9', '10']);
-            $table->string("icd_code");
-            $table->text("name");
-            $table->string("version");
-            $table->timestamps();
+        Schema::table('master_icds', function (Blueprint $table) {
+            $table->boolean('is_active')->default(true);
         });
     }
 
@@ -26,6 +21,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('master_icds');
+        $table->dropColumn('is_active');
     }
 };

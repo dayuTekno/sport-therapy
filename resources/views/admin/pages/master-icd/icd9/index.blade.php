@@ -25,17 +25,14 @@ $hint = 'mt-1.5 text-xs text-gray-500 dark:text-gray-400';
 
     {{-- ================= TAB ================= --}}
     <div class="mb-4 border-b flex gap-4">
-        <button @click="tab='9'"
-            :class="tab === '9' ? 'border-b-2 border-blue-600 text-blue-600' : ''"
-            class="px-4 py-2">
+        <a href="#" class="px-4 py-2 border-b-2 border-blue-600 text-blue-600">
             ICD 9
-        </button>
+        </a>
 
-        <button @click="tab='10'"
-            :class="tab === '10' ? 'border-b-2 border-blue-600 text-blue-600' : ''"
+        <a href="{{ route('icds10.index') }}"
             class="px-4 py-2">
             ICD 10
-        </button>
+        </a>
     </div>
 
     {{-- ================= HEADER ================= --}}
@@ -54,7 +51,7 @@ $hint = 'mt-1.5 text-xs text-gray-500 dark:text-gray-400';
             </button>
 
             {{-- TAMBAH --}}
-            <a :href="`{{ route('icds.create') }}?version=${tab}`"
+            <a :href="`{{ route('icds9.create') }}?category=${tab}`"
                class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
                 + Tambah ICD
             </a>
@@ -63,7 +60,7 @@ $hint = 'mt-1.5 text-xs text-gray-500 dark:text-gray-400';
     </div>
 
     {{-- ================= SEARCH ================= --}}
-    <form method="GET" action="{{ route('icds.index') }}" class="mb-4 flex items-center gap-2">
+    <form method="GET" action="{{ route('icds9.index') }}" class="mb-4 flex items-center gap-2">
         
         <input type="hidden" name="version" :value="tab">
 
@@ -79,7 +76,7 @@ $hint = 'mt-1.5 text-xs text-gray-500 dark:text-gray-400';
         </button>
 
         @if(request('search'))
-            <a href="{{ route('icds.index') }}?version={{ request('version', 9) }}"
+            <a href="{{ route('icds9.index') }}?version={{ request('version', 9) }}"
                 class="px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400">
                 Reset
             </a>
@@ -122,31 +119,53 @@ $hint = 'mt-1.5 text-xs text-gray-500 dark:text-gray-400';
                     <td class="px-6 py-4 text-right space-x-2">
 
                         {{-- EDIT --}}
-                        <a href="{{ route('icds.edit', $icd->id) }}"
+                        <a href="{{ route('icds9.edit', $icd->id) }}"
                         class="inline-flex items-center justify-center
                                 w-8 h-8 rounded-lg
                                 text-blue-600 hover:bg-blue-50"
                         title="Edit">
-                            ✏️
+                            {{-- pencil-square --}}
+                            <svg xmlns="http://www.w3.org/2000/svg"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke-width="1.5"
+                                stroke="currentColor"
+                                class="w-5 h-5">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M16.862 4.487a2.25 2.25 0 113.182 3.182L7.5 20.25H3v-4.5L16.862 4.487z" />
+                            </svg>
                         </a>
-
+    
                         {{-- DELETE --}}
-                        <form action="{{ route('icds.destroy', $icd->id) }}"
+                        <form action="{{ route('icds9.destroy', $icd->id) }}"
                             method="POST"
                             class="inline"
                             onsubmit="return confirm('Yakin hapus data ini?')">
                             @csrf
                             @method('DELETE')
-
+    
                             <button type="submit"
                                     class="inline-flex items-center justify-center
                                         w-8 h-8 rounded-lg
                                         text-red-600 hover:bg-red-50"
                                     title="Hapus">
-                                🗑️
+                                {{-- trash --}}
+                                <svg xmlns="http://www.w3.org/2000/svg"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke-width="1.5"
+                                    stroke="currentColor"
+                                    class="w-5 h-5">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166M4.772 5.79c.34-.059.68-.114 1.022-.166m12.456 0
+                                            a48.108 48.108 0 00-3.478-.397m-8.004 0
+                                            a48.11 48.11 0 013.478-.397m7.5 0v-.916
+                                            c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0
+                                            c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0" />
+                                </svg>
                             </button>
                         </form>
-
+    
                     </td>
 
                 </tr>
@@ -187,7 +206,7 @@ $hint = 'mt-1.5 text-xs text-gray-500 dark:text-gray-400';
                 <button @click="open = false">✕</button>
             </div>
 
-            <form action="{{ route('icds.import') }}" method="POST" enctype="multipart/form-data">
+            <form action="{{ route('icds9.import') }}" method="POST" enctype="multipart/form-data">
                 @csrf
 
 
