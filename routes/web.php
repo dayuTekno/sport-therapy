@@ -12,6 +12,7 @@ use App\Http\Controllers\PolyclinicController;
 use App\Http\Controllers\MedicineController;
 use App\Http\Controllers\Icd9Controller;
 use App\Http\Controllers\Icd10Controller;
+use App\Http\Controllers\DoctorController;
 
 
 Route::get('/', [App\Http\Controllers\HomeController::class, 'index'])->name('dashboard');;
@@ -33,6 +34,7 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('procedures', ProcedureController::class);
     Route::resource('polyclinics', PolyclinicController::class);
     Route::resource('medicines', MedicineController::class);
+    Route::resource('doctors', DoctorController::class);
     Route::post('medicines.import', [MedicineController::class, 'import'])->name('medicines.import');
 
     // Route::resource('icds', IcdController::class);

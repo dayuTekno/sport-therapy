@@ -186,9 +186,9 @@
                 </li>
 
                 <li>
-                    <a href="#"
+                    <a href="{{ route('doctors.index') }}"
                         class="menu-item group flex items-center gap-3
-                        {{ request()->routeIs('pengaju*') ? 'menu-item-active' : 'menu-item-inactive' }}">
+                        {{ request()->routeIs('doctors*') ? 'menu-item-active' : 'menu-item-inactive' }}">
                         <svg class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M12 8v8m-4-4h8M6 20h12a2 2 0 002-2v-5a6 6 0 10-12 0v5a2 2 0 002 2z" />
