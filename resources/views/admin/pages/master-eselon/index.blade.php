@@ -52,55 +52,25 @@
                 </td>
 
                 <td class="px-6 py-4 text-right space-x-2">
-
-                    {{-- EDIT --}}
-                    <a href="{{ route('eselons.edit', $es->id) }}"
-                    class="inline-flex items-center justify-center
-                            w-8 h-8 rounded-lg
-                            text-blue-600 hover:bg-blue-50"
-                    title="Edit">
-                        {{-- pencil-square --}}
-                        <svg xmlns="http://www.w3.org/2000/svg"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke-width="1.5"
-                            stroke="currentColor"
-                            class="w-5 h-5">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M16.862 4.487a2.25 2.25 0 113.182 3.182L7.5 20.25H3v-4.5L16.862 4.487z" />
-                        </svg>
-                    </a>
-
-                    {{-- DELETE --}}
-                    <form action="{{ route('eselons.destroy', $es->id) }}"
-                        method="POST"
-                        class="inline"
-                        onsubmit="return confirm('Yakin hapus data ini?')">
-                        @csrf
-                        @method('DELETE')
-
-                        <button type="submit"
-                                class="inline-flex items-center justify-center
-                                    w-8 h-8 rounded-lg
-                                    text-red-600 hover:bg-red-50"
-                                title="Hapus">
-                            {{-- trash --}}
-                            <svg xmlns="http://www.w3.org/2000/svg"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke-width="1.5"
-                                stroke="currentColor"
-                                class="w-5 h-5">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166M4.772 5.79c.34-.059.68-.114 1.022-.166m12.456 0
-                                        a48.108 48.108 0 00-3.478-.397m-8.004 0
-                                        a48.11 48.11 0 013.478-.397m7.5 0v-.916
-                                        c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0
-                                        c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0" />
+                    <div class="flex justify-end gap-2">
+                        {{-- EDIT --}}
+                        <a href="{{ route('eselons.edit', $es->id) }}" class="p-2 text-yellow-600 bg-yellow-50 rounded-lg hover:bg-yellow-100" title="Edit">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                             </svg>
-                        </button>
-                    </form>
+                        </a>
 
+                        {{-- DELETE --}}
+                        <form action="{{ route('eselons.destroy', $es->id) }}" method="POST" class="inline-block" onsubmit="return confirm('Yakin hapus data ini?')">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="p-2 text-red-600 bg-red-50 rounded-lg hover:bg-red-100" title="Hapus">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                            </button>
+                        </form>
+                    </div>
                 </td>
 
             </tr>

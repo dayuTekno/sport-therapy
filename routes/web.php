@@ -56,6 +56,7 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('poly-icds10', PolyIcd10Controller::class);
     Route::resource('poly-doctors', PolyDoctorController::class);
     Route::resource('poly-procedures', PolyProcedureController::class);
+    Route::resource('doctor-schedules', \App\Http\Controllers\DoctorScheduleController::class);
     
     Route::resource('patients', PatientController::class);
 
@@ -89,8 +90,27 @@ Route::middleware(['auth'])->group(function () {
     })->name('api.icds.search');
 
     Route::get('api/polyclinics/{id}/doctors', function($id) {
-        $poly = \App\Models\MasterPolyclinic::with('doctors')->findOrFail($id);
-        return response()->json($poly->doctors);
+        $dayOfWeek = now()->dayOfWeek; // 0 (Sunday) to 6 (Saturday)
+        
+        $schedules = \App\Models\MasterDoctorSchedule::with('doctor')
+            ->where('poly_id', $id)
+            ->where('day_of_week', $dayOfWeek)
+            ->where('is_active', true)
+            ->get();
+            
+        $doctors = $schedules->map(function($schedule) {
+            $doctor = $schedule->doctor;
+            if ($doctor) {
+                // Return doctor with schedule formatted
+                return [
+                    'id' => $doctor->id,
+                    'full_name' => $doctor->full_name . ' (' . \Carbon\Carbon::parse($schedule->start_time)->format('H:i') . ' - ' . \Carbon\Carbon::parse($schedule->end_time)->format('H:i') . ')'
+                ];
+            }
+            return null;
+        })->filter()->values();
+
+        return response()->json($doctors);
     })->name('api.poly.doctors');
 
     Route::resource('registrasi', RegistrasiController::class);

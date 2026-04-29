@@ -472,9 +472,9 @@
     <ul class="flex flex-col gap-4 mb-6">
 
         <li>
-            <a href="#"
+            <a href="{{ route('doctor-schedules.index') }}"
                 class="menu-item group flex items-center gap-3
-                        {{ request()->routeIs('pengaju*') ? 'menu-item-active' : 'menu-item-inactive' }}">
+                        {{ request()->routeIs('doctor-schedules*') ? 'menu-item-active' : 'menu-item-inactive' }}">
                 <svg class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M8 7V3m8 4V3m-9 8h6m-9 10h14a2 2 0 002-2V7H4v12a2 2 0 002 2z" />

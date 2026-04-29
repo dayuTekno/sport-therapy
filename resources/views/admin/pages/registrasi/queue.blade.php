@@ -21,7 +21,7 @@
 
 @include('admin.partials.alert')
 
-<div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 w-full max-w-2xl">
+<div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 w-full">
     
     <!-- Info Pasien -->
     <div class="mb-6 p-4 bg-blue-50 border border-blue-100 rounded-lg">
