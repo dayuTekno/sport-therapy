@@ -13,7 +13,12 @@ use App\Http\Controllers\MedicineController;
 use App\Http\Controllers\Icd9Controller;
 use App\Http\Controllers\Icd10Controller;
 use App\Http\Controllers\DoctorController;
-
+use App\Http\Controllers\PatientController;
+use App\Http\Controllers\PolyIcd9Controller;
+use App\Http\Controllers\PolyIcd10Controller;
+use App\Http\Controllers\PolyDoctorController;
+use App\Http\Controllers\PolyProcedureController;
+use App\Http\Controllers\NurseAnamnesisController;
 
 Route::get('/', [App\Http\Controllers\HomeController::class, 'index'])->name('dashboard');;
 
@@ -23,7 +28,8 @@ Auth::routes();
 Route::get('/dashboard', [App\Http\Controllers\HomeController::class, 'index'])->name('dashboard');
 
 Route::get('antrian', [AntrianController::class, 'index'])->name('antrian');
-Route::get('antrian/update', [AntrianController::class, 'update'])->name('antrian-update');
+Route::post('antrian/generate', [AntrianController::class, 'generate'])->name('antrian.generate');
+Route::get('antrian/ticket/{id}', [AntrianController::class, 'ticket'])->name('antrian.ticket');
 
 
 Route::middleware(['auth'])->group(function () {
@@ -46,8 +52,57 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('icds10', Icd10Controller::class);
     Route::post('icds10.import', [Icd10Controller::class, 'import'])->name('icds10.import');
 
+    Route::resource('poly-icds9', PolyIcd9Controller::class);
+    Route::resource('poly-icds10', PolyIcd10Controller::class);
+    Route::resource('poly-doctors', PolyDoctorController::class);
+    Route::resource('poly-procedures', PolyProcedureController::class);
     
+    Route::resource('patients', PatientController::class);
+
+    Route::get('api/icds/search', function(Illuminate\Http\Request $request) {
+        $category = $request->category;
+        $search = $request->q;
+        
+        $query = \App\Models\MasterIcd::query();
+        
+        if ($category) {
+            $query->where('category', $category);
+        }
+        
+        if ($search) {
+            $query->where(function($q) use ($search) {
+                $q->where('icd_code', 'like', "%{$search}%")
+                  ->orWhere('name', 'like', "%{$search}%");
+            });
+        }
+        
+        $icds = $query->limit(20)->get();
+        
+        $formatted = $icds->map(function($icd) {
+            return [
+                'id' => $icd->id,
+                'text' => $icd->icd_code . ' - ' . $icd->name
+            ];
+        });
+        
+        return response()->json(['results' => $formatted]);
+    })->name('api.icds.search');
+
+    Route::get('api/polyclinics/{id}/doctors', function($id) {
+        $poly = \App\Models\MasterPolyclinic::with('doctors')->findOrFail($id);
+        return response()->json($poly->doctors);
+    })->name('api.poly.doctors');
+
     Route::resource('registrasi', RegistrasiController::class);
     Route::post('registrasi/check', [RegistrasiController::class, 'check'])->name('registrasi.check');
     Route::post('registrasi/create', [RegistrasiController::class, 'store'])->name('registrasi.store');
+    Route::get('registrasi/queue/{patient_id}', [RegistrasiController::class, 'queueForm'])->name('registrasi.queue');
+    Route::post('registrasi/queue/{patient_id}', [RegistrasiController::class, 'queueStore'])->name('registrasi.queue.store');
+    
+    Route::get('admin/antrian', [AntrianController::class, 'dashboard'])->name('admin.antrian.dashboard');
+    Route::post('admin/antrian/{id}/call', [AntrianController::class, 'call'])->name('admin.antrian.call');
+
+    Route::get('anamnesis', [NurseAnamnesisController::class, 'index'])->name('anamnesis.index');
+    Route::get('anamnesis/{queue_id}/process', [NurseAnamnesisController::class, 'process'])->name('anamnesis.process');
+    Route::post('anamnesis/{queue_id}/process', [NurseAnamnesisController::class, 'store'])->name('anamnesis.store');
 });

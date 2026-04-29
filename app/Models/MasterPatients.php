@@ -9,4 +9,9 @@ class MasterPatients extends Model
     protected $table = 'master_patients';
 
     protected $guarded = [];    
+
+    public function eselon()
+    {
+        return $this->belongsTo(MasterEselon::class, 'eselon_id');
+    }
 }

@@ -51,9 +51,9 @@
                 </li>
 
                 <li>
-                    <a href="{{ route('antrian') }}"
+                    <a href="{{ route('admin.antrian.dashboard') }}"
                         class="menu-item group flex items-center gap-3
-                        {{ request()->routeIs('antrian*') ? 'menu-item-active' : 'menu-item-inactive' }}">
+                        {{ request()->routeIs('admin.antrian*') ? 'menu-item-active' : 'menu-item-inactive' }}">
                         <svg class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7h16v4a2 2 0 010 4v4H4v-4a2 2 0 010-4V7z
                         M9 11h6
@@ -82,9 +82,9 @@
                 </li>
 
                 <li>
-                    <a href="#"
+                    <a href="{{ route('anamnesis.index') }}"
                         class="menu-item group flex items-center gap-3
-                        {{ request()->routeIs('perizinan*') ? 'menu-item-active' : 'menu-item-inactive' }}">
+                        {{ request()->routeIs('anamnesis*') ? 'menu-item-active' : 'menu-item-inactive' }}">
                         <svg class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3h6a2 2 0 012 2v2h-10V5a2 2 0 012-2z
                             M7 7h10v14H7z
@@ -155,9 +155,9 @@
             <ul class="flex flex-col gap-4 mb-6">
 
                 <li>
-                    <a href="#"
+                    <a href="{{ route('patients.index') }}"
                         class="menu-item group flex items-center gap-3
-                        {{ request()->routeIs('pengaju*') ? 'menu-item-active' : 'menu-item-inactive' }}">
+                        {{ request()->routeIs('patients*') ? 'menu-item-active' : 'menu-item-inactive' }}">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
                             stroke="currentColor" stroke-width="1.8">
                             <!-- User -->
@@ -260,11 +260,11 @@
                     </a>
                 </li>
 
-                <li x-data="{ open: {{ request()->routeIs('admin.forms.*') ? 'true' : 'false' }} }">
+                <li x-data="{ open: {{ request()->routeIs('poly-icds9.*', 'poly-icds10.*', 'poly-doctors.*', 'poly-procedures.*') ? 'true' : 'false' }} }">
 
                     <a href="#" @click.prevent="open = !open"
                         class="menu-item group flex items-center justify-between
-                        {{ request()->routeIs('admin.forms.*') ? 'menu-item-active' : 'menu-item-inactive' }}">
+                        {{ request()->routeIs('poly-icds9.*', 'poly-icds10.*', 'poly-doctors.*', 'poly-procedures.*') ? 'menu-item-active' : 'menu-item-inactive' }}">
                         <div class="flex items-center gap-3">
                             <svg class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -293,23 +293,33 @@
                     <div x-show="open" x-transition>
                         <ul class="mt-2 pl-9 space-y-2">
                             <li>
-                                <a href="#"
+                                <a href="{{ route('poly-icds9.index') }}"
                                     class="menu-dropdown-item flex items-center gap-2
-                                    {{ request()->routeIs('admin.forms.elements') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive' }}">
+                                    {{ request()->routeIs('poly-icds9.*') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive' }}">
                                     <svg class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24"
                                         stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M4 4h16v6H4zM4 14h16v6H4z" />
                                     </svg>
-
-
-                                    ICD Poly
+                                    ICD 9 Poly
                                 </a>
                             </li>
                             <li>
-                                <a href="#"
+                                <a href="{{ route('poly-icds10.index') }}"
                                     class="menu-dropdown-item flex items-center gap-2
-                                    {{ request()->routeIs('admin.forms.elements') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive' }}">
+                                    {{ request()->routeIs('poly-icds10.*') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive' }}">
+                                    <svg class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24"
+                                        stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M4 4h16v6H4zM4 14h16v6H4z" />
+                                    </svg>
+                                    ICD 10 Poly
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('poly-doctors.index') }}"
+                                    class="menu-dropdown-item flex items-center gap-2
+                                    {{ request()->routeIs('poly-doctors.*') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive' }}">
                                     <svg class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24"
                                         stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -322,9 +332,9 @@
 
                 </li>
                 <li>
-                    <a href="#"
+                    <a href="{{ route('poly-procedures.index') }}"
                         class="menu-dropdown-item flex items-center gap-2
-                                    {{ request()->routeIs('admin.forms.elements') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive' }}">
+                                    {{ request()->routeIs('poly-procedures.*') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive' }}">
                         <svg class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M5 13l4 4L19 7m-2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h6" />
