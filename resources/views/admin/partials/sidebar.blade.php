@@ -50,6 +50,7 @@
                     </a>
                 </li>
 
+                @can('menu.antrian-admisi')
                 <li>
                     <a href="{{ route('admin.antrian.dashboard') }}"
                         class="menu-item group flex items-center gap-3
@@ -64,8 +65,9 @@
                         </span>
                     </a>
                 </li>
+                @endcan
 
-                <!-- CALENDAR -->
+                @can('menu.registrasi')
                 <li>
                     <a href="{{ route('registrasi.index') }}"
                         class="menu-item group flex items-center gap-3
@@ -80,7 +82,9 @@
                         </span>
                     </a>
                 </li>
+                @endcan
 
+                @can('menu.amnesa-perawat')
                 <li>
                     <a href="{{ route('anamnesis.index') }}"
                         class="menu-item group flex items-center gap-3
@@ -96,11 +100,13 @@
                         </span>
                     </a>
                 </li>
+                @endcan
 
+                @can('menu.amnesa-dokter')
                 <li>
-                    <a href="#"
+                    <a href="{{ route('doctor-exam.index') }}"
                         class="menu-item group flex items-center gap-3
-                        {{ request()->routeIs('perizinan*') ? 'menu-item-active' : 'menu-item-inactive' }}">
+                        {{ request()->routeIs('doctor-exam*') ? 'menu-item-active' : 'menu-item-inactive' }}">
                         <svg class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11a4 4 0 100-8 4 4 0 000 8z
                             M4 21a8 8 0 0116 0
@@ -112,41 +118,56 @@
                         </span>
                     </a>
                 </li>
+                @endcan
 
-
+                {{-- Kasir --}}
+                @can('menu.kasir')
                 <li>
-                    <a href="#"
+                    <a href="{{ route('cashier.index') }}"
                         class="menu-item group flex items-center gap-3
-                        {{ request()->routeIs('perizinan*') ? 'menu-item-active' : 'menu-item-inactive' }}">
+                        {{ request()->routeIs('cashier*') ? 'menu-item-active' : 'menu-item-inactive' }}">
                         <svg class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M9 12h6m-6 4h6M7 4h8l4 4v12a2 2 0 01-2 2H7a2 2 0 01-2-2V6a2 2 0 012-2z" />
+                                d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
                         </svg>
-
                         <span class="menu-item-text" :class="sidebarToggle ? 'lg:hidden' : ''">
-                            Tindakan Dokter
+                            Kasir
                         </span>
+                        @php $paymentCount = \App\Models\Antrian::where('status', 'payment')->count(); @endphp
+                        @if($paymentCount > 0)
+                            <span class="ml-auto inline-flex h-5 w-5 items-center justify-center rounded-full bg-red-100 text-[10px] font-bold text-red-600" :class="sidebarToggle ? 'lg:hidden' : ''">
+                                {{ $paymentCount }}
+                            </span>
+                        @endif
                     </a>
                 </li>
+                @endcan
 
+                {{-- Apotik --}}
+                @can('menu.apoteker')
                 <li>
-                    <a href="#"
+                    <a href="{{ route('pharmacy.index') }}"
                         class="menu-item group flex items-center gap-3
-                        {{ request()->routeIs('perizinan*') ? 'menu-item-active' : 'menu-item-inactive' }}">
+                        {{ request()->routeIs('pharmacy*') ? 'menu-item-active' : 'menu-item-inactive' }}">
                         <svg class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 3h7l5 5v13H7z
-                        M14 3v5h5
-                        M9 15l6-6
-                        M10 10l4 4" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                         </svg>
-
                         <span class="menu-item-text" :class="sidebarToggle ? 'lg:hidden' : ''">
-                            Resep
+                            Apotik
                         </span>
+                        @php $pharmacyCount = \App\Models\Antrian::where('status', 'pharmacy')->count(); @endphp
+                        @if($pharmacyCount > 0)
+                            <span class="ml-auto inline-flex h-5 w-5 items-center justify-center rounded-full bg-blue-100 text-[10px] font-bold text-blue-600" :class="sidebarToggle ? 'lg:hidden' : ''">
+                                {{ $pharmacyCount }}
+                            </span>
+                        @endif
                     </a>
                 </li>
+                @endcan
             </ul>
 
+            @can('menu.master-data')
             <!-- OTHERS -->
             <h3 class="mb-4 text-xs uppercase text-gray-400">
                 <span :class="sidebarToggle ? 'lg:hidden' : ''">Master Data</span>
@@ -344,7 +365,7 @@
                     </a>
                 </li>
             </ul>
-    </div>
+        </div>
     </li>
 
     <!-- FORMS (DROPDOWN) -->
@@ -463,7 +484,9 @@
                     </div>
                 </li> --}}
     </ul>
+            @endcan
 
+    @can('menu.users')
     <!-- OTHERS -->
     <h3 class="mb-4 text-xs uppercase text-gray-400">
         <span :class="sidebarToggle ? 'lg:hidden' : ''">Settings</span>
@@ -522,6 +545,25 @@
             </a>
         </li>
     </ul>
-    </nav>
-    </div>
+    @endcan
+
+        @can('menu.rekap-medis')
+        {{-- Laporan Section --}}
+        <div class="px-4 pt-6 pb-2">
+            <span class="text-[10px] font-bold uppercase tracking-widest text-gray-400">Laporan & Rekapitulasi</span>
+        </div>
+        
+        <li class="menu-item group">
+            <a href="{{ route('reports.medical_records.index') }}"
+               class="flex items-center gap-3 px-4 py-3 mx-2 rounded-xl transition {{ Request::is('reports/medical-records*') ? 'bg-blue-600 text-white shadow-lg shadow-blue-200' : 'text-gray-500 hover:bg-gray-100' }}">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <span class="text-sm font-medium">Rekap Rekam Medis</span>
+            </a>
+        </li>
+        @endcan
+    </ul>
+</nav>
+</div>
 </aside>

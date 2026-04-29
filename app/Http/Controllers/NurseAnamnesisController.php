@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Antrian;
 use App\Models\MedicalRecord;
+use App\Models\MedicalRecordDiagnosis;
+use App\Models\MedicalRecordProcedure;
 use Illuminate\Http\Request;
 
 class NurseAnamnesisController extends Controller
@@ -23,7 +25,7 @@ class NurseAnamnesisController extends Controller
 
     public function process($queue_id)
     {
-        $queue = Antrian::with(['patient', 'poly'])->findOrFail($queue_id);
+        $queue = Antrian::with(['patient.eselon', 'poly'])->findOrFail($queue_id);
         
         // Tandai sedang diperiksa perawat
         if ($queue->status == 'waiting') {
@@ -33,7 +35,18 @@ class NurseAnamnesisController extends Controller
         // Cek apakah sudah ada medical record yang di draft
         $record = MedicalRecord::where('queue_id', $queue->id)->first();
 
-        return view('admin.pages.anamnesis.process', compact('queue', 'record'));
+        // Load existing diagnoses & procedures
+        $nurseDiagnoses = $record ? MedicalRecordDiagnosis::with('icd')
+            ->where('medical_record_id', $record->id)
+            ->where('source', 'nurse')
+            ->get() : collect();
+
+        $nurseProcedures = $record ? MedicalRecordProcedure::with('icd')
+            ->where('medical_record_id', $record->id)
+            ->where('source', 'nurse')
+            ->get() : collect();
+
+        return view('admin.pages.anamnesis.process', compact('queue', 'record', 'nurseDiagnoses', 'nurseProcedures'));
     }
 
     public function store(Request $request, $queue_id)
@@ -50,11 +63,14 @@ class NurseAnamnesisController extends Controller
             'height' => 'nullable|numeric',
             'symptoms' => 'required|string',
             'diagnosis' => 'nullable|string',
-            'icd10_id' => 'nullable|exists:master_icds,id',
-            'icd9_id' => 'nullable|exists:master_icds,id',
+            'icd10_ids' => 'required|array|min:1',
+            'icd10_ids.*' => 'exists:master_icds,id',
+            'icd10_primary' => 'nullable|integer',
+            'icd9_ids' => 'nullable|array',
+            'icd9_ids.*' => 'exists:master_icds,id',
         ]);
 
-        MedicalRecord::updateOrCreate(
+        $record = MedicalRecord::updateOrCreate(
             ['queue_id' => $queue->id],
             [
                 'patient_id' => $queue->patient_id,
@@ -68,10 +84,34 @@ class NurseAnamnesisController extends Controller
                 'height' => $request->height,
                 'symptoms' => $request->symptoms,
                 'diagnosis' => $request->diagnosis,
-                'icd10_id' => $request->icd10_id,
-                'icd9_id' => $request->icd9_id,
             ]
         );
+
+        // Delete old nurse diagnoses & procedures, then re-insert
+        MedicalRecordDiagnosis::where('medical_record_id', $record->id)->where('source', 'nurse')->delete();
+        MedicalRecordProcedure::where('medical_record_id', $record->id)->where('source', 'nurse')->delete();
+
+        // Insert ICD-10 diagnoses
+        $primaryId = $request->icd10_primary;
+        foreach ($request->icd10_ids as $index => $icdId) {
+            MedicalRecordDiagnosis::create([
+                'medical_record_id' => $record->id,
+                'icd_id' => $icdId,
+                'type' => ($icdId == $primaryId || ($index == 0 && !$primaryId)) ? 'primary' : 'secondary',
+                'source' => 'nurse',
+            ]);
+        }
+
+        // Insert ICD-9 procedures
+        if ($request->icd9_ids) {
+            foreach ($request->icd9_ids as $icdId) {
+                MedicalRecordProcedure::create([
+                    'medical_record_id' => $record->id,
+                    'icd_id' => $icdId,
+                    'source' => 'nurse',
+                ]);
+            }
+        }
 
         $queue->update(['status' => 'waiting_doctor']);
 

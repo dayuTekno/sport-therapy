@@ -70,6 +70,20 @@
                         </div>
 
                         <div class="pt-6">
+                            <label class="{{ $label }}">Harga Tindakan (Rp)</label>
+                            <input
+                                type="number"
+                                name="price"
+                                value="{{ old('price', $es->price ?? 0) }}"
+                                class="{{ $field }} @error('price'){{ $fieldErr }}@enderror"
+                                placeholder="0"
+                            >
+                            @error('price')
+                                <p class="mt-1.5 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div class="pt-6">
                             <label class="{{ $label }}">Deskripsi</label>
                             <textarea
                                 type="text"

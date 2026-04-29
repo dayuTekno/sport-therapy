@@ -29,6 +29,9 @@
                 Nama
             </th>
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                Harga
+            </th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                 Desc
             </th>
             <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">
@@ -45,6 +48,10 @@
                 </td>
                 <td class="px-6 py-4 font-medium">
                     {{ $pro->name }}
+                </td>
+
+                <td class="px-6 py-4 font-medium text-blue-600">
+                    Rp {{ number_format($pro->price, 0, ',', '.') }}
                 </td>
 
                 <td class="px-6 py-4 text-sm text-gray-600">

@@ -69,12 +69,12 @@
             </div>
 
             <div class="pt-6">
-                <label class="{{ $label }}">Diskon</label>
-                <input type="number" name="discount_from_source"
-                    value="{{ old('discount_from_source', $settings['discount_from_source'] ?? '') }}"
-                    class="{{ $field }} @error('discount_from_source'){{ $fieldErr }}@enderror"
-                    placeholder="Rp. ...">
-                @error('discount_from_source')
+                <label class="{{ $label }}">Diskon (Rp)</label>
+                <input type="number" name="discount"
+                    value="{{ old('discount', 0) }}"
+                    class="{{ $field }} @error('discount'){{ $fieldErr }}@enderror"
+                    placeholder="0">
+                @error('discount')
                     <p class="mt-1.5 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
                 @enderror
             </div>

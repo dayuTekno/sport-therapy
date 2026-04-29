@@ -23,4 +23,15 @@ class Antrian extends Model
     {
         return $this->belongsTo(MasterDoctor::class, 'doctor_id');
     }
+
+    public function eselon()
+    {
+        return $this->belongsTo(MasterEselon::class, 'eselon_id');
+    }
+
+    public function getQueueCodeAttribute()
+    {
+        $prefix = strtoupper(substr($this->poly->polyclinic_code ?? 'A', 0, 1));
+        return $prefix . '-' . str_pad($this->queue_number, 3, '0', STR_PAD_LEFT);
+    }
 }

@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Http\Request;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\NewsController;
@@ -19,6 +20,8 @@ use App\Http\Controllers\PolyIcd10Controller;
 use App\Http\Controllers\PolyDoctorController;
 use App\Http\Controllers\PolyProcedureController;
 use App\Http\Controllers\NurseAnamnesisController;
+use App\Http\Controllers\CashierController;
+use App\Http\Controllers\PharmacyController;
 
 Route::get('/', [App\Http\Controllers\HomeController::class, 'index'])->name('dashboard');;
 
@@ -40,8 +43,9 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('procedures', ProcedureController::class);
     Route::resource('polyclinics', PolyclinicController::class);
     Route::resource('medicines', MedicineController::class);
+    Route::post('medicines/import', [MedicineController::class, 'import'])->name('medicines.import');
+    Route::post('medicines/{id}/stock-opname', [MedicineController::class, 'stockOpname'])->name('medicines.stock_opname');
     Route::resource('doctors', DoctorController::class);
-    Route::post('medicines.import', [MedicineController::class, 'import'])->name('medicines.import');
 
     // Route::resource('icds', IcdController::class);
     // Route::post('icds.import', [IcdController::class, 'import'])->name('icds.import');
@@ -89,6 +93,55 @@ Route::middleware(['auth'])->group(function () {
         return response()->json(['results' => $formatted]);
     })->name('api.icds.search');
 
+    // API: Search master procedures for Select2 (Filtered by Polyclinic if poly_id provided)
+    Route::get('api/procedures/search', function(Request $request) {
+        $q = $request->get('q', '');
+        $polyId = $request->get('poly_id');
+        
+        $query = \App\Models\MasterProcedure::query();
+        
+        if ($polyId) {
+            $query->whereHas('polyclinics', function($p) use ($polyId) {
+                $p->where('master_polyclinics.id', $polyId);
+            });
+        }
+        
+        $procedures = $query->where(function($sub) use ($q) {
+                $sub->where('name', 'like', "%{$q}%")
+                    ->orWhere('procedure_code', 'like', "%{$q}%");
+            })
+            ->limit(20)
+            ->get();
+        
+        $formatted = $procedures->map(function($proc) {
+            return [
+                'id' => $proc->id,
+                'text' => $proc->procedure_code . ' - ' . $proc->name
+            ];
+        });
+        
+        return response()->json(['results' => $formatted]);
+    })->name('api.procedures.search');
+
+    // API: Search master medicines for Select2
+    Route::get('api/medicines/search', function(Request $request) {
+        $q = $request->get('q', '');
+        
+        $medicines = \App\Models\MasterMedicine::where('medicine_name', 'like', "%{$q}%")
+            ->orWhere('medicine_international_name', 'like', "%{$q}%")
+            ->limit(20)
+            ->get();
+        
+        $formatted = $medicines->map(function($med) {
+            return [
+                'id' => $med->id,
+                'text' => $med->medicine_name . ($med->medicine_international_name ? ' (' . $med->medicine_international_name . ')' : '')
+            ];
+        });
+        
+        return response()->json(['results' => $formatted]);
+    })->name('api.medicines.search');
+
     Route::get('api/polyclinics/{id}/doctors', function($id) {
         $dayOfWeek = now()->dayOfWeek; // 0 (Sunday) to 6 (Saturday)
         
@@ -125,4 +178,20 @@ Route::middleware(['auth'])->group(function () {
     Route::get('anamnesis', [NurseAnamnesisController::class, 'index'])->name('anamnesis.index');
     Route::get('anamnesis/{queue_id}/process', [NurseAnamnesisController::class, 'process'])->name('anamnesis.process');
     Route::post('anamnesis/{queue_id}/process', [NurseAnamnesisController::class, 'store'])->name('anamnesis.store');
+
+    Route::get('doctor-exam', [\App\Http\Controllers\DoctorExaminationController::class, 'index'])->name('doctor-exam.index');
+    Route::get('doctor-exam/{queue_id}/process', [\App\Http\Controllers\DoctorExaminationController::class, 'process'])->name('doctor-exam.process');
+    Route::post('doctor-exam/{queue_id}/process', [\App\Http\Controllers\DoctorExaminationController::class, 'store'])->name('doctor-exam.store');
+
+    Route::get('cashier', [CashierController::class, 'index'])->name('cashier.index');
+    Route::get('cashier/{id}/process', [CashierController::class, 'process'])->name('cashier.process');
+    Route::post('cashier/{id}/process', [CashierController::class, 'store'])->name('cashier.store');
+
+    Route::get('pharmacy', [PharmacyController::class, 'index'])->name('pharmacy.index');
+    Route::get('pharmacy/{id}/process', [PharmacyController::class, 'process'])->name('pharmacy.process');
+    Route::post('pharmacy/{id}/process', [PharmacyController::class, 'store'])->name('pharmacy.store');
+
+    // Reports
+    Route::get('reports/medical-records', [\App\Http\Controllers\MedicalRecordReportController::class, 'index'])->name('reports.medical_records.index');
+    Route::get('reports/medical-records/{id}', [\App\Http\Controllers\MedicalRecordReportController::class, 'show'])->name('reports.medical_records.show');
 });

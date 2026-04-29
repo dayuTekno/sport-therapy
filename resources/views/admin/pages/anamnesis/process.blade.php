@@ -106,31 +106,32 @@
                 </div>
             </div>
 
-            <!-- Diagnosa & ICD -->
+            <!-- Diagnosa & Multi ICD-10 -->
             <div>
-                <h3 class="font-semibold text-gray-800 mb-4 border-b pb-2 text-blue-800">Diagnosa Keperawatan</h3>
-                <div class="space-y-4">
+                <h3 class="font-semibold text-gray-800 mb-4 border-b pb-2 text-blue-800">Diagnosa Keperawatan (ICD-10)</h3>
+                <div class="space-y-3">
                     <div>
-                        <label class="{{ $label }}">Pilih ICD-10 (Diagnosa) <span class="text-red-500">*</span></label>
-                        <select name="icd10_id" id="icd10_select" class="w-full" required>
-                            @if(isset($record) && $record->icd10_id)
-                                <option value="{{ $record->icd10_id }}" selected>{{ \App\Models\MasterIcd::find($record->icd10_id)->icd_code ?? '' }} - {{ \App\Models\MasterIcd::find($record->icd10_id)->name ?? '' }}</option>
-                            @endif
+                        <label class="{{ $label }}">Pilih ICD-10 (Diagnosa) <span class="text-red-500">*</span> <span class="text-gray-400 font-normal">- Bisa pilih lebih dari 1</span></label>
+                        <select name="icd10_ids[]" id="icd10_select" class="w-full" multiple="multiple" required>
+                            @foreach($nurseDiagnoses as $d)
+                                <option value="{{ $d->icd_id }}" selected>{{ $d->icd->icd_code ?? '' }} - {{ $d->icd->name ?? '' }}</option>
+                            @endforeach
                         </select>
-                        <p class="mt-1 text-xs text-gray-500">Cari berdasarkan kode atau nama penyakit (ICD-10)</p>
+                        <p class="mt-1 text-xs text-gray-500">Cari berdasarkan kode atau nama penyakit. Diagnosa pertama yang dipilih otomatis menjadi diagnosa utama.</p>
                     </div>
 
+                    <!-- ICD-9 Toggle -->
                     <div class="flex items-center gap-2 mt-4">
-                        <input type="checkbox" id="has_icd9" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500" {{ (isset($record) && $record->icd9_id) ? 'checked' : '' }}>
-                        <label for="has_icd9" class="text-sm font-medium text-gray-700">Baru ICD-9? (Ada Tindakan/Prosedur?)</label>
+                        <input type="checkbox" id="has_icd9" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500" {{ $nurseProcedures->count() > 0 ? 'checked' : '' }}>
+                        <label for="has_icd9" class="text-sm font-medium text-gray-700">Ada Tindakan/Prosedur? (ICD-9)</label>
                     </div>
 
-                    <div id="icd9_container" style="display: {{ (isset($record) && $record->icd9_id) ? 'block' : 'none' }};">
-                        <label class="{{ $label }}">Pilih ICD-9 (Tindakan)</label>
-                        <select name="icd9_id" id="icd9_select" class="w-full">
-                            @if(isset($record) && $record->icd9_id)
-                                <option value="{{ $record->icd9_id }}" selected>{{ \App\Models\MasterIcd::find($record->icd9_id)->icd_code ?? '' }} - {{ \App\Models\MasterIcd::find($record->icd9_id)->name ?? '' }}</option>
-                            @endif
+                    <div id="icd9_container" style="display: {{ $nurseProcedures->count() > 0 ? 'block' : 'none' }};">
+                        <label class="{{ $label }}">Pilih ICD-9 (Tindakan) <span class="text-gray-400 font-normal">- Bisa pilih lebih dari 1</span></label>
+                        <select name="icd9_ids[]" id="icd9_select" class="w-full" multiple="multiple">
+                            @foreach($nurseProcedures as $p)
+                                <option value="{{ $p->icd_id }}" selected>{{ $p->icd->icd_code ?? '' }} - {{ $p->icd->name ?? '' }}</option>
+                            @endforeach
                         </select>
                         <p class="mt-1 text-xs text-gray-500">Cari berdasarkan kode atau nama tindakan (ICD-9)</p>
                     </div>
@@ -171,49 +172,41 @@
             }
         });
 
-        // Initialize Select2 for ICD-10
+        // Multi Select2 for ICD-10
         $('#icd10_select').select2({
             placeholder: 'Ketik kode atau nama penyakit (ICD-10)...',
             allowClear: true,
+            multiple: true,
             minimumInputLength: 3,
             ajax: {
                 url: '{{ route("api.icds.search") }}',
                 dataType: 'json',
                 delay: 250,
                 data: function (params) {
-                    return {
-                        q: params.term,
-                        category: 10
-                    };
+                    return { q: params.term, category: 10 };
                 },
                 processResults: function (data) {
-                    return {
-                        results: data.results
-                    };
+                    return { results: data.results };
                 },
                 cache: true
             }
         });
 
-        // Initialize Select2 for ICD-9
+        // Multi Select2 for ICD-9
         $('#icd9_select').select2({
             placeholder: 'Ketik kode atau nama tindakan (ICD-9)...',
             allowClear: true,
+            multiple: true,
             minimumInputLength: 3,
             ajax: {
                 url: '{{ route("api.icds.search") }}',
                 dataType: 'json',
                 delay: 250,
                 data: function (params) {
-                    return {
-                        q: params.term,
-                        category: 9
-                    };
+                    return { q: params.term, category: 9 };
                 },
                 processResults: function (data) {
-                    return {
-                        results: data.results
-                    };
+                    return { results: data.results };
                 },
                 cache: true
             }

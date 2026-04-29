@@ -17,9 +17,7 @@ class ProcedureController extends Controller
 
     public function index()
     {
-        $procedures = MasterProcedure::
-        orderBy('created_at', 'desc')
-        ->paginate(10); // 👈 ini kuncinya
+        $procedures = MasterProcedure::orderBy('name', 'asc')->paginate(10);
 
         return view('admin.pages.master-procedure.index', compact('procedures'));
     }
@@ -34,12 +32,14 @@ class ProcedureController extends Controller
         $request->validate([
             'name' => 'required|unique:master_procedures,name',
             'procedure_code' => 'required|unique:master_procedures,procedure_code',
+            'price' => 'nullable|numeric|min:0',
         ]);
 
-        $es = MasterProcedure::create([
+        MasterProcedure::create([
             'procedure_code' => $request->procedure_code,
             'name' => $request->name,
             'desc' => $request->desc,
+            'price' => $request->price ?? 0,
         ]);
 
         return redirect()->route('procedures.index')
@@ -48,7 +48,7 @@ class ProcedureController extends Controller
 
     public function edit($id)
     {
-        $es = MasterProcedure::where('id', $id)->first();
+        $es = MasterProcedure::findOrFail($id);
         return view('admin.pages.master-procedure.edit', compact('es'));
     }
 
@@ -57,14 +57,16 @@ class ProcedureController extends Controller
         $request->validate([
             'procedure_code' => 'required|unique:master_procedures,procedure_code,' . $id,
             'name' => 'required|unique:master_procedures,name,' . $id,
+            'price' => 'nullable|numeric|min:0',
         ]);
 
-        $es = MasterProcedure::where('id', $id)->first();
+        $es = MasterProcedure::findOrFail($id);
 
         $es->update([
             'procedure_code' => $request->procedure_code,
             'name' => $request->name,
             'desc' => $request->desc,
+            'price' => $request->price ?? 0,
         ]);
 
         return redirect()->route('procedures.index')
@@ -73,7 +75,7 @@ class ProcedureController extends Controller
 
     public function destroy($id)
     {
-        $es = MasterProcedure::where('id', $id)->first();
+        $es = MasterProcedure::findOrFail($id);
         $es->delete();
         return redirect()->route('procedures.index')
             ->with('success', 'Data berhasil dihapus');
