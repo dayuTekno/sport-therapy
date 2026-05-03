@@ -103,91 +103,113 @@ class DoctorExaminationController extends Controller
             'medicine_ids' => 'nullable|array',
             'medicine_ids.*' => 'exists:master_medicines,id',
             'quantities' => 'nullable|array',
+            'quantities.*' => 'nullable|numeric|min:0',
             'instructions' => 'nullable|array',
         ]);
 
-        $record->update([
-            'doctor_name' => auth()->user()->name ?? 'Dokter',
-            'doctor_diagnosis' => $request->doctor_diagnosis,
-            'doctor_notes' => $request->doctor_notes,
-            'prescription' => null, // We'll use medical_record_medicines instead
-        ]);
+        try {
+            \DB::beginTransaction();
 
-        // Delete old doctor diagnoses & procedures & treatments & medicines, then re-insert
-        MedicalRecordDiagnosis::where('medical_record_id', $record->id)->where('source', 'doctor')->delete();
-        MedicalRecordProcedure::where('medical_record_id', $record->id)->where('source', 'doctor')->delete();
-        MedicalRecordTreatment::where('medical_record_id', $record->id)->delete();
-        MedicalRecordMedicine::where('medical_record_id', $record->id)->delete();
-
-        // Insert doctor ICD-10 diagnoses
-        foreach ($request->doctor_icd10_ids as $index => $icdId) {
-            MedicalRecordDiagnosis::create([
-                'medical_record_id' => $record->id,
-                'icd_id' => $icdId,
-                'type' => $index == 0 ? 'primary' : 'secondary',
-                'source' => 'doctor',
+            $record->update([
+                'doctor_name' => auth()->user()->name ?? 'Dokter',
+                'doctor_diagnosis' => $request->doctor_diagnosis,
+                'doctor_notes' => $request->doctor_notes,
+                'prescription' => null, // We'll use medical_record_medicines instead
             ]);
-        }
 
-        // Insert doctor ICD-9 procedures
-        if ($request->doctor_icd9_ids) {
-            foreach ($request->doctor_icd9_ids as $icdId) {
-                MedicalRecordProcedure::create([
+            // 1. Restore Stock of previous medicines
+            $oldMedicines = MedicalRecordMedicine::where('medical_record_id', $record->id)->get();
+            foreach ($oldMedicines as $om) {
+                if ($om->medicine) {
+                    $om->medicine->increment('stock', ceil((float) $om->quantity));
+                }
+            }
+
+            // 2. Delete old doctor diagnoses & procedures & treatments & medicines, then re-insert
+            MedicalRecordDiagnosis::where('medical_record_id', $record->id)->where('source', 'doctor')->delete();
+            MedicalRecordProcedure::where('medical_record_id', $record->id)->where('source', 'doctor')->delete();
+            MedicalRecordTreatment::where('medical_record_id', $record->id)->delete();
+            MedicalRecordMedicine::where('medical_record_id', $record->id)->delete();
+
+            // Insert doctor ICD-10 diagnoses
+            foreach ($request->doctor_icd10_ids as $index => $icdId) {
+                MedicalRecordDiagnosis::create([
                     'medical_record_id' => $record->id,
                     'icd_id' => $icdId,
+                    'type' => $index == 0 ? 'primary' : 'secondary',
                     'source' => 'doctor',
                 ]);
             }
-        }
 
-        // Insert treatments from master procedures
-        if ($request->treatment_ids) {
-            foreach ($request->treatment_ids as $procId) {
-                MedicalRecordTreatment::create([
-                    'medical_record_id' => $record->id,
-                    'procedure_id' => $procId,
-                ]);
-            }
-        }
-
-        // Insert medicines from master medicines & deduct stock
-        if ($request->medicine_ids) {
-            foreach ($request->medicine_ids as $index => $medId) {
-                $qty = $request->quantities[$index] ?? 0;
-                $medicine = \App\Models\MasterMedicine::findOrFail($medId);
-                
-                // Cek stok sebelum pemotongan
-                $stockToDeduct = ceil((float) $qty);
-                if ($medicine->stock < $stockToDeduct) {
-                    return back()->withInput()->with('error', "Stok obat '{$medicine->medicine_name}' tidak mencukupi. Stok tersedia: {$medicine->stock}.");
-                }
-
-                // Simpan record resep
-                MedicalRecordMedicine::create([
-                    'medical_record_id' => $record->id,
-                    'medicine_id' => $medId,
-                    'quantity' => $qty,
-                    'instructions' => $request->instructions[$index] ?? null,
-                ]);
-
-                // Kurangi stok
-                if ($stockToDeduct > 0) {
-                    $medicine->decrement('stock', $stockToDeduct);
+            // Insert doctor ICD-9 procedures
+            if ($request->doctor_icd9_ids) {
+                foreach ($request->doctor_icd9_ids as $icdId) {
+                    MedicalRecordProcedure::create([
+                        'medical_record_id' => $record->id,
+                        'icd_id' => $icdId,
+                        'source' => 'doctor',
+                    ]);
                 }
             }
+
+            // Insert treatments from master procedures
+            if ($request->treatment_ids) {
+                foreach ($request->treatment_ids as $procId) {
+                    MedicalRecordTreatment::create([
+                        'medical_record_id' => $record->id,
+                        'procedure_id' => $procId,
+                    ]);
+                }
+            }
+
+            // Insert medicines from master medicines & deduct stock
+            if ($request->medicine_ids) {
+                foreach ($request->medicine_ids as $index => $medId) {
+                    if (!$medId) continue;
+                    
+                    $qty = $request->quantities[$index] ?? 0;
+                    $medicine = \App\Models\MasterMedicine::findOrFail($medId);
+                    
+                    // Cek stok sebelum pemotongan
+                    $stockToDeduct = ceil((float) $qty);
+                    if ($medicine->stock < $stockToDeduct) {
+                        \DB::rollBack();
+                        return back()->withInput()->with('error', "Stok obat '{$medicine->medicine_name}' tidak mencukupi. Stok tersedia: {$medicine->stock}.");
+                    }
+
+                    // Simpan record resep
+                    MedicalRecordMedicine::create([
+                        'medical_record_id' => $record->id,
+                        'medicine_id' => $medId,
+                        'quantity' => $qty,
+                        'instructions' => $request->instructions[$index] ?? null,
+                    ]);
+
+                    // Kurangi stok
+                    if ($stockToDeduct > 0) {
+                        $medicine->decrement('stock', $stockToDeduct);
+                    }
+                }
+            }
+
+            // Tentukan alur berikutnya berdasarkan kategori pasien (diambil dari data pendaftaran/antrian)
+            $eselonName = $queue->eselon->name ?? '';
+            
+            // Kondisi: Jika BPJS maka otomatis Lunas (Apotik), selain itu harus ke Kasir
+            $isBpjs = str_contains(strtolower($eselonName), 'bpjs');
+            
+            $nextStatus = $isBpjs ? 'pharmacy' : 'payment';
+            $queue->update(['status' => $nextStatus]);
+
+            \DB::commit();
+
+            $msg = $isBpjs ? 'Pemeriksaan selesai (BPJS). Pasien diarahkan langsung ke Apotik.' : 'Pemeriksaan selesai. Pasien diarahkan ke Kasir untuk pelunasan.';
+
+            return redirect()->route('doctor-exam.index')->with('success', $msg);
+
+        } catch (\Exception $e) {
+            \DB::rollBack();
+            return back()->withInput()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
-
-        // Tentukan alur berikutnya berdasarkan kategori pasien (diambil dari data pendaftaran/antrian)
-        $eselonName = $queue->eselon->name ?? '';
-        
-        // Kondisi: Jika BPJS maka otomatis Lunas (Apotik), selain itu harus ke Kasir
-        $isBpjs = str_contains(strtolower($eselonName), 'bpjs');
-        
-        $nextStatus = $isBpjs ? 'pharmacy' : 'payment';
-        $queue->update(['status' => $nextStatus]);
-
-        $msg = $isBpjs ? 'Pemeriksaan selesai (BPJS). Pasien diarahkan langsung ke Apotik.' : 'Pemeriksaan selesai. Pasien diarahkan ke Kasir untuk pelunasan.';
-
-        return redirect()->route('doctor-exam.index')->with('success', $msg);
     }
 }

@@ -268,29 +268,63 @@
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-100" id="medicine_list">
-                                @forelse($medicines as $m)
-                                    <tr class="medicine-row">
-                                        <td class="p-2">
-                                            <input type="hidden" name="medicine_ids[]" value="{{ $m->medicine_id }}">
-                                            <span class="font-medium text-gray-800">{{ $m->medicine->medicine_name }}</span>
-                                        </td>
-                                        <td class="p-2">
-                                            <input type="text" name="quantities[]" value="{{ $m->quantity }}" class="{{ $input }} text-center" placeholder="Jml">
-                                        </td>
-                                        <td class="p-2">
-                                            <input type="text" name="instructions[]" value="{{ $m->instructions }}" class="{{ $input }}" placeholder="Contoh: 3 x 1 sesudah makan">
-                                        </td>
-                                        <td class="p-2 text-right">
-                                            <button type="button" class="text-red-500 hover:text-red-700 remove-medicine">
-                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                @empty
-                                    <tr id="empty_medicine_msg">
-                                        <td colspan="4" class="p-4 text-center text-gray-500 italic">Belum ada obat ditambahkan</td>
-                                    </tr>
-                                @endforelse
+                                @php
+                                    $oldMedicineIds = old('medicine_ids', []);
+                                    $hasOld = count($oldMedicineIds) > 0;
+                                @endphp
+
+                                @if($hasOld)
+                                    @foreach($oldMedicineIds as $index => $medId)
+                                        @php
+                                            $medName = '';
+                                            if ($medId) {
+                                                $med = \App\Models\MasterMedicine::find($medId);
+                                                $medName = $med ? $med->medicine_name : 'Obat tidak ditemukan';
+                                            }
+                                        @endphp
+                                        <tr class="medicine-row">
+                                            <td class="p-2">
+                                                <input type="hidden" name="medicine_ids[]" value="{{ $medId }}">
+                                                <span class="font-medium text-gray-800">{{ $medName }}</span>
+                                            </td>
+                                            <td class="p-2">
+                                                <input type="text" name="quantities[]" value="{{ old('quantities.'.$index) }}" class="{{ $input }} text-center" placeholder="Jml">
+                                            </td>
+                                            <td class="p-2">
+                                                <input type="text" name="instructions[]" value="{{ old('instructions.'.$index) }}" class="{{ $input }}" placeholder="Contoh: 3 x 1 sesudah makan">
+                                            </td>
+                                            <td class="p-2 text-right">
+                                                <button type="button" class="text-red-500 hover:text-red-700 remove-medicine">
+                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                @else
+                                    @forelse($medicines as $m)
+                                        <tr class="medicine-row">
+                                            <td class="p-2">
+                                                <input type="hidden" name="medicine_ids[]" value="{{ $m->medicine_id }}">
+                                                <span class="font-medium text-gray-800">{{ $m->medicine->medicine_name }}</span>
+                                            </td>
+                                            <td class="p-2">
+                                                <input type="text" name="quantities[]" value="{{ $m->quantity }}" class="{{ $input }} text-center" placeholder="Jml">
+                                            </td>
+                                            <td class="p-2">
+                                                <input type="text" name="instructions[]" value="{{ $m->instructions }}" class="{{ $input }}" placeholder="Contoh: 3 x 1 sesudah makan">
+                                            </td>
+                                            <td class="p-2 text-right">
+                                                <button type="button" class="text-red-500 hover:text-red-700 remove-medicine">
+                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <tr id="empty_medicine_msg">
+                                            <td colspan="4" class="p-4 text-center text-gray-500 italic">Belum ada obat ditambahkan</td>
+                                        </tr>
+                                    @endforelse
+                                @endif
                             </tbody>
                         </table>
                     </div>
@@ -319,6 +353,11 @@
 
 <script>
     $(document).ready(function() {
+        // Hide empty message if there are rows (for pre-loaded or old input)
+        if ($('.medicine-row').length > 0) {
+            $('#empty_medicine_msg').hide();
+        }
+
         // Toggle ICD-9
         $('#doctor_has_icd9').change(function() {
             if ($(this).is(':checked')) {

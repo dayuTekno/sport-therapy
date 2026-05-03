@@ -77,7 +77,7 @@
 
                 <!-- Title -->
                 <h2 class="text-3xl lg:text-4xl font-semibold text-white mb-3">
-                    Sistem Informasi Klinik
+                    SmartKlinik
                 </h2>
 
                 <!-- Subtitle -->

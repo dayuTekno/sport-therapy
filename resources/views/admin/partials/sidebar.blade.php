@@ -13,7 +13,7 @@
 
             {{-- TEXT --}}
             <span class="text-base font-semibold whitespace-nowrap" :class="sidebarToggle ? 'hidden' : ''">
-                Sistem Informasi Klinik
+                SmartKlinik
             </span>
         </a>
 

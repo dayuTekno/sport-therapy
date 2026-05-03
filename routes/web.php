@@ -100,11 +100,10 @@ Route::middleware(['auth'])->group(function () {
         
         $query = \App\Models\MasterProcedure::query();
         
-        if ($polyId) {
-            $query->whereHas('polyclinics', function($p) use ($polyId) {
-                $p->where('master_polyclinics.id', $polyId);
-            });
-        }
+        // If we want to show all but filter by poly if available
+        // For now, let's just allow all procedures to be searchable to avoid "not found" issues
+        // But we can still filter if we want strictness. 
+        // The user says "tidak bisa di pilih", which often means the list is empty.
         
         $procedures = $query->where(function($sub) use ($q) {
                 $sub->where('name', 'like', "%{$q}%")
