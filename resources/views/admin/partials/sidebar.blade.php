@@ -6,9 +6,14 @@
     <div :class="sidebarToggle ? 'justify-between lg:justify-center' : 'justify-between'" class="flex items-center gap-2 pt-6 pb-5 border-b border-gray-100 dark:border-gray-800 lg:border-none">
         <a href="{{ auth()->user()->isSaasAdmin() && !session()->has('active_clinic_id') ? route('saas.dashboard') : route('dashboard') }}" class="flex items-center gap-3">
             {{-- LOGO --}}
-            <img class="w-[40px] h-[40px] dark:hidden object-contain" src="{{ asset('storage/icons/hospital.png') }}"
-                alt="Logo" />
-            <img class="w-[40px] h-[40px] hidden dark:block object-contain" src="{{ asset('storage/icons/hospital.png') }}"
+            @php
+                $clinicLogo = auth()->user()->clinic?->logo_path;
+                $defaultLogo = asset('admin/images/logo/hospital.png');
+                $logoSrc = $clinicLogo ? asset('storage/' . $clinicLogo) : $defaultLogo;
+            @endphp
+            <img class="w-[40px] h-[40px] object-contain rounded-lg" 
+                src="{{ $logoSrc }}" 
+                onerror="this.src='{{ asset('admin/images/logo/hospital.png') }}'"
                 alt="Logo" />
 
             {{-- TEXT --}}
@@ -40,8 +45,10 @@
         </button>
 
         {{-- ICON SAAT SIDEBAR COLLAPSE --}}
-        <img class="logo-icon" :class="sidebarToggle ? 'lg:block' : 'hidden'"
-            src="{{ asset('/storage/images/logo-icon.svg') }}" />
+        <img class="logo-icon w-[32px] h-[32px] object-contain" :class="sidebarToggle ? 'lg:block' : 'hidden'"
+            src="{{ asset('admin/images/logo/logo-icon.svg') }}" 
+            onerror="this.src='{{ asset('admin/images/logo/hospital.png') }}'"
+            alt="Logo Icon" />
     </div>
 
     {{-- IMPERSONATION BANNER DI SIDEBAR JIKA SEDANG AKTIF --}}

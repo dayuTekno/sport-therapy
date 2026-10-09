@@ -19,8 +19,13 @@
 
             <!-- Logo (Mobile) -->
             <a href="{{ route('dashboard') }}" class="lg:hidden flex items-center gap-2">
-                <img class="h-7 w-7 object-contain dark:hidden" src="{{ asset('storage/icons/hospital.png') }}" alt="Logo">
-                <img class="h-7 w-7 object-contain hidden dark:block" src="{{ asset('storage/icons/hospital.png') }}" alt="Logo">
+                @php
+                    $mobileLogo = auth()->user()->clinic?->logo_path ? asset('storage/' . auth()->user()->clinic->logo_path) : asset('admin/images/logo/hospital.png');
+                @endphp
+                <img class="h-7 w-7 object-contain rounded-md" 
+                    src="{{ $mobileLogo }}" 
+                    onerror="this.src='{{ asset('admin/images/logo/hospital.png') }}'" 
+                    alt="Logo">
                 <span class="text-xs font-black tracking-tight text-gray-800 dark:text-white truncate max-w-[130px] sm:max-w-xs">
                     {{ Str::limit(auth()->user()->clinic?->name ?? 'Sport Therapy', 16) }}
                 </span>
