@@ -214,7 +214,13 @@ WEB_USER="www"
 sudo chown -R "$CURRENT_USER:$WEB_USER" storage bootstrap/cache 2>/dev/null || sudo chown -R "$WEB_USER:$WEB_USER" storage bootstrap/cache
 sudo chmod -R 775 storage bootstrap/cache
 
-echo -e "${GREEN}✓ Izin folder berhasil diatur.${NC}"
+# Hapus pembatasan open_basedir (.user.ini) bawaan aaPanel yang memblokir folder vendor/storage Laravel
+sudo chattr -i "$PROJECT_DIR/public/.user.ini" 2>/dev/null || true
+sudo rm -f "$PROJECT_DIR/public/.user.ini" 2>/dev/null || true
+sudo chattr -i "$PROJECT_DIR/.user.ini" 2>/dev/null || true
+sudo rm -f "$PROJECT_DIR/.user.ini" 2>/dev/null || true
+
+echo -e "${GREEN}✓ Izin folder & proteksi open_basedir berhasil disesuaikan.${NC}"
 
 # ------------------------------------------------------------------------------
 # SELESAI
