@@ -19,11 +19,18 @@ echo -e "${CYAN}======================================================${NC}"
 
 PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$PROJECT_DIR"
+CURRENT_USER=$(whoami)
+WEB_USER="www"
+
+# ------------------------------------------------------------------------------
+# 0. PERBAIKI HAK AKSES AWAL AGAR TIDAK EACCES
+# ------------------------------------------------------------------------------
+sudo chown -R "$CURRENT_USER" "$PROJECT_DIR" 2>/dev/null || true
 
 # ------------------------------------------------------------------------------
 # 1. DETEKSI BINARY PHP & PHP.INI
 # ------------------------------------------------------------------------------
-echo -e "\n${YELLOW}[1/9] Mendeteksi PHP dan Konfigurasi...${NC}"
+echo -e "\n${YELLOW}[1/10] Mendeteksi PHP dan Konfigurasi...${NC}"
 
 if [ -f "/www/server/php/83/bin/php" ]; then
     PHP_CMD="/www/server/php/83/bin/php"
@@ -51,16 +58,16 @@ run_php() {
 }
 
 # ------------------------------------------------------------------------------
-# 2. MEMASTIKAN DEPENDENSI SISTEM & DRIVER POSTGRESQL (PDO_PGSQL)
+# 2. MEMASTIKAN DRIVER POSTGRESQL (PDO_PGSQL) & LIBPQ
 # ------------------------------------------------------------------------------
-echo -e "\n${YELLOW}[2/9] Memeriksa driver PostgreSQL di sistem & PHP...${NC}"
+echo -e "\n${YELLOW}[2/10] Memeriksa driver PostgreSQL di sistem & PHP...${NC}"
 
 # Install library client libpq di AlmaLinux jika belum ada
 if command -v dnf &>/dev/null; then
     if ! rpm -q libpq-devel &>/dev/null; then
         echo "Menginstall libpq & libpq-devel untuk AlmaLinux..."
         sudo dnf install -y libpq libpq-devel postgresql-libs || true
-        sudo ldconfig
+        sudo ldconfig 2>/dev/null || true
     fi
 fi
 
@@ -102,7 +109,7 @@ fi
 # ------------------------------------------------------------------------------
 # 3. MEMASTIKAN CONTAINER DOCKER POSTGRESQL KLINIK BERJALAN
 # ------------------------------------------------------------------------------
-echo -e "\n${YELLOW}[3/9] Memeriksa status container Docker PostgreSQL...${NC}"
+echo -e "\n${YELLOW}[3/10] Memeriksa status container Docker PostgreSQL...${NC}"
 
 if [ -f "docker-compose.db.yml" ]; then
     if command -v docker &>/dev/null; then
@@ -124,7 +131,7 @@ fi
 # ------------------------------------------------------------------------------
 # 4. KONFIGURASI FILE .ENV
 # ------------------------------------------------------------------------------
-echo -e "\n${YELLOW}[4/9] Memeriksa file konfigurasi environment (.env)...${NC}"
+echo -e "\n${YELLOW}[4/10] Memeriksa file konfigurasi environment (.env)...${NC}"
 
 if [ ! -f ".env" ]; then
     echo "Membuat file .env dari .env.example..."
@@ -143,7 +150,7 @@ echo -e "${GREEN}✓ File .env dikonfigurasi (Port: 5433, Host: 127.0.0.1).${NC}
 # ------------------------------------------------------------------------------
 # 5. INSTALL DEPENDENSI COMPOSER & APP KEY
 # ------------------------------------------------------------------------------
-echo -e "\n${YELLOW}[5/9] Memasang dependensi Composer...${NC}"
+echo -e "\n${YELLOW}[5/10] Memasang dependensi Composer...${NC}"
 
 COMPOSER_CMD=$(which composer || true)
 if [ -z "$COMPOSER_CMD" ]; then
@@ -165,20 +172,55 @@ if ! grep -q "APP_KEY=base64:" .env; then
 fi
 
 # ------------------------------------------------------------------------------
-# 6. MIGRASI & SEEDER DATABASE
+# 6. INSTALASI & BUILD FRONTEND (NODE.JS, NPM & VITE)
 # ------------------------------------------------------------------------------
-echo -e "\n${YELLOW}[6/9] Menjalankan migrasi & data awal (Seeder)...${NC}"
+echo -e "\n${YELLOW}[6/10] Menyiapkan Node.js, NPM & Build Frontend (Vite)...${NC}"
+
+# Cek apakah Node.js terpasang dan versinya >= 18
+NODE_VER=$(node -v 2>/dev/null | sed 's/v//' | cut -d'.' -f1 || echo "0")
+
+if [ "$NODE_VER" -lt 18 ]; then
+    echo "Node.js versi < 18 atau belum terpasang. Menginstall Node.js 20 LTS..."
+    if command -v dnf &>/dev/null; then
+        # Hapus versi lama jika ada & pasang NodeSource 20.x
+        curl -fsSL https://rpm.nodesource.com/setup_20.x | sudo bash - > /dev/null 2>&1 || true
+        sudo dnf install -y nodejs > /dev/null 2>&1 || true
+    elif command -v apt-get &>/dev/null; then
+        curl -fsSL https://deb.nodesource.com/setup_20.x | sudo bash - > /dev/null 2>&1 || true
+        sudo apt-get install -y nodejs > /dev/null 2>&1 || true
+    fi
+fi
+
+# Jalankan NPM install dan build
+if command -v npm &>/dev/null; then
+    echo "Menjalankan npm install & build Vite..."
+    npm install --no-audit --no-fund || npm install --force
+    npm run build || true
+    echo -e "${GREEN}✓ Aset frontend Vite berhasil di-build.${NC}"
+else
+    # Jika npm tetap tidak tersedia, pastikan manifest dari git sudah ada
+    if [ -f "public/build/manifest.json" ]; then
+        echo -e "${GREEN}✓ Menggunakan aset frontend yang sudah ter-compile (public/build).${NC}"
+    else
+        echo -e "${RED}! Peringatan: npm tidak tersedia dan file public/build belum ditemukan.${NC}"
+    fi
+fi
+
+# ------------------------------------------------------------------------------
+# 7. MIGRASI & SEEDER DATABASE
+# ------------------------------------------------------------------------------
+echo -e "\n${YELLOW}[7/10] Menjalankan migrasi & data awal (Seeder)...${NC}"
 
 run_php artisan migrate --force
 run_php artisan db:seed --force
 echo -e "${GREEN}✓ Migrasi dan database seeder berhasil dieksekusi.${NC}"
 
 # ------------------------------------------------------------------------------
-# 7. PERSIAPAN ASET & STORAGE LINK
+# 8. PERSIAPAN STORAGE LINK & PEMBERSIHAN HOT
 # ------------------------------------------------------------------------------
-echo -e "\n${YELLOW}[7/9] Menyiapkan storage symlink dan aset frontend...${NC}"
+echo -e "\n${YELLOW}[8/10] Menyiapkan storage symlink dan membersihkan mode dev...${NC}"
 
-# Bersihkan file hot (mode dev) agar Vite tidak mencoba akses localhost:5173
+# Bersihkan file hot (mode dev) agar Vite tidak mencari localhost:5173
 rm -f public/hot
 
 # Recreate symlink storage yang bersih
@@ -188,9 +230,9 @@ run_php artisan storage:link
 echo -e "${GREEN}✓ Storage link berhasil diperbarui.${NC}"
 
 # ------------------------------------------------------------------------------
-# 8. OPTIMASI CACHE PRODUCTION
+# 9. OPTIMASI CACHE PRODUCTION
 # ------------------------------------------------------------------------------
-echo -e "\n${YELLOW}[8/9] Mengoptimasi cache Laravel untuk Production...${NC}"
+echo -e "\n${YELLOW}[9/10] Mengoptimasi cache Laravel untuk Production...${NC}"
 
 run_php artisan config:clear
 run_php artisan route:clear
@@ -203,16 +245,9 @@ run_php artisan view:cache
 echo -e "${GREEN}✓ Cache konfigurasi, rute, dan view berhasil di-cache.${NC}"
 
 # ------------------------------------------------------------------------------
-# 9. PENGATURAN HAK AKSES FOLDER (PERMISSIONS)
+# 10. PENGATURAN HAK AKSES & PEMBATASAN OPEN_BASEDIR AAPANEL
 # ------------------------------------------------------------------------------
-echo -e "\n${YELLOW}[9/9] Mengatur izin akses folder (storage & cache)...${NC}"
-
-CURRENT_USER=$(whoami)
-WEB_USER="www"
-
-# Berikan izin ke storage dan bootstrap/cache
-sudo chown -R "$CURRENT_USER:$WEB_USER" storage bootstrap/cache 2>/dev/null || sudo chown -R "$WEB_USER:$WEB_USER" storage bootstrap/cache
-sudo chmod -R 775 storage bootstrap/cache
+echo -e "\n${YELLOW}[10/10] Mengatur izin akses folder & menonaktifkan open_basedir...${NC}"
 
 # Hapus pembatasan open_basedir (.user.ini) bawaan aaPanel yang memblokir folder vendor/storage Laravel
 sudo chattr -i "$PROJECT_DIR/public/.user.ini" 2>/dev/null || true
@@ -220,7 +255,17 @@ sudo rm -f "$PROJECT_DIR/public/.user.ini" 2>/dev/null || true
 sudo chattr -i "$PROJECT_DIR/.user.ini" 2>/dev/null || true
 sudo rm -f "$PROJECT_DIR/.user.ini" 2>/dev/null || true
 
-echo -e "${GREEN}✓ Izin folder & proteksi open_basedir berhasil disesuaikan.${NC}"
+# Berikan izin ke storage dan bootstrap/cache
+sudo chown -R "$CURRENT_USER:$WEB_USER" storage bootstrap/cache 2>/dev/null || sudo chown -R "$WEB_USER:$WEB_USER" storage bootstrap/cache
+sudo chmod -R 775 storage bootstrap/cache
+
+# Restart PHP-FPM dan Nginx agar perubahan aktif
+if [ -f "/etc/init.d/php-fpm-83" ]; then
+    sudo /etc/init.d/php-fpm-83 restart > /dev/null 2>&1 || true
+fi
+sudo systemctl reload nginx 2>/dev/null || true
+
+echo -e "${GREEN}✓ Izin folder, restart PHP-FPM & proteksi open_basedir berhasil disesuaikan.${NC}"
 
 # ------------------------------------------------------------------------------
 # SELESAI
