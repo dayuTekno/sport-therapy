@@ -14,9 +14,14 @@ class PatientController extends Controller
         $query = MasterPatients::query();
 
         if ($request->search) {
-            $query->where('full_name', 'like', '%' . $request->search . '%')
-                  ->orWhere('nik', 'like', '%' . $request->search . '%')
-                  ->orWhere('patient_code', 'like', '%' . $request->search . '%');
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('full_name', 'ilike', '%' . $search . '%')
+                  ->orWhere('phone_number', 'ilike', '%' . $search . '%')
+                  ->orWhere('occupation', 'ilike', '%' . $search . '%')
+                  ->orWhere('nik', 'ilike', '%' . $search . '%')
+                  ->orWhere('patient_code', 'ilike', '%' . $search . '%');
+            });
         }
 
         $patients = $query->orderBy('created_at', 'desc')->paginate(10)->withQueryString();
@@ -24,35 +29,47 @@ class PatientController extends Controller
         return view('admin.pages.master-patient.index', compact('patients'));
     }
 
-    public function create()
+    public function create(Request $request)
     {
         $eselons = MasterEselon::where('is_active', true)->get();
-        return view('admin.pages.master-patient.create', compact('eselons'));
+        $phone = $request->get('phone');
+        $from = $request->get('from');
+        return view('admin.pages.master-patient.create', compact('eselons', 'phone', 'from'));
     }
 
     public function store(Request $request)
     {
         $request->validate([
-            'nik' => 'required|unique:master_patients,nik|digits:16',
+            'phone_number' => 'required|string|max:25',
             'full_name' => 'required|string|max:255',
-            'date_of_birth' => 'required|date',
+            'age' => 'required|numeric|min:1|max:120',
             'gender' => 'required|in:male,female',
-            'phone_number' => 'nullable|string|max:20',
-            'address' => 'nullable|string|max:255',
+            'occupation' => 'required|string|max:255',
+            'address' => 'required|string|max:500',
+            'nik' => 'nullable|digits:16|unique:master_patients,nik',
+            'date_of_birth' => 'nullable|date',
+            'eselon_id' => 'nullable|exists:master_eselons,id',
         ]);
 
-        MasterPatients::create([
-            'patient_code' => Str::uuid(),
-            'nik' => $request->nik,
-            'full_name' => $request->full_name,
-            'date_of_birth' => $request->date_of_birth,
-            'gender' => $request->gender,
+        $patient = MasterPatients::create([
+            'patient_code' => (string) Str::uuid(),
             'phone_number' => $request->phone_number,
+            'full_name' => $request->full_name,
+            'age' => $request->age,
+            'gender' => $request->gender,
+            'occupation' => $request->occupation,
             'address' => $request->address,
+            'nik' => $request->nik,
+            'date_of_birth' => $request->date_of_birth,
             'eselon_id' => $request->eselon_id,
         ]);
 
-        return redirect()->route('patients.index')->with('success', 'Data Pasien berhasil ditambahkan');
+        if ($request->get('from') === 'reservation') {
+            return redirect()->route('reservations.create', ['phone' => $patient->phone_number])
+                ->with('success', "Pasien {$patient->full_name} berhasil didaftarkan! Data langsung dimuat di formulir reservasi.");
+        }
+
+        return redirect()->route('patients.index')->with('success', 'Data Pasien berhasil ditambahkan ke Master Data');
     }
 
     public function edit($id)
@@ -67,21 +84,26 @@ class PatientController extends Controller
         $patient = MasterPatients::findOrFail($id);
 
         $request->validate([
-            'nik' => 'required|digits:16|unique:master_patients,nik,' . $id,
+            'phone_number' => 'required|string|max:25',
             'full_name' => 'required|string|max:255',
-            'date_of_birth' => 'required|date',
+            'age' => 'required|numeric|min:1|max:120',
             'gender' => 'required|in:male,female',
-            'phone_number' => 'nullable|string|max:20',
-            'address' => 'nullable|string|max:255',
+            'occupation' => 'required|string|max:255',
+            'address' => 'required|string|max:500',
+            'nik' => 'nullable|digits:16|unique:master_patients,nik,' . $id,
+            'date_of_birth' => 'nullable|date',
+            'eselon_id' => 'nullable|exists:master_eselons,id',
         ]);
 
         $patient->update([
-            'nik' => $request->nik,
-            'full_name' => $request->full_name,
-            'date_of_birth' => $request->date_of_birth,
-            'gender' => $request->gender,
             'phone_number' => $request->phone_number,
+            'full_name' => $request->full_name,
+            'age' => $request->age,
+            'gender' => $request->gender,
+            'occupation' => $request->occupation,
             'address' => $request->address,
+            'nik' => $request->nik,
+            'date_of_birth' => $request->date_of_birth,
             'eselon_id' => $request->eselon_id,
         ]);
 

@@ -8,5 +8,9 @@ class MasterDoctor extends Model
 {
     protected $table = 'master_doctors';
 
-    protected $guarded = [];    
+    protected $guarded = [];
+
+    protected $casts = [
+        'is_active' => 'boolean',
+    ];    
 }

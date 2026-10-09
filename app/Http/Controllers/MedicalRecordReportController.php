@@ -23,8 +23,8 @@ class MedicalRecordReportController extends Controller
 
         if ($request->filled('search')) {
             $query->whereHas('patient', function ($q) use ($request) {
-                $q->where('full_name', 'like', '%' . $request->search . '%')
-                  ->orWhere('patient_code', 'like', '%' . $request->search . '%');
+                $q->where('full_name', 'ilike', '%' . $request->search . '%')
+                  ->orWhere('patient_code', 'ilike', '%' . $request->search . '%');
             });
         }
 

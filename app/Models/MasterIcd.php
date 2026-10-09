@@ -8,5 +8,9 @@ class MasterIcd extends Model
 {
     protected $table = 'master_icds';
 
-    protected $guarded = [];    
+    protected $guarded = [];
+
+    protected $casts = [
+        'is_active' => 'boolean',
+    ];    
 }

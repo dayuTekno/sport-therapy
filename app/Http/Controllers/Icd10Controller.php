@@ -24,7 +24,7 @@ class Icd10Controller extends Controller
         $query = MasterIcd::where('category', $category);
         $query = $this->getAllByCategory($category);
         if ($request->search) {
-            $query->where('name', 'like', '%' . $request->search . '%');
+            $query->where('name', 'ilike', '%' . $request->search . '%');
         }    
         $icds = $query->orderBy('icd_code', 'ASC')->paginate(10)->withQueryString();
 

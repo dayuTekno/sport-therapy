@@ -29,6 +29,20 @@ class LoginController extends Controller
     protected $redirectTo = '/home';
 
     /**
+     * Maximum login attempts allowed before throttling.
+     *
+     * @var int
+     */
+    protected $maxAttempts = 5;
+
+    /**
+     * Number of minutes to lockout on throttled login.
+     *
+     * @var int
+     */
+    protected $decayMinutes = 1;
+
+    /**
      * Create a new controller instance.
      *
      * @return void

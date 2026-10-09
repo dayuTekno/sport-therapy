@@ -22,6 +22,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'clinic_id',
     ];
 
     /**
@@ -47,8 +48,39 @@ class User extends Authenticatable
         ];
     }
 
-    public function dataRegister()
+    public function clinic()
     {
-        return $this->hasOne(DataRegister::class, 'user_id');
+        return $this->belongsTo(Clinic::class, 'clinic_id');
+    }
+
+    public function isSaasAdmin(): bool
+    {
+        return $this->hasRole('saas_admin') || ($this->clinic_id === null && $this->hasRole('admin'));
+    }
+
+    public function isClinicAdmin(): bool
+    {
+        return $this->hasRole('clinic_admin') || ($this->clinic_id !== null && $this->hasRole('admin'));
+    }
+
+    public function isClinicOperator(): bool
+    {
+        return $this->hasRole('operator') || ($this->clinic_id !== null && !$this->isClinicAdmin());
+    }
+
+    public function getClinicNameAttribute(): string
+    {
+        return $this->clinic?->name ?? 'Platform Global';
+    }
+
+    public function getRoleDisplayAttribute(): string
+    {
+        if ($this->isSaasAdmin()) {
+            return 'Administrator SaaS';
+        }
+        if ($this->isClinicAdmin()) {
+            return 'Administrator Klinik';
+        }
+        return 'Operator Klinik';
     }
 }

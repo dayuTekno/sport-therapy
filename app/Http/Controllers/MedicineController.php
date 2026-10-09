@@ -22,7 +22,7 @@ class MedicineController extends Controller
         $query = MasterMedicine::query();
     
         if ($request->filled('search')) {
-            $query->where('medicine_name', 'like', '%' . $request->search . '%');
+            $query->where('medicine_name', 'ilike', '%' . $request->search . '%');
         }
     
         $medicines = $query

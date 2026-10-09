@@ -8,7 +8,11 @@ class MasterEselon extends Model
 {
     protected $table = 'master_eselons';
 
-    protected $guarded = [];    
+    protected $guarded = [];
+
+    protected $casts = [
+        'is_active' => 'boolean',
+    ];    
 
     public function queues()
     {

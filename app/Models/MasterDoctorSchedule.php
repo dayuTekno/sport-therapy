@@ -9,6 +9,10 @@ class MasterDoctorSchedule extends Model
     protected $table = 'master_doctor_schedules';
     protected $guarded = [];
 
+    protected $casts = [
+        'is_active' => 'boolean',
+    ];
+
     public function doctor()
     {
         return $this->belongsTo(MasterDoctor::class, 'doctor_id');

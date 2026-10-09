@@ -10,74 +10,68 @@ class UserSeeder extends Seeder
 {
     public function run(): void
     {
-        // 1. Admin
-        $admin = User::firstOrCreate(
+        // 1. Administrator SaaS (Superadmin Platform Global, clinic_id null)
+        $saasAdmin = User::firstOrCreate(
             ['email' => 'admin@mail.com'],
             [
-                'name' => 'Admin Sistem',
+                'name' => 'Administrator SaaS',
                 'password' => Hash::make('password'),
+                'clinic_id' => null,
             ]
         );
-        $admin->syncRoles(['admin']);
+        $saasAdmin->clinic_id = null;
+        $saasAdmin->save();
+        $saasAdmin->syncRoles(['saas_admin']);
 
-        // 2. Admisi
-        $admisi = User::firstOrCreate(
-            ['email' => 'admisi@mail.com'],
+        // 2. Administrator Klinik (Admin Klinik RSTBDI, clinic_id 1)
+        $clinicAdmin = User::firstOrCreate(
+            ['email' => 'admin.rstbdi@mail.com'],
             [
-                'name' => 'Petugas Admisi',
+                'name' => 'Admin Klinik RSTBDI',
                 'password' => Hash::make('password'),
+                'clinic_id' => 1,
             ]
         );
-        $admisi->syncRoles(['admisi']);
+        $clinicAdmin->clinic_id = 1;
+        $clinicAdmin->save();
+        $clinicAdmin->syncRoles(['admin']);
 
-        // 3. Dokter
-        $dokter = User::firstOrCreate(
-            ['email' => 'dokter@mail.com'],
+        // 3. Operator Klinik RSTBDI (Petugas Operasional, clinic_id 1)
+        $operator = User::firstOrCreate(
+            ['email' => 'operator@mail.com'],
             [
-                'name' => 'Dokter Umum',
+                'name' => 'Operator Klinik',
                 'password' => Hash::make('password'),
+                'clinic_id' => 1,
             ]
         );
-        $dokter->syncRoles(['dokter']);
+        $operator->clinic_id = 1;
+        $operator->save();
+        $operator->syncRoles(['operator']);
 
-        // 4. Perawat
-        $perawat = User::firstOrCreate(
-            ['email' => 'perawat@mail.com'],
-            [
-                'name' => 'Perawat Jaga',
-                'password' => Hash::make('password'),
-            ]
-        );
-        $perawat->syncRoles(['perawat']);
+        // Staf klinik lainnya disinkronkan ke role operator
+        $staffUsers = [
+            ['email' => 'admisi@mail.com', 'name' => 'Petugas Admisi'],
+            ['email' => 'terapis@mail.com', 'name' => 'Terapis Olahraga'],
+            ['email' => 'kasir@mail.com', 'name' => 'Petugas Kasir'],
+            ['email' => 'perawat@mail.com', 'name' => 'Perawat Jaga'],
+            ['email' => 'dokter@mail.com', 'name' => 'Dokter Umum'],
+            ['email' => 'logistik@mail.com', 'name' => 'Pengelola Logistik & Peralatan'],
+            ['email' => 'monitoring@mail.com', 'name' => 'Tim Monitoring'],
+        ];
 
-        // 5. Kasir
-        $kasir = User::firstOrCreate(
-            ['email' => 'kasir@mail.com'],
-            [
-                'name' => 'Petugas Kasir',
-                'password' => Hash::make('password'),
-            ]
-        );
-        $kasir->syncRoles(['kasir']);
-
-        // 6. Apoteker
-        $apoteker = User::firstOrCreate(
-            ['email' => 'apoteker@mail.com'],
-            [
-                'name' => 'Apoteker',
-                'password' => Hash::make('password'),
-            ]
-        );
-        $apoteker->syncRoles(['apoteker']);
-
-        // 7. Monitoring
-        $monitoring = User::firstOrCreate(
-            ['email' => 'monitoring@mail.com'],
-            [
-                'name' => 'Tim Monitoring',
-                'password' => Hash::make('password'),
-            ]
-        );
-        $monitoring->syncRoles(['monitoring']);
+        foreach ($staffUsers as $staff) {
+            $u = User::firstOrCreate(
+                ['email' => $staff['email']],
+                [
+                    'name' => $staff['name'],
+                    'password' => Hash::make('password'),
+                    'clinic_id' => 1,
+                ]
+            );
+            $u->clinic_id = 1;
+            $u->save();
+            $u->syncRoles(['operator']);
+        }
     }
 }

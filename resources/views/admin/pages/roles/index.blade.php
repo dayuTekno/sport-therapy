@@ -56,6 +56,7 @@
                         </a>
 
                         {{-- DELETE --}}
+                        @if(!in_array($role->name, ['admin', 'operator', 'saas_admin']))
                         <form action="{{ route('roles.destroy', $role) }}" method="POST" class="inline-block" onsubmit="return confirm('Yakin hapus role ini?')">
                             @csrf
                             @method('DELETE')
@@ -65,6 +66,7 @@
                                 </svg>
                             </button>
                         </form>
+                        @endif
                     </div>
                 </td>
 

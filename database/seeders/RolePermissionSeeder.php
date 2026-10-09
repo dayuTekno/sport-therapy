@@ -11,37 +11,40 @@ class RolePermissionSeeder extends Seeder
 {
     public function run(): void
     {
-        // reset cache permission
+        // Reset cache permission
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
-        // Menu based permissions
+        // Menu & Feature based permissions
         $permissions = [
-            // Admin only
+            // Admin only (Settings & Master Data)
             'menu.master-data',
             'menu.users',
             'menu.roles',
-            
-            // Admisi
-            'menu.registrasi',
-            'menu.antrian-admisi',
-            
-            // Medis
-            'menu.amnesa-dokter',
-            'menu.amnesa-perawat',
-            'menu.rekap-medis',
-            
-            // Keuangan & Obat
-            'menu.kasir',
-            'menu.apoteker',
-            
-            // CRUD permissions that existed before
+
+            // Pasien & Reservasi
+            'menu.pasien',
+            'menu.registrasi',       // Buat Reservasi
+            'menu.antrian-admisi',   // Reservasi Terapi
+            'menu.riwayat-terapi',   // Riwayat Terapi (Selesai & Batal)
+
+            // Terapi & Medis
+            'menu.sesi-terapi',      // Sesi Terapi Pasien
+            'menu.amnesa-dokter',    // Sesi Terapi Pasien (legacy alias)
+            'menu.jadwal-terapis',   // Jadwal Terapis
+            'menu.terapis',          // Master Terapis
+            'menu.jenjang-terapi',   // Jenjang Terapi
+            'menu.rekap-medis',      // Laporan Rekap Rekam Medis
+
+            // Keuangan & Stok Peralatan
+            'menu.kasir',            // Kasir & Pembayaran
+            'menu.apoteker',         // Stok Peralatan Terapi
+            'menu.peralatan-terapi', // Master Peralatan Terapi
+
+            // CRUD permissions
             'user.view', 'user.create', 'user.edit', 'user.delete',
             'role.view', 'role.create', 'role.edit', 'role.delete',
             'master-eselon.view', 'master-eselon.create', 'master-eselon.edit', 'master-eselon.delete',
-            'master-procedures.view', 'master-procedures.create', 'master-procedures.edit', 'master-procedures.delete',
-            'master-polyclinic.view', 'master-polyclinic.create', 'master-polyclinic.edit', 'master-polyclinic.delete',
             'master-medicine.view', 'master-medicine.create', 'master-medicine.edit', 'master-medicine.delete',
-            'master-icd.view', 'master-icd.create', 'master-icd.edit', 'master-icd.delete',
             'master-doctor.view', 'master-doctor.create', 'master-doctor.edit', 'master-doctor.delete',
         ];
 
@@ -52,54 +55,70 @@ class RolePermissionSeeder extends Seeder
             ]);
         }
 
-        // 1. Admin
+        // =========================================================================
+        // 1. SAAS ADMINISTRATOR (Akses Platform SaaS Tertinggi)
+        // =========================================================================
+        $saasAdmin = Role::firstOrCreate(['name' => 'saas_admin', 'guard_name' => 'web']);
+        $saasAdmin->syncPermissions(Permission::all());
+
+        // =========================================================================
+        // 2. ADMIN KLINIK (Akses Penuh Seluruh Modul Klinik & Pengelolaan User Staf)
+        // =========================================================================
         $admin = Role::firstOrCreate(['name' => 'admin', 'guard_name' => 'web']);
-        $admin->givePermissionTo(Permission::all());
-
-        // 2. Admisi
-        $admisi = Role::firstOrCreate(['name' => 'admisi', 'guard_name' => 'web']);
-        $admisi->givePermissionTo([
+        $adminPermissions = [
+            'menu.master-data',
+            'menu.users',
+            'menu.roles',
+            'menu.pasien',
             'menu.registrasi',
-            'menu.antrian-admisi'
-        ]);
-
-        // 3. Dokter
-        $dokter = Role::firstOrCreate(['name' => 'dokter', 'guard_name' => 'web']);
-        $dokter->givePermissionTo([
+            'menu.antrian-admisi',
+            'menu.riwayat-terapi',
+            'menu.sesi-terapi',
             'menu.amnesa-dokter',
-            'menu.rekap-medis'
-        ]);
+            'menu.jadwal-terapis',
+            'menu.terapis',
+            'menu.jenjang-terapi',
+            'menu.rekap-medis',
+            'menu.kasir',
+            'menu.apoteker',
+            'menu.peralatan-terapi',
+            'user.view', 'user.create', 'user.edit', 'user.delete',
+            'role.view', 'role.create', 'role.edit',
+        ];
+        $admin->syncPermissions($adminPermissions);
 
-        // 4. Perawat
-        $perawat = Role::firstOrCreate(['name' => 'perawat', 'guard_name' => 'web']);
-        $perawat->givePermissionTo([
-            'menu.amnesa-perawat',
-            'menu.rekap-medis'
-        ]);
+        // =========================================================================
+        // 3. OPERATOR KLINIK (Akses Seluruh Operasional Layanan Tanpa Menu Settings)
+        // =========================================================================
+        $operator = Role::firstOrCreate(['name' => 'operator', 'guard_name' => 'web']);
+        $operatorPermissions = [
+            'menu.master-data',
+            'menu.pasien',
+            'menu.registrasi',
+            'menu.antrian-admisi',
+            'menu.riwayat-terapi',
+            'menu.sesi-terapi',
+            'menu.amnesa-dokter',
+            'menu.jadwal-terapis',
+            'menu.terapis',
+            'menu.jenjang-terapi',
+            'menu.rekap-medis',
+            'menu.kasir',
+            'menu.apoteker',
+            'menu.peralatan-terapi',
+        ];
+        $operator->syncPermissions($operatorPermissions);
 
-        // 5. Kasir
-        $kasir = Role::firstOrCreate(['name' => 'kasir', 'guard_name' => 'web']);
-        $kasir->givePermissionTo([
-            'menu.kasir'
-        ]);
+        // Bersihkan role usang di luar admin, operator, saas_admin
+        $obsoleteRoles = ['admisi', 'dokter', 'perawat', 'kasir', 'monitoring', 'terapis', 'clinic_admin', 'logistik', 'apoteker', 'user'];
+        foreach ($obsoleteRoles as $oldRole) {
+            $r = Role::where('name', $oldRole)->first();
+            if ($r) {
+                $r->delete();
+            }
+        }
 
-        // 6. Apoteker
-        $apoteker = Role::firstOrCreate(['name' => 'apoteker', 'guard_name' => 'web']);
-        $apoteker->givePermissionTo([
-            'menu.apoteker'
-        ]);
-
-        // 7. Monitoring
-        $monitoring = Role::firstOrCreate(['name' => 'monitoring', 'guard_name' => 'web']);
-        $monitoring->givePermissionTo([
-            'menu.rekap-medis'
-        ]);
-        
-        // Remove old operator/user roles if they exist to clean up
-        $operator = Role::where('name', 'operator')->first();
-        if ($operator) $operator->delete();
-        
-        $userRole = Role::where('name', 'user')->first();
-        if ($userRole) $userRole->delete();
+        // Refresh cache
+        app()[PermissionRegistrar::class]->forgetCachedPermissions();
     }
 }

@@ -1,29 +1,34 @@
 <header x-data="{ dropdownOpen: false, notifOpen: false }"
-    class="sticky top-0 z-50 flex w-full border-b border-gray-200 bg-white
-           dark:border-gray-800 dark:bg-gray-900">
-    <div class="flex flex-grow items-center justify-between px-4 py-4 md:px-6">
+    class="sticky top-0 z-30 flex w-full border-b border-gray-200 bg-white/95 backdrop-blur-sm
+           dark:border-gray-800 dark:bg-gray-900/95">
+    <div class="flex flex-grow items-center justify-between px-3 sm:px-4 py-3 md:px-6">
 
         <!-- LEFT -->
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-2 sm:gap-3">
 
             <!-- Sidebar Toggle (Mobile) -->
             <button @click="sidebarToggle = !sidebarToggle"
-                class="lg:hidden rounded-lg border border-gray-200 p-2
-                       dark:border-gray-700 dark:text-gray-400">
-                <svg width="20" height="20" fill="none" stroke="currentColor">
+                type="button"
+                aria-label="Toggle Menu"
+                class="lg:hidden rounded-xl border border-gray-200 p-2 text-gray-600 hover:bg-gray-50 active:bg-gray-100
+                       dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800 transition">
+                <svg width="22" height="22" fill="none" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
                 </svg>
             </button>
 
             <!-- Logo (Mobile) -->
-            <a href="{{ route('dashboard') }}" class="lg:hidden">
-                <img class="h-8 dark:hidden" src="{{ asset('admin/images/logo/logo.svg') }}">
-                <img class="hidden h-8 dark:block" src="{{ asset('admin/images/logo/logo-dark.svg') }}">
+            <a href="{{ route('dashboard') }}" class="lg:hidden flex items-center gap-2">
+                <img class="h-7 w-7 object-contain dark:hidden" src="{{ asset('storage/icons/hospital.png') }}" alt="Logo">
+                <img class="h-7 w-7 object-contain hidden dark:block" src="{{ asset('storage/icons/hospital.png') }}" alt="Logo">
+                <span class="text-xs font-black tracking-tight text-gray-800 dark:text-white truncate max-w-[130px] sm:max-w-xs">
+                    {{ Str::limit(auth()->user()->clinic?->name ?? 'Sport Therapy', 16) }}
+                </span>
             </a>
         </div>
 
         <!-- RIGHT -->
-        <div class="flex items-center gap-4">
+        <div class="flex items-center gap-2 sm:gap-4">
             {{-- 
             <!-- 🔔 NOTIFICATION -->
             <div class="relative">
@@ -132,12 +137,23 @@
             <!-- 👤 USER DROPDOWN -->
             <div class="relative">
                 <button @click="dropdownOpen = !dropdownOpen" class="flex items-center gap-3">
-                    <img class="h-10 w-10 rounded-full object-cover"
+                    <img class="h-9 w-9 rounded-full object-cover border border-gray-200 dark:border-gray-700"
                         src="{{ Auth::user()->avatar ?? asset('admin/images/user/user-37.jpg') }}">
 
-                    <span class="hidden text-sm font-medium text-gray-700 dark:text-gray-300 sm:block">
-                        {{-- {{ Auth::user()->name }} --}}
-                    </span>
+                    <div class="hidden text-left sm:block">
+                        <span class="block text-xs font-bold text-gray-800 dark:text-gray-200 leading-tight">
+                            {{ Auth::user()->name }}
+                        </span>
+                        <span class="block text-[10px] text-gray-500 dark:text-gray-400 font-medium">
+                            @if(Auth::user()->isSaasAdmin())
+                                <span class="text-blue-600 font-bold dark:text-blue-400">SaaS Superadmin</span>
+                            @elseif(Auth::user()->isClinicAdmin())
+                                <span class="text-purple-600 font-bold dark:text-purple-400">Admin Klinik</span>
+                            @else
+                                <span class="text-emerald-600 font-bold dark:text-emerald-400">Operator Klinik</span>
+                            @endif
+                        </span>
+                    </div>
 
                     <svg :class="dropdownOpen && 'rotate-180'" class="h-4 w-4 text-gray-500 transition-transform"
                         fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -147,16 +163,46 @@
 
                 <!-- USER MENU -->
                 <div x-show="dropdownOpen" @click.outside="dropdownOpen = false" x-transition
-                    class="absolute right-0 mt-3 w-56 rounded-xl border
-                           border-gray-200 bg-white p-3 shadow-lg
-                           dark:border-gray-800 dark:bg-gray-900">
+                    class="absolute right-0 mt-3 w-56 max-w-[calc(100vw-2rem)] rounded-2xl border
+                           border-gray-200 bg-white p-2 shadow-2xl
+                           dark:border-gray-800 dark:bg-gray-900 z-50">
+
+                    <div class="px-3 py-2 border-b border-gray-100 dark:border-gray-800 mb-1">
+                        <p class="text-xs font-bold text-gray-900 dark:text-white">{{ Auth::user()->name }}</p>
+                        <p class="text-[11px] text-gray-500 truncate">{{ Auth::user()->email }}</p>
+                        <p class="text-[10px] mt-1 font-semibold text-blue-600 dark:text-blue-400">
+                            {{ Auth::user()->role_display }}
+                        </p>
+                    </div>
+
+                    @if(Auth::user()->isSaasAdmin())
+                        <a href="{{ route('saas.dashboard') }}"
+                           class="block w-full rounded-lg px-3 py-2 text-left text-xs font-medium text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/5 transition">
+                            Panel SaaS Platform
+                        </a>
+                        <a href="{{ route('saas.clinics.index') }}"
+                           class="block w-full rounded-lg px-3 py-2 text-left text-xs font-medium text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/5 transition">
+                            Kelola Mitra Klinik
+                        </a>
+                        <a href="{{ route('saas.cms.index') }}"
+                           class="block w-full rounded-lg px-3 py-2 text-left text-xs font-medium text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/5 transition">
+                            CMS Landing Page
+                        </a>
+                    @endif
+
+                    <a href="{{ url('/') }}" target="_blank"
+                       class="block w-full rounded-lg px-3 py-2 text-left text-xs font-medium text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/5 transition">
+                        Lihat Landing Page ↗
+                    </a>
+
+                    <div class="my-1 border-t border-gray-100 dark:border-gray-800"></div>
 
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
                         <button type="submit"
-                            class="w-full rounded-lg px-3 py-2 text-left text-sm
+                            class="w-full rounded-lg px-3 py-2 text-left text-xs font-semibold
                                    text-red-600 hover:bg-red-50
-                                   dark:hover:bg-red-500/10">
+                                   dark:hover:bg-red-500/10 transition">
                             Logout
                         </button>
                     </form>

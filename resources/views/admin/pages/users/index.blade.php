@@ -51,14 +51,11 @@
 
                 <td class="px-6 py-4 text-sm text-gray-600">
                     @forelse ($user->roles as $role)
-                        <span class="inline-flex items-center
-                                     px-2 py-1 mr-1
-                                     rounded-md text-xs
-                                     bg-blue-50 text-blue-700">
-                            {{ $role->name }}
+                        <span class="inline-flex items-center px-2 py-0.5 mr-1 rounded-md text-xs font-bold {{ $role->name === 'admin' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700' }}">
+                            {{ $role->name === 'admin' ? 'Administrator' : 'Operator' }}
                         </span>
                     @empty
-                        -
+                        <span class="text-xs text-gray-400">Tidak ada role</span>
                     @endforelse
                 </td>
 

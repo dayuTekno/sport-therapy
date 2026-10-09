@@ -23,12 +23,15 @@ use App\Http\Controllers\NurseAnamnesisController;
 use App\Http\Controllers\CashierController;
 use App\Http\Controllers\PharmacyController;
 
-Route::get('/', [App\Http\Controllers\HomeController::class, 'index'])->name('dashboard');;
-
+Route::get('/', [App\Http\Controllers\PublicController::class, 'landing'])->name('public.landing');
+Route::get('/register-clinic', [App\Http\Controllers\PublicController::class, 'registerClinicForm'])->name('register.clinic');
+Route::post('/register-clinic', [App\Http\Controllers\PublicController::class, 'registerClinicSubmit'])->name('register.clinic.submit');
 
 Auth::routes();
 
 Route::get('/dashboard', [App\Http\Controllers\HomeController::class, 'index'])->name('dashboard');
+Route::get('/admin/dashboard', [App\Http\Controllers\HomeController::class, 'index'])->name('admin.dashboard');
+Route::get('/admin', [App\Http\Controllers\HomeController::class, 'index'])->name('admin');
 
 Route::get('antrian', [AntrianController::class, 'index'])->name('antrian');
 Route::post('antrian/generate', [AntrianController::class, 'generate'])->name('antrian.generate');
@@ -40,26 +43,42 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('users', UserController::class);
     Route::resource('news', NewsController::class);
     Route::resource('eselons', EselonController::class);
-    Route::resource('procedures', ProcedureController::class);
+    // Route::resource('procedures', ProcedureController::class);
     Route::resource('polyclinics', PolyclinicController::class);
     Route::resource('medicines', MedicineController::class);
     Route::post('medicines/import', [MedicineController::class, 'import'])->name('medicines.import');
     Route::post('medicines/{id}/stock-opname', [MedicineController::class, 'stockOpname'])->name('medicines.stock_opname');
     Route::resource('doctors', DoctorController::class);
+    Route::resource('therapists', \App\Http\Controllers\TherapistController::class);
+    Route::resource('therapy-equipments', \App\Http\Controllers\TherapyEquipmentController::class);
+    Route::resource('therapy-types', \App\Http\Controllers\TherapyTypeController::class);
+    Route::get('reservations-history', [\App\Http\Controllers\ReservationController::class, 'history'])->name('reservations.history');
+    Route::resource('reservations', \App\Http\Controllers\ReservationController::class);
+    Route::post('reservations/{id}/confirm', [\App\Http\Controllers\ReservationController::class, 'confirm'])->name('reservations.confirm');
+    Route::post('reservations/{id}/cancel', [\App\Http\Controllers\ReservationController::class, 'cancel'])->name('reservations.cancel');
+    Route::post('reservations/{id}/complete', [\App\Http\Controllers\ReservationController::class, 'complete'])->name('reservations.complete');
+    Route::post('reservations/{id}/advance', [\App\Http\Controllers\ReservationController::class, 'advanceStage'])->name('reservations.advance');
+    Route::get('api/patients/lookup', [\App\Http\Controllers\ReservationController::class, 'lookupPatient'])->name('api.patients.lookup');
+
+    // Sesi Terapi Pasien (Berjenjang & Mendukung >1 Terapi per Hari)
+    Route::resource('therapy-sessions', \App\Http\Controllers\TherapySessionController::class);
+    Route::post('therapy-sessions/{id}/complete', [\App\Http\Controllers\TherapySessionController::class, 'complete'])->name('therapy-sessions.complete');
+    Route::get('therapy-sessions/patient/{patient_id}/history', [\App\Http\Controllers\TherapySessionController::class, 'patientHistory'])->name('therapy-sessions.patient-history');
+    Route::get('api/patients/{id}/last-stage', [\App\Http\Controllers\TherapySessionController::class, 'getPatientLastStage'])->name('api.patients.last-stage');
 
     // Route::resource('icds', IcdController::class);
     // Route::post('icds.import', [IcdController::class, 'import'])->name('icds.import');
 
-    Route::resource('icds9', Icd9Controller::class);
-    Route::post('icds9.import', [Icd9Controller::class, 'import'])->name('icds9.import');
+    // Route::resource('icds9', Icd9Controller::class);
+    // Route::post('icds9.import', [Icd9Controller::class, 'import'])->name('icds9.import');
 
-    Route::resource('icds10', Icd10Controller::class);
-    Route::post('icds10.import', [Icd10Controller::class, 'import'])->name('icds10.import');
+    // Route::resource('icds10', Icd10Controller::class);
+    // Route::post('icds10.import', [Icd10Controller::class, 'import'])->name('icds10.import');
 
-    Route::resource('poly-icds9', PolyIcd9Controller::class);
-    Route::resource('poly-icds10', PolyIcd10Controller::class);
+    // Route::resource('poly-icds9', PolyIcd9Controller::class);
+    // Route::resource('poly-icds10', PolyIcd10Controller::class);
     Route::resource('poly-doctors', PolyDoctorController::class);
-    Route::resource('poly-procedures', PolyProcedureController::class);
+    // Route::resource('poly-procedures', PolyProcedureController::class);
     Route::resource('doctor-schedules', \App\Http\Controllers\DoctorScheduleController::class);
     
     Route::resource('patients', PatientController::class);
@@ -76,8 +95,8 @@ Route::middleware(['auth'])->group(function () {
         
         if ($search) {
             $query->where(function($q) use ($search) {
-                $q->where('icd_code', 'like', "%{$search}%")
-                  ->orWhere('name', 'like', "%{$search}%");
+                $q->where('icd_code', 'ilike', "%{$search}%")
+                  ->orWhere('name', 'ilike', "%{$search}%");
             });
         }
         
@@ -106,8 +125,8 @@ Route::middleware(['auth'])->group(function () {
         // The user says "tidak bisa di pilih", which often means the list is empty.
         
         $procedures = $query->where(function($sub) use ($q) {
-                $sub->where('name', 'like', "%{$q}%")
-                    ->orWhere('procedure_code', 'like', "%{$q}%");
+                $sub->where('name', 'ilike', "%{$q}%")
+                    ->orWhere('procedure_code', 'ilike', "%{$q}%");
             })
             ->limit(20)
             ->get();
@@ -126,8 +145,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('api/medicines/search', function(Request $request) {
         $q = $request->get('q', '');
         
-        $medicines = \App\Models\MasterMedicine::where('medicine_name', 'like', "%{$q}%")
-            ->orWhere('medicine_international_name', 'like', "%{$q}%")
+        $medicines = \App\Models\MasterMedicine::where('medicine_name', 'ilike', "%{$q}%")
+            ->orWhere('medicine_international_name', 'ilike', "%{$q}%")
             ->limit(20)
             ->get();
         
@@ -174,17 +193,19 @@ Route::middleware(['auth'])->group(function () {
     Route::get('admin/antrian', [AntrianController::class, 'dashboard'])->name('admin.antrian.dashboard');
     Route::post('admin/antrian/{id}/call', [AntrianController::class, 'call'])->name('admin.antrian.call');
 
-    Route::get('anamnesis', [NurseAnamnesisController::class, 'index'])->name('anamnesis.index');
-    Route::get('anamnesis/{queue_id}/process', [NurseAnamnesisController::class, 'process'])->name('anamnesis.process');
-    Route::post('anamnesis/{queue_id}/process', [NurseAnamnesisController::class, 'store'])->name('anamnesis.store');
+    // Legacy Poliklinik (Skrining Pasien / Anamnesa Perawat - Tidak digunakan di skema Sport Therapist)
+    // Route::get('anamnesis', [NurseAnamnesisController::class, 'index'])->name('anamnesis.index');
+    // Route::get('anamnesis/{queue_id}/process', [NurseAnamnesisController::class, 'process'])->name('anamnesis.process');
+    // Route::post('anamnesis/{queue_id}/process', [NurseAnamnesisController::class, 'store'])->name('anamnesis.store');
 
-    Route::get('doctor-exam', [\App\Http\Controllers\DoctorExaminationController::class, 'index'])->name('doctor-exam.index');
-    Route::get('doctor-exam/{queue_id}/process', [\App\Http\Controllers\DoctorExaminationController::class, 'process'])->name('doctor-exam.process');
-    Route::post('doctor-exam/{queue_id}/process', [\App\Http\Controllers\DoctorExaminationController::class, 'store'])->name('doctor-exam.store');
+    Route::get('doctor-exam', [\App\Http\Controllers\TherapySessionController::class, 'index'])->name('doctor-exam.index');
+    Route::get('doctor-exam/{queue_id}/process', [\App\Http\Controllers\TherapySessionController::class, 'show'])->name('doctor-exam.process');
+    Route::post('doctor-exam/{queue_id}/process', [\App\Http\Controllers\TherapySessionController::class, 'complete'])->name('doctor-exam.store');
 
     Route::get('cashier', [CashierController::class, 'index'])->name('cashier.index');
     Route::get('cashier/{id}/process', [CashierController::class, 'process'])->name('cashier.process');
     Route::post('cashier/{id}/process', [CashierController::class, 'store'])->name('cashier.store');
+    Route::get('cashier/{id}/receipt', [CashierController::class, 'receipt'])->name('cashier.receipt');
 
     Route::get('pharmacy', [PharmacyController::class, 'index'])->name('pharmacy.index');
     Route::get('pharmacy/{id}/process', [PharmacyController::class, 'process'])->name('pharmacy.process');
@@ -193,4 +214,32 @@ Route::middleware(['auth'])->group(function () {
     // Reports
     Route::get('reports/medical-records', [\App\Http\Controllers\MedicalRecordReportController::class, 'index'])->name('reports.medical_records.index');
     Route::get('reports/medical-records/{id}', [\App\Http\Controllers\MedicalRecordReportController::class, 'show'])->name('reports.medical_records.show');
+
+    // ==========================================
+    // SAAS ADMINISTRATOR PLATFORM ROUTES
+    // ==========================================
+    Route::prefix('admin/saas')->name('saas.')->group(function () {
+        Route::get('dashboard', [\App\Http\Controllers\SaasDashboardController::class, 'index'])->name('dashboard');
+        
+        // Tenant Clinics Management
+        Route::get('clinics', [\App\Http\Controllers\SaasClinicController::class, 'index'])->name('clinics.index');
+        Route::get('clinics/create', [\App\Http\Controllers\SaasClinicController::class, 'create'])->name('clinics.create');
+        Route::post('clinics', [\App\Http\Controllers\SaasClinicController::class, 'store'])->name('clinics.store');
+        Route::get('clinics/{id}/edit', [\App\Http\Controllers\SaasClinicController::class, 'edit'])->name('clinics.edit');
+        Route::put('clinics/{id}', [\App\Http\Controllers\SaasClinicController::class, 'update'])->name('clinics.update');
+        Route::delete('clinics/{id}', [\App\Http\Controllers\SaasClinicController::class, 'destroy'])->name('clinics.destroy');
+        Route::get('clinics/{id}/impersonate', [\App\Http\Controllers\SaasClinicController::class, 'impersonate'])->name('clinics.impersonate');
+        Route::get('exit-impersonation', [\App\Http\Controllers\SaasClinicController::class, 'exitImpersonation'])->name('clinics.exit-impersonation');
+
+        // Subscription Plans
+        Route::get('plans', [\App\Http\Controllers\SaasPlanController::class, 'index'])->name('plans.index');
+        Route::post('plans', [\App\Http\Controllers\SaasPlanController::class, 'store'])->name('plans.store');
+        Route::put('plans/{id}', [\App\Http\Controllers\SaasPlanController::class, 'update'])->name('plans.update');
+
+        // CMS Landing Page (Bagian Luar Website)
+        Route::get('landing-page', [\App\Http\Controllers\SaasCmsController::class, 'index'])->name('cms.index');
+        Route::post('landing-page/hero', [\App\Http\Controllers\SaasCmsController::class, 'updateHero'])->name('cms.hero');
+        Route::post('landing-page/features', [\App\Http\Controllers\SaasCmsController::class, 'updateFeatures'])->name('cms.features');
+        Route::post('landing-page/contact', [\App\Http\Controllers\SaasCmsController::class, 'updateContact'])->name('cms.contact');
+    });
 });

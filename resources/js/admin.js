@@ -6,6 +6,7 @@ import "../css/admin.css";
 import Alpine from "alpinejs";
 import persist from "@alpinejs/persist";
 import flatpickr from "flatpickr";
+window.flatpickr = flatpickr;
 import Dropzone from "dropzone";
 
 import chart01 from "./components/charts/chart-01";

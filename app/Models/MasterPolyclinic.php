@@ -10,6 +10,10 @@ class MasterPolyclinic extends Model
 
     protected $guarded = [];
 
+    protected $casts = [
+        'is_active' => 'boolean',
+    ];
+
     public function icds()
     {
         return $this->belongsToMany(MasterIcd::class, 'master_poly_icds', 'polyclinic_id', 'icd_id');

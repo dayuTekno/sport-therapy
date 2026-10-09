@@ -8,5 +8,9 @@ class MasterMedicine extends Model
 {
     protected $table = 'master_medicines';
 
-    protected $guarded = [];    
+    protected $guarded = [];
+
+    protected $casts = [
+        'is_active' => 'boolean',
+    ];    
 }
