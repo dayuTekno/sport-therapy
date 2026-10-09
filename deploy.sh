@@ -48,6 +48,16 @@ fi
 
 echo -e "${GREEN}✓ Menggunakan PHP: $PHP_CMD (v$PHP_VER)${NC}"
 
+# Buat wrapper agar perintah 'php' di terminal manapun otomatis membaca php.ini aaPanel
+if [ -f "/www/server/php/83/bin/php" ]; then
+    sudo tee /usr/local/bin/php > /dev/null << 'EOF'
+#!/bin/bash
+exec /www/server/php/83/bin/php -c /www/server/php/83/etc/php.ini "$@"
+EOF
+    sudo chmod +x /usr/local/bin/php
+    sudo cp -f /usr/local/bin/php /usr/bin/php 2>/dev/null || true
+fi
+
 # Fungsi pembantu untuk menjalankan PHP dengan php.ini aaPanel
 run_php() {
     if [ -n "$PHP_INI" ] && [ -f "$PHP_INI" ]; then
