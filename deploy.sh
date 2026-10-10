@@ -41,56 +41,95 @@ sudo rm -f /var/lib/rpm/.rpm.lock 2>/dev/null || true
 sudo chown -R "$CURRENT_USER" "$PROJECT_DIR" 2>/dev/null || true
 
 # ------------------------------------------------------------------------------
-# 1. DETEKSI & PEMULIHAN OTOMATIS BINARY PHP 8.3
+# 1. DETEKSI & PEMASANGAN CEPAT BINARY PHP (>= 8.2)
 # ------------------------------------------------------------------------------
 echo -e "\n${YELLOW}[1/10] Mendeteksi dan Memvalidasi Binary PHP...${NC}"
 
-# Hapus wrapper bash rusak yang sempat dibuat di /usr/local/bin atau /usr/bin
-if [ -f "/usr/local/bin/php" ] && grep -q "#!/bin/bash" /usr/local/bin/php 2>/dev/null; then
-    sudo rm -f /usr/local/bin/php
-fi
-
-# Cek apakah binary /www/server/php/83/bin/php tertimpa bash script
-if [ -f "/www/server/php/83/bin/php" ] && grep -q "#!/bin/bash" /www/server/php/83/bin/php 2>/dev/null; then
-    echo -e "${YELLOW}! Binary /www/server/php/83/bin/php terdeteksi berupa script wrapper.${NC}"
-    echo -e "${YELLOW}! Memulihkan PHP 8.3 via aaPanel Fast Binary (hanya ~15 detik)...${NC}"
-    sudo rm -f /www/server/php/83/bin/php /usr/bin/php /usr/local/bin/php
-    if [ -f "/www/server/panel/install/install_soft.sh" ]; then
-        # Mode 1 = Fast Pre-compiled Binary package (bukan 0 compile source)
-        sudo bash /www/server/panel/install/install_soft.sh 1 install php 83 > /dev/null 2>&1 || true
+# Bersihkan wrapper shell script yang sempat menimpa binary
+for bad_path in /usr/local/bin/php /usr/bin/php /www/server/php/83/bin/php; do
+    if [ -f "$bad_path" ] && grep -q "#!/bin/bash" "$bad_path" 2>/dev/null; then
+        sudo rm -f "$bad_path"
     fi
+done
+
+# Fungsi pencari binary PHP yang berfungsi dan versinya >= 8.2
+find_working_php() {
+    local candidates=(
+        "/www/server/php/83/bin/php"
+        "/www/server/php/82/bin/php"
+        "/usr/bin/php8.3"
+        "/usr/bin/php8.2"
+        "/usr/bin/php83"
+        "/usr/bin/php82"
+        "/usr/bin/php"
+        "/usr/local/bin/php"
+    )
+
+    for p in "${candidates[@]}"; do
+        if [ -f "$p" ] && [ -x "$p" ] && ! grep -q "#!/bin/bash" "$p" 2>/dev/null; then
+            if "$p" -r 'exit(version_compare(PHP_VERSION, "8.2.0", ">=") ? 0 : 1);' 2>/dev/null; then
+                echo "$p"
+                return 0
+            fi
+        fi
+    done
+
+    # Cek folder aaPanel /www/server/php/*
+    if [ -d "/www/server/php" ]; then
+        for d in /www/server/php/*; do
+            local p="$d/bin/php"
+            if [ -f "$p" ] && [ -x "$p" ] && ! grep -q "#!/bin/bash" "$p" 2>/dev/null; then
+                if "$p" -r 'exit(version_compare(PHP_VERSION, "8.2.0", ">=") ? 0 : 1);' 2>/dev/null; then
+                    echo "$p"
+                    return 0
+                fi
+            fi
+        done
+    fi
+
+    return 1
+}
+
+PHP_CMD=$(find_working_php || true)
+
+# Jika belum ada binary PHP >= 8.2, install cepat paket RPM Remi resmi (~15 detik, bukan compile source)
+if [ -z "$PHP_CMD" ] || [ ! -x "$PHP_CMD" ]; then
+    echo -e "${YELLOW}! Binary PHP >= 8.2 belum terpasang. Memasang paket cepat via DNF (Remi)...${NC}"
+    
+    if command -v dnf &>/dev/null; then
+        sudo dnf install -y epel-release || true
+        sudo dnf install -y https://rpms.remirepo.net/enterprise/remi-release-9.rpm || sudo dnf install -y https://rpms.remirepo.net/enterprise/remi-release-8.rpm || true
+        sudo dnf module reset php -y || true
+        sudo dnf module enable php:remi-8.3 -y || sudo dnf module enable php:remi-8.2 -y || true
+        sudo dnf install -y php-cli php-common php-pgsql php-pdo php-mbstring php-xml php-curl php-zip php-bcmath php-intl php-fpm || true
+    fi
+
+    PHP_CMD=$(find_working_php || which php 2>/dev/null || echo "/usr/bin/php")
 fi
 
-# Tentukan path PHP binary
-PHP_CMD=""
+if [ ! -x "$PHP_CMD" ]; then
+    echo -e "${RED}✗ Tidak dapat menemukan atau memasang binary PHP >= 8.2.${NC}"
+    exit 1
+fi
+
+# Tentukan file php.ini jika ada
 PHP_INI=""
-
-if [ -x "/www/server/php/83/bin/php" ] && ! grep -q "#!/bin/bash" /www/server/php/83/bin/php 2>/dev/null; then
-    PHP_CMD="/www/server/php/83/bin/php"
+if [[ "$PHP_CMD" == *"/www/server/php/83/"* ]] && [ -f "/www/server/php/83/etc/php.ini" ]; then
     PHP_INI="/www/server/php/83/etc/php.ini"
-elif [ -x "/www/server/php/82/bin/php" ]; then
-    PHP_CMD="/www/server/php/82/bin/php"
+elif [[ "$PHP_CMD" == *"/www/server/php/82/"* ]] && [ -f "/www/server/php/82/etc/php.ini" ]; then
     PHP_INI="/www/server/php/82/etc/php.ini"
-elif command -v php &>/dev/null && ! grep -q "#!/bin/bash" "$(which php)" 2>/dev/null; then
-    PHP_CMD=$(which php)
-    PHP_INI=""
-else
-    # Jika PHP belum ada atau rusak, install cepat via aaPanel fast mode (1)
-    echo -e "${YELLOW}! Mengunduh PHP 8.3 paket cepat aaPanel...${NC}"
-    if [ -f "/www/server/panel/install/install_soft.sh" ]; then
-        sudo bash /www/server/panel/install/install_soft.sh 1 install php 83
-    fi
-    PHP_CMD="/www/server/php/83/bin/php"
-    PHP_INI="/www/server/php/83/etc/php.ini"
 fi
 
-# Buat symlink bersih ke sistem & pastikan masuk ke PATH
-if [ -f "$PHP_CMD" ]; then
-    sudo chmod +x "$PHP_CMD" 2>/dev/null || true
-    sudo rm -f /usr/bin/php /usr/local/bin/php 2>/dev/null || true
-    sudo ln -sf "$PHP_CMD" /usr/bin/php 2>/dev/null || true
-    sudo ln -sf "$PHP_CMD" /usr/local/bin/php 2>/dev/null || true
-    sudo ln -sf "$PHP_CMD" /bin/php 2>/dev/null || true
+# Pastikan symlink global aktif dan tidak tertimpa
+sudo chmod +x "$PHP_CMD" 2>/dev/null || true
+sudo rm -f /usr/bin/php /usr/local/bin/php 2>/dev/null || true
+sudo ln -sf "$PHP_CMD" /usr/bin/php 2>/dev/null || true
+sudo ln -sf "$PHP_CMD" /usr/local/bin/php 2>/dev/null || true
+
+# Jika aaPanel mencari di /www/server/php/83/bin/php, buatkan symlink juga
+if [ ! -f "/www/server/php/83/bin/php" ]; then
+    sudo mkdir -p /www/server/php/83/bin 2>/dev/null || true
+    sudo ln -sf "$PHP_CMD" /www/server/php/83/bin/php 2>/dev/null || true
 fi
 
 export PATH="$(dirname "$PHP_CMD"):$PATH"
@@ -98,7 +137,7 @@ export PATH="$(dirname "$PHP_CMD"):$PATH"
 PHP_VER=$("$PHP_CMD" -r 'echo PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;' 2>/dev/null || echo "8.3")
 echo -e "${GREEN}✓ Menggunakan PHP: $PHP_CMD (v$PHP_VER)${NC}"
 
-# Fungsi eksekutor PHP
+# Fungsi pembantu eksekusi PHP
 run_php() {
     if [ -n "$PHP_INI" ] && [ -f "$PHP_INI" ]; then
         "$PHP_CMD" -c "$PHP_INI" "$@"
@@ -113,14 +152,14 @@ run_php() {
 echo -e "\n${YELLOW}[2/10] Memeriksa driver PostgreSQL di PHP...${NC}"
 
 if ! "$PHP_CMD" -m 2>/dev/null | grep -qi "pdo_pgsql"; then
-    echo "Mengaktifkan ekstensi pdo_pgsql di php.ini..."
+    echo "Mengaktifkan ekstensi pdo_pgsql..."
     SO_FILE=$(find /www/server/php/83/ -name "pdo_pgsql.so" 2>/dev/null | head -n 1)
-    if [ -n "$SO_FILE" ] && [ -f "$PHP_INI" ]; then
+    if [ -n "$SO_FILE" ] && [ -n "$PHP_INI" ] && [ -f "$PHP_INI" ]; then
         if ! grep -q "$SO_FILE" "$PHP_INI" 2>/dev/null; then
             echo "extension = $SO_FILE" | sudo tee -a "$PHP_INI" > /dev/null
         fi
         echo "extension = pgsql.so" | sudo tee -a "$PHP_INI" > /dev/null 2>&1 || true
-    elif [ -f "$PHP_INI" ]; then
+    elif [ -n "$PHP_INI" ] && [ -f "$PHP_INI" ]; then
         echo "extension = pdo_pgsql" | sudo tee -a "$PHP_INI" > /dev/null 2>&1 || true
         echo "extension = pgsql" | sudo tee -a "$PHP_INI" > /dev/null 2>&1 || true
     fi
@@ -129,6 +168,7 @@ if ! "$PHP_CMD" -m 2>/dev/null | grep -qi "pdo_pgsql"; then
     if [ -f "/etc/init.d/php-fpm-83" ]; then
         sudo /etc/init.d/php-fpm-83 restart > /dev/null 2>&1 || true
     fi
+    sudo systemctl restart php-fpm 2>/dev/null || true
 fi
 
 if "$PHP_CMD" -m 2>/dev/null | grep -qi "pdo_pgsql"; then
@@ -178,6 +218,7 @@ echo -e "${GREEN}✓ File .env dikonfigurasi (Port: 5433, Host: 127.0.0.1).${NC}
 echo -e "\n${YELLOW}[5/10] Memasang dependensi Composer...${NC}"
 
 COMPOSER_BIN=$(which composer 2>/dev/null || true)
+
 if [ -n "$COMPOSER_BIN" ] && [ -f "$COMPOSER_BIN" ]; then
     run_php "$COMPOSER_BIN" install --no-dev --optimize-autoloader --no-interaction
 else
@@ -189,6 +230,7 @@ else
     fi
     run_php composer.phar install --no-dev --optimize-autoloader --no-interaction
 fi
+
 echo -e "${GREEN}✓ Dependensi Composer selesai dipasang.${NC}"
 
 if ! grep -q "APP_KEY=base64:" .env; then
@@ -261,6 +303,7 @@ sudo chmod -R 775 storage bootstrap/cache 2>/dev/null || true
 if [ -f "/etc/init.d/php-fpm-83" ]; then
     sudo /etc/init.d/php-fpm-83 restart > /dev/null 2>&1 || true
 fi
+sudo systemctl restart php-fpm 2>/dev/null || true
 sudo systemctl reload nginx 2>/dev/null || true
 
 echo -e "\n${CYAN}======================================================${NC}"
