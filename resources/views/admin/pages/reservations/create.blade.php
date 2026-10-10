@@ -303,6 +303,19 @@
                     @endforeach
                 </select>
                 <p class="text-[11px] text-gray-500 mt-1">Dapat dikosongkan jika pasien belum menentukan terapis spesifik.</p>
+                
+                {{-- Warning Banner Bentrok Terapis --}}
+                <div id="therapistConflictWarning" class="hidden mt-3 p-3.5 bg-rose-50 border border-rose-200 rounded-xl text-xs text-rose-800 flex items-start gap-3 transition">
+                    <span class="text-xl leading-none shrink-0">⚠️</span>
+                    <div class="space-y-1 flex-1">
+                        <strong class="font-bold text-rose-900 block" id="therapistConflictTitle">Jadwal Terapis Bentrok!</strong>
+                        <p class="text-xs text-rose-700 leading-relaxed" id="therapistConflictDesc"></p>
+                        <p class="text-[11px] text-rose-600 font-semibold mt-1">
+                            ℹ️ Permintaan reservasi pada jam tersebut akan ditolak oleh sistem. Silakan pilih jam atau terapis lain.
+                        </p>
+                    </div>
+                </div>
+                @error('therapist_id') <p class="text-xs text-rose-600 mt-2 font-semibold">⚠️ {{ $message }}</p> @enderror
             </div>
         </div>
 
@@ -487,6 +500,10 @@ document.addEventListener('DOMContentLoaded', function() {
             if (prefSchedInput) prefSchedInput.value = fallback;
             if (previewSchedText) previewSchedText.textContent = fallback;
         }
+
+        if (typeof checkTherapistAvailability === 'function') {
+            checkTherapistAvailability();
+        }
     }
 
     function highlightSelectedTimeChip(timeStr) {
@@ -597,11 +614,97 @@ document.addEventListener('DOMContentLoaded', function() {
         prefTimeInput.addEventListener('change', () => syncSchedulePreview());
     }
 
+    // ==========================================
+    // Realtime Therapist Schedule Conflict Check
+    // ==========================================
+    const therapistSelect = document.getElementById('therapist_id');
+    const warningBox = document.getElementById('therapistConflictWarning');
+    const warningDesc = document.getElementById('therapistConflictDesc');
+    const btnSubmit = document.getElementById('btnSubmitReservation');
+    const reservationForm = document.getElementById('reservationForm');
+
+    let currentConflict = null;
+
+    async function checkTherapistAvailability() {
+        const therapistId = therapistSelect ? therapistSelect.value : '';
+        const dateVal = prefDateInput ? prefDateInput.value : '';
+        const timeVal = prefTimeInput && prefTimeInput.value ? prefTimeInput.value : '09:00';
+
+        if (!therapistId || !dateVal) {
+            if (warningBox) warningBox.classList.add('hidden');
+            clearBookedChips();
+            currentConflict = null;
+            return;
+        }
+
+        try {
+            const url = `{{ route('api.therapists.check-availability') }}?therapist_id=${encodeURIComponent(therapistId)}&date=${encodeURIComponent(dateVal)}&time=${encodeURIComponent(timeVal)}`;
+            const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
+            const data = await res.json();
+
+            // Tandai tombol jam yang sudah terisi
+            updateBookedChips(data.booked_slots || []);
+
+            if (!data.available && data.conflict) {
+                currentConflict = data.conflict;
+                if (warningBox) {
+                    warningBox.classList.remove('hidden');
+                    warningDesc.textContent = data.conflict.message;
+                }
+            } else {
+                currentConflict = null;
+                if (warningBox) {
+                    warningBox.classList.add('hidden');
+                }
+            }
+        } catch (err) {
+            console.error('Error saat mengecek ketersediaan terapis:', err);
+        }
+    }
+
+    function clearBookedChips() {
+        document.querySelectorAll('.quick-time-btn').forEach(btn => {
+            btn.classList.remove('line-through', 'border-rose-400', 'bg-rose-50', 'text-rose-700', 'opacity-60');
+            btn.removeAttribute('title');
+        });
+    }
+
+    function updateBookedChips(bookedSlots) {
+        clearBookedChips();
+        document.querySelectorAll('.quick-time-btn').forEach(btn => {
+            const time = btn.getAttribute('data-time');
+            const slot = bookedSlots.find(s => s.time === time);
+            if (slot) {
+                btn.classList.add('line-through', 'border-rose-400', 'bg-rose-50', 'text-rose-700', 'opacity-60');
+                btn.setAttribute('title', `Sudah Terjadwal: ${slot.patient_name} (${slot.title})`);
+            }
+        });
+    }
+
+    if (therapistSelect) {
+        therapistSelect.addEventListener('change', checkTherapistAvailability);
+    }
+
+    if (reservationForm) {
+        reservationForm.addEventListener('submit', function(e) {
+            if (currentConflict) {
+                e.preventDefault();
+                alert(currentConflict.message || 'Jadwal bentrok: Terapis yang dipilih sudah memiliki jadwal pada jam tersebut. Silakan pilih jam atau terapis lain.');
+                if (warningBox) {
+                    warningBox.classList.remove('hidden');
+                    warningBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+                return false;
+            }
+        });
+    }
+
     // Initial sync
     syncSchedulePreview();
     if (prefTimeInput && prefTimeInput.value) {
         highlightSelectedTimeChip(prefTimeInput.value);
     }
+    checkTherapistAvailability();
 });
 </script>
 

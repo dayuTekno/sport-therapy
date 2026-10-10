@@ -206,6 +206,15 @@
                             </option>
                         @endforeach
                     </select>
+
+                    <div id="sessionTherapistConflictWarning" class="hidden mt-2 p-3 bg-rose-50 border border-rose-200 rounded-xl text-xs text-rose-800 flex items-start gap-2">
+                        <span class="text-base leading-none shrink-0">⚠️</span>
+                        <div class="space-y-0.5 flex-1">
+                            <strong class="font-bold text-rose-900 block">Jadwal Terapis Bentrok!</strong>
+                            <p class="text-xs text-rose-700 leading-relaxed" id="sessionConflictDesc"></p>
+                        </div>
+                    </div>
+                    @error('therapist_id') <p class="text-xs text-rose-600 mt-1 font-semibold">⚠️ {{ $message }}</p> @enderror
                 </div>
             </div>
 
@@ -307,6 +316,73 @@ document.addEventListener('DOMContentLoaded', function() {
     if (therapyTypeSelect.value) {
         therapyTypeSelect.dispatchEvent(new Event('change'));
     }
+
+    // ==========================================
+    // Realtime Therapist Schedule Conflict Check
+    // ==========================================
+    const therapistSelect = document.getElementById('therapist_id');
+    const sessWarningBox = document.getElementById('sessionTherapistConflictWarning');
+    const sessConflictDesc = document.getElementById('sessionConflictDesc');
+    const sessionForm = document.getElementById('therapySessionForm');
+
+    let currentSessConflict = null;
+
+    async function checkSessionTherapistAvailability() {
+        const therapistId = therapistSelect ? therapistSelect.value : '';
+        const scheduledAtVal = scheduledAtInput ? scheduledAtInput.value : '';
+
+        if (!therapistId || !scheduledAtVal) {
+            if (sessWarningBox) sessWarningBox.classList.add('hidden');
+            currentSessConflict = null;
+            return;
+        }
+
+        const [dateVal, timeVal] = scheduledAtVal.split('T');
+
+        try {
+            const url = `{{ route('api.therapists.check-availability') }}?therapist_id=${encodeURIComponent(therapistId)}&date=${encodeURIComponent(dateVal)}&time=${encodeURIComponent(timeVal)}`;
+            const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
+            const data = await res.json();
+
+            if (!data.available && data.conflict) {
+                currentSessConflict = data.conflict;
+                if (sessWarningBox) {
+                    sessWarningBox.classList.remove('hidden');
+                    sessConflictDesc.textContent = data.conflict.message;
+                }
+            } else {
+                currentSessConflict = null;
+                if (sessWarningBox) {
+                    sessWarningBox.classList.add('hidden');
+                }
+            }
+        } catch (err) {
+            console.error('Error saat memeriksa jadwal terapis:', err);
+        }
+    }
+
+    if (therapistSelect) {
+        therapistSelect.addEventListener('change', checkSessionTherapistAvailability);
+    }
+    if (scheduledAtInput) {
+        scheduledAtInput.addEventListener('change', checkSessionTherapistAvailability);
+    }
+
+    if (sessionForm) {
+        sessionForm.addEventListener('submit', function(e) {
+            if (currentSessConflict) {
+                e.preventDefault();
+                alert(currentSessConflict.message || 'Jadwal bentrok: Terapis yang dipilih sudah memiliki jadwal pada jam tersebut. Silakan pilih jam atau terapis lain.');
+                if (sessWarningBox) {
+                    sessWarningBox.classList.remove('hidden');
+                    sessWarningBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+                return false;
+            }
+        });
+    }
+
+    checkSessionTherapistAvailability();
 });
 </script>
 

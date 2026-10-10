@@ -189,6 +189,27 @@ class TherapySessionController extends Controller
             }
         }
 
+        // VALIDASI: Tolak jika terapis yang sama sudah memiliki jadwal pada jam yang sama
+        if ($request->filled('therapist_id')) {
+            $therapist = Therapist::find($request->therapist_id);
+            if ($therapist) {
+                $duration = 60;
+                if ($request->filled('therapy_type_id')) {
+                    $tTypeCheck = TherapyType::find($request->therapy_type_id);
+                    if ($tTypeCheck && $tTypeCheck->duration_minutes > 0) {
+                        $duration = $tTypeCheck->duration_minutes;
+                    }
+                }
+                $conflict = $therapist->getScheduleConflict($scheduledAt, $duration, $request->reservation_id);
+                if ($conflict) {
+                    return redirect()->back()
+                        ->withInput()
+                        ->withErrors(['therapist_id' => $conflict['message']])
+                        ->with('error', $conflict['message']);
+                }
+            }
+        }
+
         $session = TherapySession::create([
             'patient_id' => $request->patient_id,
             'reservation_id' => $request->reservation_id,
@@ -309,10 +330,25 @@ class TherapySessionController extends Controller
                 ->count();
             $dailyOrder = $existingCount + 1;
 
+            $nextTherapistId = $request->next_therapist_id ?: $session->therapist_id;
+            if ($nextTherapistId) {
+                $therapist = Therapist::find($nextTherapistId);
+                if ($therapist) {
+                    $duration = $nextType?->duration_minutes ?: 60;
+                    $conflict = $therapist->getScheduleConflict($nextScheduledAt, $duration, $session->reservation_id, $session->id);
+                    if ($conflict) {
+                        return redirect()->back()
+                            ->withInput()
+                            ->withErrors(['next_therapist_id' => $conflict['message']])
+                            ->with('error', $conflict['message']);
+                    }
+                }
+            }
+
             $newSession = TherapySession::create([
                 'patient_id' => $session->patient_id,
                 'reservation_id' => $session->reservation_id,
-                'therapist_id' => $request->next_therapist_id ?: $session->therapist_id,
+                'therapist_id' => $nextTherapistId,
                 'therapy_type_id' => $nextType?->id,
                 'stage_number' => $nextStageNumber,
                 'stage_name' => $nextStageName,

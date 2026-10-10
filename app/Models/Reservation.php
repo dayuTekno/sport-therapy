@@ -14,6 +14,7 @@ class Reservation extends Model
     protected $guarded = [];
 
     protected $casts = [
+        'preferred_datetime' => 'datetime',
         'confirmed_schedule' => 'datetime',
         'cancelled_at' => 'datetime',
         'completed_at' => 'datetime',

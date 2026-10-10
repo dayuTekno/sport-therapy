@@ -59,6 +59,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('reservations/{id}/complete', [\App\Http\Controllers\ReservationController::class, 'complete'])->name('reservations.complete');
     Route::post('reservations/{id}/advance', [\App\Http\Controllers\ReservationController::class, 'advanceStage'])->name('reservations.advance');
     Route::get('api/patients/lookup', [\App\Http\Controllers\ReservationController::class, 'lookupPatient'])->name('api.patients.lookup');
+    Route::get('api/therapists/check-availability', [\App\Http\Controllers\ReservationController::class, 'checkTherapistAvailability'])->name('api.therapists.check-availability');
 
     // Sesi Terapi Pasien (Berjenjang & Mendukung >1 Terapi per Hari)
     Route::resource('therapy-sessions', \App\Http\Controllers\TherapySessionController::class);

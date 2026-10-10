@@ -13,7 +13,7 @@ dotenv.config({ path: path.resolve(__dirname, '../.env') });
 
 const dbConfig = {
   host: process.env.DB_HOST || '127.0.0.1',
-  port: parseInt(process.env.DB_PORT || '3306', 10),
+  port: parseInt(process.env.MYSQL_PORT || (process.env.DB_CONNECTION === 'pgsql' ? '3306' : process.env.DB_PORT) || '3306', 10),
   database: process.env.DB_DATABASE || 'db_clinic',
   user: process.env.DB_USERNAME || 'root',
   password: process.env.DB_PASSWORD !== undefined ? process.env.DB_PASSWORD : 'localhost',
@@ -265,7 +265,37 @@ server.tool(
       patientId = insertRes.insertId;
     }
 
-    // 2. Generate code and create reservation
+    // 2. Validasi jadwal bentrok terapis (tolak jika terapis yang sama diminta pada jam yang sama)
+    if (therapist_id) {
+      const [conflicts] = await pool.query(
+        `SELECT r.id, r.reservation_code, r.preferred_schedule, r.confirmed_schedule, p.full_name as patient_name, t.full_name as therapist_name
+         FROM reservations r
+         JOIN master_patients p ON r.patient_id = p.id
+         JOIN therapists t ON r.therapist_id = t.id
+         WHERE r.therapist_id = ?
+           AND r.status IN ('pending_confirmation', 'confirmed', 'in_progress')
+           AND (r.preferred_schedule = ? OR (r.confirmed_schedule IS NOT NULL AND r.confirmed_schedule LIKE ?))
+         LIMIT 1`,
+        [therapist_id, preferred_schedule, `%${preferred_schedule}%`]
+      );
+
+      if (conflicts.length > 0) {
+        const c = conflicts[0];
+        return {
+          content: [
+            {
+              type: 'text',
+              text: JSON.stringify({
+                status: 'error',
+                message: `Jadwal bentrok: Terapis ${c.therapist_name} sudah memiliki jadwal reservasi (${c.reservation_code}) pada waktu '${c.preferred_schedule}' dengan pasien ${c.patient_name}. Permintaan jadwal ditolak, silakan pilih jam atau terapis lain.`,
+              }, null, 2),
+            },
+          ],
+        };
+      }
+    }
+
+    // 3. Generate code and create reservation
     const reservationCode = await generateReservationCode();
 
     const [resResult] = await pool.query(
@@ -410,6 +440,38 @@ server.tool(
           },
         ],
       };
+    }
+
+    const targetTherapistId = therapist_id || check[0].therapist_id;
+
+    if (targetTherapistId) {
+      const [conflicts] = await pool.query(
+        `SELECT r.id, r.reservation_code, r.confirmed_schedule, p.full_name as patient_name, t.full_name as therapist_name
+         FROM reservations r
+         JOIN master_patients p ON r.patient_id = p.id
+         JOIN therapists t ON r.therapist_id = t.id
+         WHERE r.therapist_id = ?
+           AND r.id != ?
+           AND r.status IN ('pending_confirmation', 'confirmed', 'in_progress')
+           AND (r.confirmed_schedule = ? OR r.preferred_schedule = ?)
+         LIMIT 1`,
+        [targetTherapistId, reservation_id, confirmed_schedule, confirmed_schedule]
+      );
+
+      if (conflicts.length > 0) {
+        const c = conflicts[0];
+        return {
+          content: [
+            {
+              type: 'text',
+              text: JSON.stringify({
+                status: 'error',
+                message: `Jadwal bentrok: Terapis ${c.therapist_name} sudah memiliki jadwal (${c.reservation_code}) pada jam '${confirmed_schedule}' dengan pasien ${c.patient_name}. Konfirmasi jadwal ditolak.`,
+              }, null, 2),
+            },
+          ],
+        };
+      }
     }
 
     await pool.query(

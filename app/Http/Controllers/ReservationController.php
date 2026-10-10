@@ -111,18 +111,41 @@ class ReservationController extends Controller
 
         // Format preferred schedule from datepicker & timepicker
         $preferredSchedule = $request->preferred_schedule;
+        $targetDateTime = null;
+
         if ($request->filled('preferred_date')) {
             $time = $request->preferred_time ?: '09:00';
             try {
-                $carbonDate = \Carbon\Carbon::parse($request->preferred_date . ' ' . $time);
-                $preferredSchedule = $carbonDate->locale('id')->isoFormat('dddd, D MMMM Y - [Pukul] HH:mm [WIB]');
+                $targetDateTime = \Carbon\Carbon::parse($request->preferred_date . ' ' . $time);
+                $preferredSchedule = $targetDateTime->locale('id')->isoFormat('dddd, D MMMM Y - [Pukul] HH:mm [WIB]');
             } catch (\Exception $e) {
                 $preferredSchedule = $request->preferred_date . ' - ' . $time;
+            }
+        } elseif ($request->filled('preferred_schedule')) {
+            try {
+                $targetDateTime = \Carbon\Carbon::parse($request->preferred_schedule);
+            } catch (\Exception $e) {
+                $targetDateTime = null;
             }
         }
 
         if (empty($preferredSchedule)) {
+            $targetDateTime = now();
             $preferredSchedule = now()->locale('id')->isoFormat('dddd, D MMMM Y - [Pukul] HH:mm [WIB]');
+        }
+
+        // VALIDASI: Tolak jika terapis yang sama sudah memiliki jadwal pada jam yang sama
+        if ($request->filled('therapist_id') && $targetDateTime) {
+            $therapist = Therapist::find($request->therapist_id);
+            if ($therapist) {
+                $conflict = $therapist->getScheduleConflict($targetDateTime);
+                if ($conflict) {
+                    return redirect()->back()
+                        ->withInput()
+                        ->withErrors(['therapist_id' => $conflict['message']])
+                        ->with('error', $conflict['message']);
+                }
+            }
         }
 
         $reservation = Reservation::create([
@@ -133,6 +156,7 @@ class ReservationController extends Controller
             'complaint_duration' => $request->complaint_duration,
             'medical_history' => $request->medical_history,
             'preferred_schedule' => $preferredSchedule,
+            'preferred_datetime' => $targetDateTime,
             'status' => 'pending_confirmation',
         ]);
 
@@ -163,10 +187,33 @@ class ReservationController extends Controller
             'notes' => 'nullable',
         ]);
 
+        $therapistId = $request->therapist_id ?: $reservation->therapist_id;
+        $targetDateTime = null;
+        try {
+            $targetDateTime = \Carbon\Carbon::parse($request->confirmed_schedule);
+        } catch (\Exception $e) {
+            $targetDateTime = null;
+        }
+
+        // VALIDASI: Tolak jika terapis bentrok pada jam yang dikonfirmasi
+        if ($therapistId && $targetDateTime) {
+            $therapist = Therapist::find($therapistId);
+            if ($therapist) {
+                $conflict = $therapist->getScheduleConflict($targetDateTime, 60, $reservation->id);
+                if ($conflict) {
+                    return redirect()->back()
+                        ->withInput()
+                        ->withErrors(['therapist_id' => $conflict['message']])
+                        ->with('error', $conflict['message']);
+                }
+            }
+        }
+
         $reservation->update([
             'status' => 'confirmed',
             'confirmed_schedule' => $request->confirmed_schedule,
-            'therapist_id' => $request->therapist_id ?: $reservation->therapist_id,
+            'preferred_datetime' => $reservation->preferred_datetime ?: $targetDateTime,
+            'therapist_id' => $therapistId,
             'notes' => $request->notes,
         ]);
 
@@ -183,6 +230,25 @@ class ReservationController extends Controller
             'scheduled_at' => 'nullable',
             'therapist_id' => 'nullable|exists:therapists,id',
         ]);
+
+        $therapistId = $request->therapist_id ?: $reservation->therapist_id;
+        if ($therapistId && $request->filled('scheduled_at')) {
+            try {
+                $advanceDateTime = \Carbon\Carbon::parse($request->scheduled_at);
+                $therapist = Therapist::find($therapistId);
+                if ($therapist) {
+                    $conflict = $therapist->getScheduleConflict($advanceDateTime, 60, $reservation->id);
+                    if ($conflict) {
+                        return redirect()->back()
+                            ->withInput()
+                            ->withErrors(['therapist_id' => $conflict['message']])
+                            ->with('error', $conflict['message']);
+                    }
+                }
+            } catch (\Exception $e) {
+                // Ignore parse errors if any
+            }
+        }
 
         $currentStage = $reservation->current_stage;
         $nextStageNumber = $currentStage + 1;
@@ -214,7 +280,7 @@ class ReservationController extends Controller
         TherapySession::create([
             'reservation_id' => $reservation->id,
             'patient_id' => $reservation->patient_id,
-            'therapist_id' => $request->therapist_id ?: $reservation->therapist_id,
+            'therapist_id' => $therapistId,
             'therapy_type_id' => $nextType?->id,
             'stage_number' => $nextStageNumber,
             'stage_name' => $nextStageName,
@@ -229,6 +295,54 @@ class ReservationController extends Controller
         ]);
 
         return redirect()->back()->with('success', "Tahap {$currentStage} selesai dievaluasi! Berhasil membuka {$nextStageName}.");
+    }
+
+    /**
+     * API untuk memeriksa ketersediaan dan jadwal bentrok terapis secara realtime
+     */
+    public function checkTherapistAvailability(Request $request)
+    {
+        $therapistId = $request->get('therapist_id');
+        $date = $request->get('date');
+        $time = $request->get('time');
+        $excludeReservationId = $request->get('exclude_reservation_id');
+        $excludeSessionId = $request->get('exclude_session_id');
+
+        if (!$therapistId) {
+            return response()->json([
+                'available' => true,
+                'message' => 'Terapis belum ditentukan.',
+                'booked_slots' => [],
+            ]);
+        }
+
+        $therapist = Therapist::find($therapistId);
+        if (!$therapist) {
+            return response()->json([
+                'available' => false,
+                'message' => 'Terapis tidak ditemukan.',
+                'booked_slots' => [],
+            ], 404);
+        }
+
+        $bookedSlots = $date ? $therapist->getBookedSlotsForDate($date, $excludeReservationId, $excludeSessionId) : [];
+
+        $conflict = null;
+        if ($date && $time) {
+            try {
+                $targetDateTime = \Carbon\Carbon::parse($date . ' ' . $time);
+                $conflict = $therapist->getScheduleConflict($targetDateTime, 60, $excludeReservationId, $excludeSessionId);
+            } catch (\Exception $e) {
+                $conflict = null;
+            }
+        }
+
+        return response()->json([
+            'available' => $conflict === null,
+            'therapist_name' => $therapist->full_name,
+            'conflict' => $conflict,
+            'booked_slots' => $bookedSlots,
+        ]);
     }
 
     public function lookupPatient(Request $request)
