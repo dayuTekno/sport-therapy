@@ -84,12 +84,16 @@ else
     PHP_INI="/www/server/php/83/etc/php.ini"
 fi
 
-# Buat symlink bersih ke sistem
-if [ -x "$PHP_CMD" ]; then
+# Buat symlink bersih ke sistem & pastikan masuk ke PATH
+if [ -f "$PHP_CMD" ]; then
+    sudo chmod +x "$PHP_CMD" 2>/dev/null || true
     sudo rm -f /usr/bin/php /usr/local/bin/php 2>/dev/null || true
     sudo ln -sf "$PHP_CMD" /usr/bin/php 2>/dev/null || true
     sudo ln -sf "$PHP_CMD" /usr/local/bin/php 2>/dev/null || true
+    sudo ln -sf "$PHP_CMD" /bin/php 2>/dev/null || true
 fi
+
+export PATH="$(dirname "$PHP_CMD"):$PATH"
 
 PHP_VER=$("$PHP_CMD" -r 'echo PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;' 2>/dev/null || echo "8.3")
 echo -e "${GREEN}✓ Menggunakan PHP: $PHP_CMD (v$PHP_VER)${NC}"
@@ -173,16 +177,18 @@ echo -e "${GREEN}✓ File .env dikonfigurasi (Port: 5433, Host: 127.0.0.1).${NC}
 # ------------------------------------------------------------------------------
 echo -e "\n${YELLOW}[5/10] Memasang dependensi Composer...${NC}"
 
-COMPOSER_CMD=$(which composer 2>/dev/null || true)
-if [ -z "$COMPOSER_CMD" ] || [ ! -x "$COMPOSER_CMD" ]; then
-    echo "Mengunduh Composer lokal..."
-    run_php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
-    run_php composer-setup.php --quiet
-    rm -f composer-setup.php
-    COMPOSER_CMD="$PHP_CMD composer.phar"
+COMPOSER_BIN=$(which composer 2>/dev/null || true)
+if [ -n "$COMPOSER_BIN" ] && [ -f "$COMPOSER_BIN" ]; then
+    run_php "$COMPOSER_BIN" install --no-dev --optimize-autoloader --no-interaction
+else
+    if [ ! -f "composer.phar" ]; then
+        echo "Mengunduh Composer lokal (composer.phar)..."
+        run_php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
+        run_php composer-setup.php --quiet
+        rm -f composer-setup.php
+    fi
+    run_php composer.phar install --no-dev --optimize-autoloader --no-interaction
 fi
-
-$COMPOSER_CMD install --no-dev --optimize-autoloader --no-interaction
 echo -e "${GREEN}✓ Dependensi Composer selesai dipasang.${NC}"
 
 if ! grep -q "APP_KEY=base64:" .env; then
