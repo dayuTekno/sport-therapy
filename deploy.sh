@@ -384,9 +384,9 @@ run_php artisan view:cache
 echo -e "${GREEN}✓ Cache konfigurasi, rute, dan view berhasil di-cache.${NC}"
 
 # ------------------------------------------------------------------------------
-# 10. IZIN AKSES FOLDER & PEMBATASAN OPEN_BASEDIR AAPANEL
+# 10. IZIN AKSES FOLDER, SOCKET PHP-FPM & PEMBATASAN OPEN_BASEDIR AAPANEL
 # ------------------------------------------------------------------------------
-echo -e "\n${YELLOW}[10/10] Mengatur izin akses folder & menonaktifkan open_basedir...${NC}"
+echo -e "\n${YELLOW}[10/10] Mengatur izin akses folder & menghubungkan socket PHP-FPM...${NC}"
 
 sudo chattr -i "$PROJECT_DIR/public/.user.ini" 2>/dev/null || true
 sudo rm -f "$PROJECT_DIR/public/.user.ini" 2>/dev/null || true
@@ -396,11 +396,34 @@ sudo rm -f "$PROJECT_DIR/.user.ini" 2>/dev/null || true
 sudo chown -R "$CURRENT_USER:$WEB_USER" storage bootstrap/cache 2>/dev/null || sudo chown -R "$WEB_USER:$WEB_USER" storage bootstrap/cache 2>/dev/null || true
 sudo chmod -R 775 storage bootstrap/cache 2>/dev/null || true
 
+# Tautkan binary php-fpm ke folder aaPanel jika belum ada
+if [ -x "/usr/sbin/php-fpm" ] && [ ! -f "/www/server/php/83/sbin/php-fpm" ]; then
+    sudo mkdir -p /www/server/php/83/sbin 2>/dev/null || true
+    sudo ln -sf /usr/sbin/php-fpm /www/server/php/83/sbin/php-fpm 2>/dev/null || true
+fi
+
+# Konfigurasi pool PHP-FPM agar mendengarkan socket yang diharapkan Nginx aaPanel (/tmp/php-cgi-83.sock)
+if [ -f "/etc/php-fpm.d/www.conf" ]; then
+    sudo sed -i 's|^listen = .*|listen = /tmp/php-cgi-83.sock|' /etc/php-fpm.d/www.conf
+    sudo sed -i 's|^;*listen.owner = .*|listen.owner = www|' /etc/php-fpm.d/www.conf
+    sudo sed -i 's|^;*listen.group = .*|listen.group = www|' /etc/php-fpm.d/www.conf
+    sudo sed -i 's|^;*listen.mode = .*|listen.mode = 0666|' /etc/php-fpm.d/www.conf
+    sudo sed -i 's|^user = .*|user = www|' /etc/php-fpm.d/www.conf
+    sudo sed -i 's|^group = .*|group = www|' /etc/php-fpm.d/www.conf
+fi
+
+sudo systemctl enable php-fpm 2>/dev/null || true
+sudo systemctl restart php-fpm 2>/dev/null || true
+
+# Jika socket sistem /run/php-fpm/www.sock aktif tetapi Nginx butuh /tmp/php-cgi-83.sock, buatkan symlink cadangan
+if [ -e "/run/php-fpm/www.sock" ] && [ ! -e "/tmp/php-cgi-83.sock" ]; then
+    sudo ln -sf /run/php-fpm/www.sock /tmp/php-cgi-83.sock 2>/dev/null || true
+fi
+
 if [ -f "/etc/init.d/php-fpm-83" ]; then
     sudo /etc/init.d/php-fpm-83 restart > /dev/null 2>&1 || true
 fi
-sudo systemctl restart php-fpm 2>/dev/null || true
-sudo systemctl reload nginx 2>/dev/null || true
+sudo systemctl reload nginx 2>/dev/null || sudo /etc/init.d/nginx reload 2>/dev/null || true
 
 echo -e "\n${CYAN}======================================================${NC}"
 echo -e "${GREEN}   DEPLOYMENT SELESAI DENGAN SUKSES! 🚀              ${NC}"
