@@ -30,24 +30,24 @@
             <div class="space-y-3 text-sm">
                 <div>
                     <p class="text-gray-500 text-xs">Nama Lengkap</p>
-                    <p class="font-medium text-gray-800">{{ $queue->patient->full_name }}</p>
+                    <p class="font-medium text-gray-800">{{ $queue->patient->full_name ?? '-' }}</p>
                 </div>
                 <div>
                     <p class="text-gray-500 text-xs">Nomor RM / NIK</p>
-                    <p class="font-medium text-gray-800">{{ substr($queue->patient->patient_code, 0, 8) }} / {{ $queue->patient->nik }}</p>
+                    <p class="font-medium text-gray-800">{{ $queue->patient?->patient_code ? substr($queue->patient->patient_code, 0, 8) : '-' }} / {{ $queue->patient->nik ?? '-' }}</p>
                 </div>
                 <div>
                     <p class="text-gray-500 text-xs">Jenis Kelamin</p>
-                    <p class="font-medium text-gray-800">{{ $queue->patient->gender == 'male' ? 'Laki-laki' : 'Perempuan' }}</p>
+                    <p class="font-medium text-gray-800">{{ $queue->patient?->gender == 'male' ? 'Laki-laki' : ($queue->patient?->gender == 'female' ? 'Perempuan' : '-') }}</p>
                 </div>
                 <div>
                     <p class="text-gray-500 text-xs">Tanggal Lahir</p>
-                    <p class="font-medium text-gray-800">{{ \Carbon\Carbon::parse($queue->patient->date_of_birth)->format('d M Y') }} ({{ \Carbon\Carbon::parse($queue->patient->date_of_birth)->age }} Tahun)</p>
+                    <p class="font-medium text-gray-800">{{ $queue->patient?->date_of_birth ? \Carbon\Carbon::parse($queue->patient->date_of_birth)->format('d M Y') . ' (' . \Carbon\Carbon::parse($queue->patient->date_of_birth)->age . ' Tahun)' : '-' }}</p>
                 </div>
                 <div>
                     <p class="text-gray-500 text-xs">Eselon</p>
                     <p class="font-medium text-gray-800">
-                        @if($queue->patient->eselon)
+                        @if($queue->patient?->eselon)
                             <span class="px-2 py-0.5 bg-blue-100 text-blue-700 rounded text-xs">{{ $queue->patient->eselon->name }}</span>
                         @else
                             -
