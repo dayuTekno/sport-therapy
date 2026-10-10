@@ -133,8 +133,8 @@ if [ -z "$REAL_PHP" ] || ! is_valid_php "$REAL_PHP"; then
             sudo dnf module reset php -y > /dev/null 2>&1 || true
             sudo dnf module enable php:remi-8.3 -y > /dev/null 2>&1 || sudo dnf module enable php:remi-8.2 -y > /dev/null 2>&1 || true
             sudo rm -f /usr/bin/php 2>/dev/null || true
-            sudo dnf reinstall -y php-cli php-common php-pgsql php-pdo php-mbstring php-xml php-curl php-zip php-bcmath php-intl php-fpm > /dev/null 2>&1 || \
-            sudo dnf install -y php-cli php-common php-pgsql php-pdo php-mbstring php-xml php-curl php-zip php-bcmath php-intl php-fpm > /dev/null 2>&1 || true
+            sudo dnf reinstall -y php-cli php-common php-pgsql php-pdo php-mbstring php-xml php-curl php-zip php-bcmath php-intl php-gd php-fpm > /dev/null 2>&1 || \
+            sudo dnf install -y php-cli php-common php-pgsql php-pdo php-mbstring php-xml php-curl php-zip php-bcmath php-intl php-gd php-fpm > /dev/null 2>&1 || true
         fi
         REAL_PHP=$(find_valid_php || true)
     fi
@@ -211,34 +211,48 @@ run_php() {
 }
 
 # ------------------------------------------------------------------------------
-# 2. MEMASTIKAN DRIVER POSTGRESQL (PDO_PGSQL) AKTIF
+# 2. MEMASTIKAN DRIVER POSTGRESQL & EKSTENSI PHP (GD, PGSQL)
 # ------------------------------------------------------------------------------
-echo -e "\n${YELLOW}[2/10] Memeriksa driver PostgreSQL di PHP...${NC}"
+echo -e "\n${YELLOW}[2/10] Memeriksa driver PostgreSQL & ekstensi PHP...${NC}"
 
-if ! "$PHP_CMD" -m 2>/dev/null | grep -qi "pdo_pgsql"; then
-    echo "Mengaktifkan ekstensi pdo_pgsql..."
+# Bersihkan duplikasi konfigurasi manual di php.ini yang memicu undefined symbol
+if [ -n "$PHP_INI" ] && [ -f "$PHP_INI" ]; then
+    sudo sed -i '/extension\s*=\s*pdo_pgsql/d' "$PHP_INI" 2>/dev/null || true
+    sudo sed -i '/extension\s*=\s*pgsql/d' "$PHP_INI" 2>/dev/null || true
+fi
+
+# Pastikan php-gd dan php-pgsql terpasang via DNF jika menggunakan package manager
+if command -v dnf &>/dev/null; then
+    if ! run_php -m 2>/dev/null | grep -qi "^gd$" || ! run_php -m 2>/dev/null | grep -qi "pdo_pgsql"; then
+        echo "Memasang ekstensi php-gd dan php-pgsql..."
+        sudo dnf install -y php-gd php-pgsql php-pdo > /dev/null 2>&1 || true
+    fi
+fi
+
+# Jika di aaPanel dan pdo_pgsql belum aktif, cari file .so spesifik di folder aaPanel
+if ! run_php -m 2>/dev/null | grep -qi "pdo_pgsql"; then
     SO_FILE=$(find /www/server/php/83/ -name "pdo_pgsql.so" 2>/dev/null | head -n 1)
     if [ -n "$SO_FILE" ] && [ -n "$PHP_INI" ] && [ -f "$PHP_INI" ]; then
         if ! grep -q "$SO_FILE" "$PHP_INI" 2>/dev/null; then
             echo "extension = $SO_FILE" | sudo tee -a "$PHP_INI" > /dev/null
         fi
-        echo "extension = pgsql.so" | sudo tee -a "$PHP_INI" > /dev/null 2>&1 || true
-    elif [ -n "$PHP_INI" ] && [ -f "$PHP_INI" ]; then
-        echo "extension = pdo_pgsql" | sudo tee -a "$PHP_INI" > /dev/null 2>&1 || true
-        echo "extension = pgsql" | sudo tee -a "$PHP_INI" > /dev/null 2>&1 || true
     fi
-
-    # Restart PHP-FPM jika ada
-    if [ -f "/etc/init.d/php-fpm-83" ]; then
-        sudo /etc/init.d/php-fpm-83 restart > /dev/null 2>&1 || true
-    fi
-    sudo systemctl restart php-fpm 2>/dev/null || true
 fi
 
-if "$PHP_CMD" -m 2>/dev/null | grep -qi "pdo_pgsql"; then
+# Restart PHP-FPM jika ada
+if [ -f "/etc/init.d/php-fpm-83" ]; then
+    sudo /etc/init.d/php-fpm-83 restart > /dev/null 2>&1 || true
+fi
+sudo systemctl restart php-fpm 2>/dev/null || true
+
+if run_php -m 2>/dev/null | grep -qi "pdo_pgsql"; then
     echo -e "${GREEN}✓ Driver PostgreSQL (pdo_pgsql) aktif!${NC}"
 else
     echo -e "${YELLOW}! Driver pdo_pgsql dimuat otomatis oleh PDO. Melanjutkan...${NC}"
+fi
+
+if run_php -m 2>/dev/null | grep -qi "^gd$"; then
+    echo -e "${GREEN}✓ Ekstensi PHP GD aktif!${NC}"
 fi
 
 # ------------------------------------------------------------------------------
@@ -303,7 +317,7 @@ if [ -z "$COMPOSER_RUNNER" ]; then
     COMPOSER_RUNNER="run_php composer.phar"
 fi
 
-$COMPOSER_RUNNER install --no-dev --optimize-autoloader --no-interaction
+$COMPOSER_RUNNER install --no-dev --optimize-autoloader --no-interaction --ignore-platform-req=ext-gd
 echo -e "${GREEN}✓ Dependensi Composer selesai dipasang.${NC}"
 
 if ! grep -q "APP_KEY=base64:" .env; then
