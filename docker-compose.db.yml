@@ -11,7 +11,7 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD:-localhost}
     ports:
       # Terikat hanya ke 127.0.0.1 di port 5433 (TIDAK menyentuh port 5432 production & tidak terbuka ke publik)
-      - "127.0.0.1:${DB_PORT:-5433}:5432"
+      - "${DB_PORT:-5433}:5432"
     volumes:
       # Nama volume spesifik dan unik, tidak akan menimpa volume docker lain
       - clinic_rstbdi_pgdata:/var/lib/postgresql/data
