@@ -412,12 +412,13 @@ Restart=always
 RestartSec=2s
 EOF
 
-# Konfigurasi pool PHP-FPM agar mendengarkan socket yang diharapkan Nginx aaPanel (/tmp/php-cgi-83.sock)
+# Konfigurasi pool PHP-FPM agar mendengarkan TCP Port 127.0.0.1:9083 (Kebal terhadap penghapusan socket pada reload aaPanel)
 if [ -f "/etc/php-fpm.d/www.conf" ]; then
-    sudo sed -i 's|^listen = .*|listen = /tmp/php-cgi-83.sock|' /etc/php-fpm.d/www.conf
-    sudo sed -i 's|^;*listen.owner = .*|listen.owner = www|' /etc/php-fpm.d/www.conf
-    sudo sed -i 's|^;*listen.group = .*|listen.group = www|' /etc/php-fpm.d/www.conf
-    sudo sed -i 's|^;*listen.mode = .*|listen.mode = 0666|' /etc/php-fpm.d/www.conf
+    sudo sed -i 's|^listen = .*|listen = 127.0.0.1:9083|' /etc/php-fpm.d/www.conf
+    sudo sed -i 's|^;*listen.allowed_clients = .*|listen.allowed_clients = 127.0.0.1|' /etc/php-fpm.d/www.conf
+    sudo sed -i 's|^listen.owner =|;listen.owner =|' /etc/php-fpm.d/www.conf
+    sudo sed -i 's|^listen.group =|;listen.group =|' /etc/php-fpm.d/www.conf
+    sudo sed -i 's|^listen.mode =|;listen.mode =|' /etc/php-fpm.d/www.conf
     sudo sed -i 's|^listen.acl_users =|;listen.acl_users =|' /etc/php-fpm.d/www.conf
     sudo sed -i 's|^user = .*|user = www|' /etc/php-fpm.d/www.conf
     sudo sed -i 's|^group = .*|group = www|' /etc/php-fpm.d/www.conf
@@ -454,7 +455,7 @@ case "$1" in
         systemctl restart php-fpm
         ;;
     reload)
-        systemctl reload php-fpm
+        systemctl reload php-fpm || systemctl restart php-fpm
         ;;
     status)
         systemctl status php-fpm
@@ -470,21 +471,31 @@ sudo systemctl daemon-reload
 sudo systemctl enable php-fpm 2>/dev/null || true
 sudo systemctl restart php-fpm 2>/dev/null || true
 
-# Jika socket sistem /run/php-fpm/www.sock aktif tetapi Nginx butuh /tmp/php-cgi-83.sock, buatkan symlink cadangan
-if [ -e "/run/php-fpm/www.sock" ] && [ ! -e "/tmp/php-cgi-83.sock" ]; then
-    sudo ln -sf /run/php-fpm/www.sock /tmp/php-cgi-83.sock 2>/dev/null || true
-fi
-
-if [ -e "/tmp/php-cgi-83.sock" ]; then
-    sudo chmod 777 /tmp/php-cgi-83.sock 2>/dev/null || true
-fi
-
-# Optimasi buffer & timeout FastCGI Nginx
+# Optimasi buffer & timeout FastCGI Nginx serta arahkan ke 127.0.0.1:9083
 ENABLE_PHP_83="/www/server/nginx/conf/enable-php-83.conf"
 if [ -f "$ENABLE_PHP_83" ]; then
-    if ! grep -q "fastcgi_buffer_size" "$ENABLE_PHP_83"; then
-        sudo sed -i '/fastcgi_pass/a \    fastcgi_connect_timeout 60s;\n    fastcgi_send_timeout 120s;\n    fastcgi_read_timeout 120s;\n    fastcgi_buffer_size 128k;\n    fastcgi_buffers 4 256k;\n    fastcgi_busy_buffers_size 256k;' "$ENABLE_PHP_83"
-    fi
+    cat << 'EOF' | sudo tee "$ENABLE_PHP_83" > /dev/null
+location ~ [^/]\.php(/|$)
+{
+    try_files $uri =404;
+    fastcgi_pass 127.0.0.1:9083;
+    fastcgi_index index.php;
+    include fastcgi.conf;
+    include pathinfo.conf;
+
+    fastcgi_connect_timeout 60s;
+    fastcgi_send_timeout 120s;
+    fastcgi_read_timeout 120s;
+    fastcgi_buffer_size 128k;
+    fastcgi_buffers 4 256k;
+    fastcgi_busy_buffers_size 256k;
+}
+EOF
+fi
+
+VHOST_CONF="/www/server/panel/vhost/nginx/sport-therapist.corpshow.id.conf"
+if [ -f "$VHOST_CONF" ]; then
+    sudo sed -i 's|fastcgi_pass unix:/tmp/php-cgi-83.sock;|fastcgi_pass 127.0.0.1:9083;|g' "$VHOST_CONF"
 fi
 sudo systemctl reload nginx 2>/dev/null || sudo /etc/init.d/nginx reload 2>/dev/null || true
 
