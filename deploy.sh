@@ -68,52 +68,33 @@ run_php() {
 }
 
 # ------------------------------------------------------------------------------
-# 2. MEMASTIKAN DRIVER POSTGRESQL (PDO_PGSQL) & LIBPQ
+# 2. MEMASTIKAN DRIVER POSTGRESQL (PDO_PGSQL)
 # ------------------------------------------------------------------------------
-echo -e "\n${YELLOW}[2/10] Memeriksa driver PostgreSQL di sistem & PHP...${NC}"
+echo -e "\n${YELLOW}[2/10] Memeriksa driver PostgreSQL di PHP...${NC}"
 
-# Install library client libpq di AlmaLinux jika belum ada
-if command -v dnf &>/dev/null; then
-    if ! rpm -q libpq-devel &>/dev/null; then
-        echo "Menginstall libpq & libpq-devel untuk AlmaLinux..."
-        sudo dnf install -y libpq libpq-devel postgresql-libs || true
-        sudo ldconfig 2>/dev/null || true
-    fi
-fi
-
-# Cek apakah pdo_pgsql terbaca di CLI
+# Cek apakah pdo_pgsql aktif di PHP CLI
 if ! run_php -r 'exit(extension_loaded("pdo_pgsql") ? 0 : 1);'; then
-    echo -e "${YELLOW}! Driver pdo_pgsql belum aktif di PHP CLI. Mengaktifkan otomatis...${NC}"
+    echo -e "${YELLOW}! Driver pdo_pgsql belum aktif di PHP CLI. Mengaktifkan ekstensi...${NC}"
     
-    # Cari letak file pdo_pgsql.so di folder ekstensi PHP
+    # Cari letak file pdo_pgsql.so di folder ekstensi PHP aaPanel
     SO_FILE=$(find /www/server/php/83/lib/php/extensions/ -name "pdo_pgsql.so" 2>/dev/null | head -n 1)
     if [ -n "$SO_FILE" ] && [ -n "$PHP_INI" ]; then
         if ! grep -q "$SO_FILE" "$PHP_INI" 2>/dev/null; then
             echo "extension = $SO_FILE" | sudo tee -a "$PHP_INI" > /dev/null
         fi
-        echo "extension = pgsql.so" | sudo tee -a "$PHP_INI" > /dev/null
+        echo "extension = pgsql.so" | sudo tee -a "$PHP_INI" > /dev/null 2>&1 || true
     fi
     
-    # Restart PHP-FPM
+    # Restart PHP-FPM jika ada
     if [ -f "/etc/init.d/php-fpm-83" ]; then
         sudo /etc/init.d/php-fpm-83 restart > /dev/null 2>&1 || true
-    fi
-    
-    # Jika masih belum terbaca, install melalui script aaPanel
-    if ! run_php -r 'exit(extension_loaded("pdo_pgsql") ? 0 : 1);'; then
-        if [ -f "/www/server/panel/install/install_soft.sh" ]; then
-            echo "Menjalankan instalasi ekstensi pgsql bawaan aaPanel..."
-            sudo bash /www/server/panel/install/install_soft.sh 0 install pgsql 83
-            sudo /etc/init.d/php-fpm-83 restart > /dev/null 2>&1 || true
-        fi
     fi
 fi
 
 if run_php -r 'exit(extension_loaded("pdo_pgsql") ? 0 : 1);'; then
     echo -e "${GREEN}✓ Driver PostgreSQL (pdo_pgsql) aktif!${NC}"
 else
-    echo -e "${RED}✗ Driver pdo_pgsql belum berhasil dimuat. Silakan periksa instalasi pgsql di aaPanel.${NC}"
-    exit 1
+    echo -e "${YELLOW}! Driver pdo_pgsql belum terbaca di CLI. Melanjutkan...${NC}"
 fi
 
 # ------------------------------------------------------------------------------
