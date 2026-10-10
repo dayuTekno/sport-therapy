@@ -402,6 +402,16 @@ if [ -x "/usr/sbin/php-fpm" ] && [ ! -f "/www/server/php/83/sbin/php-fpm" ]; the
     sudo ln -sf /usr/sbin/php-fpm /www/server/php/83/sbin/php-fpm 2>/dev/null || true
 fi
 
+# Nonaktifkan PrivateTmp systemd & pastikan Auto-Restart jika crash
+OVERRIDE_DIR="/etc/systemd/system/php-fpm.service.d"
+sudo mkdir -p "$OVERRIDE_DIR"
+cat << 'EOF' | sudo tee "$OVERRIDE_DIR/override.conf" > /dev/null
+[Service]
+PrivateTmp=false
+Restart=always
+RestartSec=2s
+EOF
+
 # Konfigurasi pool PHP-FPM agar mendengarkan socket yang diharapkan Nginx aaPanel (/tmp/php-cgi-83.sock)
 if [ -f "/etc/php-fpm.d/www.conf" ]; then
     sudo sed -i 's|^listen = .*|listen = /tmp/php-cgi-83.sock|' /etc/php-fpm.d/www.conf
@@ -411,8 +421,52 @@ if [ -f "/etc/php-fpm.d/www.conf" ]; then
     sudo sed -i 's|^listen.acl_users =|;listen.acl_users =|' /etc/php-fpm.d/www.conf
     sudo sed -i 's|^user = .*|user = www|' /etc/php-fpm.d/www.conf
     sudo sed -i 's|^group = .*|group = www|' /etc/php-fpm.d/www.conf
+
+    # Tingkatkan kapasitas worker agar tidak kehabisan antrean proses saat CRUD
+    sudo sed -i 's|^pm = .*|pm = dynamic|' /etc/php-fpm.d/www.conf
+    sudo sed -i 's|^pm.max_children = .*|pm.max_children = 50|' /etc/php-fpm.d/www.conf
+    sudo sed -i 's|^pm.start_servers = .*|pm.start_servers = 5|' /etc/php-fpm.d/www.conf
+    sudo sed -i 's|^pm.min_spare_servers = .*|pm.min_spare_servers = 5|' /etc/php-fpm.d/www.conf
+    sudo sed -i 's|^pm.max_spare_servers = .*|pm.max_spare_servers = 20|' /etc/php-fpm.d/www.conf
+    sudo sed -i 's|^;*pm.max_requests = .*|pm.max_requests = 1000|' /etc/php-fpm.d/www.conf
+    sudo sed -i 's|^;*request_terminate_timeout = .*|request_terminate_timeout = 120s|' /etc/php-fpm.d/www.conf
 fi
 
+# Naikkan batas memori & timeout di php.ini jika ada
+if [ -f "/etc/php.ini" ]; then
+    sudo sed -i 's|^memory_limit = .*|memory_limit = 512M|' /etc/php.ini
+    sudo sed -i 's|^max_execution_time = .*|max_execution_time = 120|' /etc/php.ini
+    sudo sed -i 's|^post_max_size = .*|post_max_size = 64M|' /etc/php.ini
+    sudo sed -i 's|^upload_max_filesize = .*|upload_max_filesize = 64M|' /etc/php.ini
+fi
+
+# Buat shim service /etc/init.d/php-fpm-83 agar sinkron dengan systemd dan aaPanel
+cat << 'EOF' | sudo tee /etc/init.d/php-fpm-83 > /dev/null
+#!/bin/bash
+case "$1" in
+    start)
+        systemctl start php-fpm
+        ;;
+    stop)
+        systemctl stop php-fpm
+        ;;
+    restart|force-reload)
+        systemctl restart php-fpm
+        ;;
+    reload)
+        systemctl reload php-fpm
+        ;;
+    status)
+        systemctl status php-fpm
+        ;;
+    *)
+        systemctl restart php-fpm
+        ;;
+esac
+EOF
+sudo chmod +x /etc/init.d/php-fpm-83 2>/dev/null || true
+
+sudo systemctl daemon-reload
 sudo systemctl enable php-fpm 2>/dev/null || true
 sudo systemctl restart php-fpm 2>/dev/null || true
 
@@ -421,8 +475,16 @@ if [ -e "/run/php-fpm/www.sock" ] && [ ! -e "/tmp/php-cgi-83.sock" ]; then
     sudo ln -sf /run/php-fpm/www.sock /tmp/php-cgi-83.sock 2>/dev/null || true
 fi
 
-if [ -f "/etc/init.d/php-fpm-83" ]; then
-    sudo /etc/init.d/php-fpm-83 restart > /dev/null 2>&1 || true
+if [ -e "/tmp/php-cgi-83.sock" ]; then
+    sudo chmod 777 /tmp/php-cgi-83.sock 2>/dev/null || true
+fi
+
+# Optimasi buffer & timeout FastCGI Nginx
+ENABLE_PHP_83="/www/server/nginx/conf/enable-php-83.conf"
+if [ -f "$ENABLE_PHP_83" ]; then
+    if ! grep -q "fastcgi_buffer_size" "$ENABLE_PHP_83"; then
+        sudo sed -i '/fastcgi_pass/a \    fastcgi_connect_timeout 60s;\n    fastcgi_send_timeout 120s;\n    fastcgi_read_timeout 120s;\n    fastcgi_buffer_size 128k;\n    fastcgi_buffers 4 256k;\n    fastcgi_busy_buffers_size 256k;' "$ENABLE_PHP_83"
+    fi
 fi
 sudo systemctl reload nginx 2>/dev/null || sudo /etc/init.d/nginx reload 2>/dev/null || true
 
