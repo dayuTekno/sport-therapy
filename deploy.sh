@@ -37,6 +37,20 @@ sudo pkill -9 -f "make" 2>/dev/null || true
 sudo killall -9 dnf rpm 2>/dev/null || true
 sudo rm -f /var/lib/rpm/.rpm.lock 2>/dev/null || true
 
+# Hapus symlink circular / rusak / shell wrapper yang sempat menimpa binary PHP
+for bad_path in /usr/bin/php /usr/local/bin/php /bin/php /www/server/php/83/bin/php /www/server/php/82/bin/php; do
+    if [ -L "$bad_path" ]; then
+        target=$(readlink "$bad_path" 2>/dev/null || true)
+        if [ "$target" = "$bad_path" ] || [ "$target" = "/usr/bin/php" ] || [ "$target" = "/www/server/php/83/bin/php" ] || [ ! -e "$bad_path" ] || ! "$bad_path" -v &>/dev/null; then
+            sudo rm -f "$bad_path"
+        fi
+    elif [ -f "$bad_path" ] && head -n 2 "$bad_path" 2>/dev/null | grep -E -q "^#!/bin/(bash|sh)"; then
+        if ! "$bad_path" -v &>/dev/null; then
+            sudo rm -f "$bad_path"
+        fi
+    fi
+done
+
 # Berikan hak akses ke direktori proyek
 sudo chown -R "$CURRENT_USER" "$PROJECT_DIR" 2>/dev/null || true
 
@@ -45,28 +59,12 @@ sudo chown -R "$CURRENT_USER" "$PROJECT_DIR" 2>/dev/null || true
 # ------------------------------------------------------------------------------
 echo -e "\n${YELLOW}[1/10] Mendeteksi dan Memvalidasi Binary PHP...${NC}"
 
-# Bersihkan wrapper shell script yang sempat menimpa binary
-for bad_path in /usr/local/bin/php /usr/bin/php /www/server/php/83/bin/php; do
-    if [ -f "$bad_path" ] && grep -q "#!/bin/bash" "$bad_path" 2>/dev/null; then
-        sudo rm -f "$bad_path"
-    fi
-done
-
-# Fungsi pencari binary PHP yang berfungsi dan versinya >= 8.2
-find_working_php() {
-    local candidates=(
-        "/www/server/php/83/bin/php"
-        "/www/server/php/82/bin/php"
-        "/usr/bin/php8.3"
-        "/usr/bin/php8.2"
-        "/usr/bin/php83"
-        "/usr/bin/php82"
-        "/usr/bin/php"
-        "/usr/local/bin/php"
-    )
-
-    for p in "${candidates[@]}"; do
-        if [ -f "$p" ] && [ -x "$p" ] && ! grep -q "#!/bin/bash" "$p" 2>/dev/null; then
+# Fungsi mencari binary PHP fisik asli (bukan symlink melingkar)
+find_real_php() {
+    # 1. Cek binary nyata di aaPanel (bukan symlink)
+    for v in 83 82 81; do
+        local p="/www/server/php/$v/bin/php"
+        if [ -f "$p" ] && [ ! -L "$p" ] && [ -x "$p" ]; then
             if "$p" -r 'exit(version_compare(PHP_VERSION, "8.2.0", ">=") ? 0 : 1);' 2>/dev/null; then
                 echo "$p"
                 return 0
@@ -74,43 +72,63 @@ find_working_php() {
         fi
     done
 
-    # Cek folder aaPanel /www/server/php/*
-    if [ -d "/www/server/php" ]; then
-        for d in /www/server/php/*; do
-            local p="$d/bin/php"
-            if [ -f "$p" ] && [ -x "$p" ] && ! grep -q "#!/bin/bash" "$p" 2>/dev/null; then
-                if "$p" -r 'exit(version_compare(PHP_VERSION, "8.2.0", ">=") ? 0 : 1);' 2>/dev/null; then
-                    echo "$p"
+    # 2. Cek binary nyata di sistem
+    for p in /usr/bin/php-cli /usr/bin/php8.3 /usr/bin/php8.2 /usr/bin/php /usr/local/bin/php; do
+        if [ -f "$p" ] && [ ! -L "$p" ] && [ -x "$p" ]; then
+            if "$p" -r 'exit(version_compare(PHP_VERSION, "8.2.0", ">=") ? 0 : 1);' 2>/dev/null; then
+                echo "$p"
+                return 0
+            fi
+        fi
+    done
+
+    # 3. Jika ada symlink yang valid dan mengarah ke file nyata
+    for p in /www/server/php/83/bin/php /usr/bin/php; do
+        if [ -e "$p" ]; then
+            local real
+            real=$(readlink -f "$p" 2>/dev/null || true)
+            if [ -n "$real" ] && [ -f "$real" ] && [ ! -L "$real" ] && [ -x "$real" ]; then
+                if "$real" -r 'exit(version_compare(PHP_VERSION, "8.2.0", ">=") ? 0 : 1);' 2>/dev/null; then
+                    echo "$real"
                     return 0
                 fi
             fi
-        done
-    fi
+        fi
+    done
 
     return 1
 }
 
-PHP_CMD=$(find_working_php || true)
+REAL_PHP=$(find_real_php || true)
 
-# Jika belum ada binary PHP >= 8.2, install cepat paket RPM Remi resmi (~15 detik, bukan compile source)
-if [ -z "$PHP_CMD" ] || [ ! -x "$PHP_CMD" ]; then
-    echo -e "${YELLOW}! Binary PHP >= 8.2 belum terpasang. Memasang paket cepat via DNF (Remi)...${NC}"
+# Jika belum ada binary fisik yang valid, install paket RPM Remi resmi via DNF (~15 detik)
+if [ -z "$REAL_PHP" ] || [ ! -x "$REAL_PHP" ]; then
+    echo -e "${YELLOW}! Binary PHP fisik belum ditemukan. Memasang via DNF (Remi RPM)...${NC}"
     
+    # Hapus symlink rusak yang memblokir penulisan file rpm
+    sudo rm -f /usr/bin/php /usr/local/bin/php /bin/php
+
     if command -v dnf &>/dev/null; then
         sudo dnf install -y epel-release || true
         sudo dnf install -y https://rpms.remirepo.net/enterprise/remi-release-9.rpm || sudo dnf install -y https://rpms.remirepo.net/enterprise/remi-release-8.rpm || true
         sudo dnf module reset php -y || true
         sudo dnf module enable php:remi-8.3 -y || sudo dnf module enable php:remi-8.2 -y || true
+        sudo dnf reinstall -y php-cli php-common php-pgsql php-pdo php-mbstring php-xml php-curl php-zip php-bcmath php-intl php-fpm || \
         sudo dnf install -y php-cli php-common php-pgsql php-pdo php-mbstring php-xml php-curl php-zip php-bcmath php-intl php-fpm || true
     fi
 
-    PHP_CMD=$(find_working_php || which php 2>/dev/null || echo "/usr/bin/php")
+    REAL_PHP=$(find_real_php || which php 2>/dev/null || echo "/usr/bin/php")
 fi
 
-if [ ! -x "$PHP_CMD" ]; then
-    echo -e "${RED}✗ Tidak dapat menemukan atau memasang binary PHP >= 8.2.${NC}"
+# Pastikan REAL_PHP adalah path absolut nyata (canonical)
+REAL_PHP=$(readlink -f "$REAL_PHP" 2>/dev/null || echo "$REAL_PHP")
+
+if [ ! -x "$REAL_PHP" ]; then
+    echo -e "${RED}✗ Tidak dapat menemukan atau memasang binary PHP >= 8.2 yang dapat dieksekusi.${NC}"
     exit 1
 fi
+
+PHP_CMD="$REAL_PHP"
 
 # Tentukan file php.ini jika ada
 PHP_INI=""
@@ -118,24 +136,30 @@ if [[ "$PHP_CMD" == *"/www/server/php/83/"* ]] && [ -f "/www/server/php/83/etc/p
     PHP_INI="/www/server/php/83/etc/php.ini"
 elif [[ "$PHP_CMD" == *"/www/server/php/82/"* ]] && [ -f "/www/server/php/82/etc/php.ini" ]; then
     PHP_INI="/www/server/php/82/etc/php.ini"
+elif [ -f "/etc/php.ini" ]; then
+    PHP_INI="/etc/php.ini"
 fi
 
-# Pastikan symlink global aktif dan tidak tertimpa
-sudo chmod +x "$PHP_CMD" 2>/dev/null || true
-sudo rm -f /usr/bin/php /usr/local/bin/php 2>/dev/null || true
-sudo ln -sf "$PHP_CMD" /usr/bin/php 2>/dev/null || true
-sudo ln -sf "$PHP_CMD" /usr/local/bin/php 2>/dev/null || true
+# Buat symlink aman (HANYA jika target berbeda dari link agar tidak circular)
+safe_symlink() {
+    local target="$1"
+    local link_path="$2"
+    if [ "$target" != "$link_path" ]; then
+        sudo rm -f "$link_path" 2>/dev/null || true
+        sudo mkdir -p "$(dirname "$link_path")" 2>/dev/null || true
+        sudo ln -sf "$target" "$link_path" 2>/dev/null || true
+    fi
+}
 
-# Jika aaPanel mencari di /www/server/php/83/bin/php, buatkan symlink juga
-if [ ! -f "/www/server/php/83/bin/php" ]; then
-    sudo mkdir -p /www/server/php/83/bin 2>/dev/null || true
-    sudo ln -sf "$PHP_CMD" /www/server/php/83/bin/php 2>/dev/null || true
-fi
+safe_symlink "$PHP_CMD" "/usr/bin/php"
+safe_symlink "$PHP_CMD" "/usr/local/bin/php"
+safe_symlink "$PHP_CMD" "/bin/php"
+safe_symlink "$PHP_CMD" "/www/server/php/83/bin/php"
 
 export PATH="$(dirname "$PHP_CMD"):$PATH"
 
 PHP_VER=$("$PHP_CMD" -r 'echo PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;' 2>/dev/null || echo "8.3")
-echo -e "${GREEN}✓ Menggunakan PHP: $PHP_CMD (v$PHP_VER)${NC}"
+echo -e "${GREEN}✓ Menggunakan PHP Asli: $PHP_CMD (v$PHP_VER)${NC}"
 
 # Fungsi pembantu eksekusi PHP
 run_php() {
@@ -217,20 +241,29 @@ echo -e "${GREEN}✓ File .env dikonfigurasi (Port: 5433, Host: 127.0.0.1).${NC}
 # ------------------------------------------------------------------------------
 echo -e "\n${YELLOW}[5/10] Memasang dependensi Composer...${NC}"
 
-COMPOSER_BIN=$(which composer 2>/dev/null || true)
+# Cek apakah Composer sistem dapat dieksekusi via run_php atau langsung
+COMPOSER_RUNNER=""
+SYS_COMPOSER=$(which composer 2>/dev/null || true)
 
-if [ -n "$COMPOSER_BIN" ] && [ -f "$COMPOSER_BIN" ]; then
-    run_php "$COMPOSER_BIN" install --no-dev --optimize-autoloader --no-interaction
-else
+if [ -n "$SYS_COMPOSER" ]; then
+    if run_php "$SYS_COMPOSER" --version &>/dev/null; then
+        COMPOSER_RUNNER="run_php $SYS_COMPOSER"
+    elif "$SYS_COMPOSER" --version &>/dev/null; then
+        COMPOSER_RUNNER="$SYS_COMPOSER"
+    fi
+fi
+
+if [ -z "$COMPOSER_RUNNER" ]; then
     if [ ! -f "composer.phar" ]; then
-        echo "Mengunduh Composer lokal (composer.phar)..."
+        echo "Mengunduh Composer mandiri (composer.phar)..."
         run_php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
         run_php composer-setup.php --quiet
         rm -f composer-setup.php
     fi
-    run_php composer.phar install --no-dev --optimize-autoloader --no-interaction
+    COMPOSER_RUNNER="run_php composer.phar"
 fi
 
+$COMPOSER_RUNNER install --no-dev --optimize-autoloader --no-interaction
 echo -e "${GREEN}✓ Dependensi Composer selesai dipasang.${NC}"
 
 if ! grep -q "APP_KEY=base64:" .env; then
@@ -258,6 +291,15 @@ fi
 # 7. MIGRASI & SEEDER DATABASE
 # ------------------------------------------------------------------------------
 echo -e "\n${YELLOW}[7/10] Menjalankan migrasi & data awal (Seeder)...${NC}"
+
+# Tunggu sampai database siap menerima koneksi (maksimal 15 detik)
+echo "Memeriksa kesiapan koneksi database PostgreSQL..."
+for i in {1..15}; do
+    if run_php artisan db:monitor 2>/dev/null | grep -qi "OK" || run_php artisan migrate:status &>/dev/null; then
+        break
+    fi
+    sleep 1
+done
 
 run_php artisan migrate --force
 run_php artisan db:seed --force
