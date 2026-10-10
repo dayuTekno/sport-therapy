@@ -408,6 +408,7 @@ if [ -f "/etc/php-fpm.d/www.conf" ]; then
     sudo sed -i 's|^;*listen.owner = .*|listen.owner = www|' /etc/php-fpm.d/www.conf
     sudo sed -i 's|^;*listen.group = .*|listen.group = www|' /etc/php-fpm.d/www.conf
     sudo sed -i 's|^;*listen.mode = .*|listen.mode = 0666|' /etc/php-fpm.d/www.conf
+    sudo sed -i 's|^listen.acl_users =|;listen.acl_users =|' /etc/php-fpm.d/www.conf
     sudo sed -i 's|^user = .*|user = www|' /etc/php-fpm.d/www.conf
     sudo sed -i 's|^group = .*|group = www|' /etc/php-fpm.d/www.conf
 fi
