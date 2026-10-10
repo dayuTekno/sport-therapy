@@ -67,7 +67,13 @@ class MedicalRecordReportController extends Controller
         $records = $query->orderBy('scheduled_at', 'desc')->paginate(20)->withQueryString();
 
         $therapists = Therapist::where('is_active', true)->orderBy('full_name')->get();
+        if ($therapists->isEmpty()) {
+            $therapists = Therapist::orderBy('full_name')->get();
+        }
         $therapyTypes = TherapyType::where('is_active', true)->orderBy('stage_order')->get();
+        if ($therapyTypes->isEmpty()) {
+            $therapyTypes = TherapyType::orderBy('stage_order')->get();
+        }
 
         return view('admin.pages.reports.medical-records.index', compact(
             'records',

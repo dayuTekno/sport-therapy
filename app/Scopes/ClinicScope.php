@@ -25,9 +25,12 @@ class ClinicScope implements Scope
                 return;
             }
 
-            // Untuk admin dan staf klinik terapi, isolasi ketat sesuai clinic_id miliknya
+            // Untuk admin dan staf klinik terapi, isolasi sesuai clinic_id miliknya atau master data global (null)
             if ($user->clinic_id) {
-                $builder->where($model->getTable() . '.clinic_id', $user->clinic_id);
+                $builder->where(function ($query) use ($model, $user) {
+                    $query->where($model->getTable() . '.clinic_id', $user->clinic_id)
+                          ->orWhereNull($model->getTable() . '.clinic_id');
+                });
             }
         }
     }

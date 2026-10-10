@@ -64,7 +64,13 @@ class TherapySessionController extends Controller
         $multiSessionCount = count($multiSessionPatientIds);
 
         $therapists = Therapist::where('is_active', true)->get();
+        if ($therapists->isEmpty()) {
+            $therapists = Therapist::all();
+        }
         $therapyTypes = TherapyType::where('is_active', true)->orderBy('stage_order')->get();
+        if ($therapyTypes->isEmpty()) {
+            $therapyTypes = TherapyType::orderBy('stage_order')->get();
+        }
 
         return view('admin.pages.therapy-sessions.index', compact(
             'sessions',
@@ -126,7 +132,13 @@ class TherapySessionController extends Controller
 
         $patients = MasterPatients::orderBy('full_name')->get();
         $therapists = Therapist::where('is_active', true)->get();
+        if ($therapists->isEmpty()) {
+            $therapists = Therapist::all();
+        }
         $therapyTypes = TherapyType::where('is_active', true)->orderBy('stage_order')->get();
+        if ($therapyTypes->isEmpty()) {
+            $therapyTypes = TherapyType::orderBy('stage_order')->get();
+        }
 
         return view('admin.pages.therapy-sessions.create', compact(
             'patients',
@@ -224,7 +236,13 @@ class TherapySessionController extends Controller
             ->get();
 
         $therapists = Therapist::where('is_active', true)->get();
+        if ($therapists->isEmpty()) {
+            $therapists = Therapist::all();
+        }
         $therapyTypes = TherapyType::where('is_active', true)->orderBy('stage_order')->get();
+        if ($therapyTypes->isEmpty()) {
+            $therapyTypes = TherapyType::orderBy('stage_order')->get();
+        }
 
         return view('admin.pages.therapy-sessions.show', compact(
             'session',

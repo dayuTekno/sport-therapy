@@ -29,7 +29,7 @@ class TherapyTypeController extends Controller
             'price' => 'nullable|numeric',
         ]);
 
-        $validated['is_active'] = $request->has('is_active') ? 1 : 0;
+        $validated['is_active'] = $request->has('is_active') ? $request->boolean('is_active') : true;
 
         TherapyType::create($validated);
 
@@ -55,7 +55,7 @@ class TherapyTypeController extends Controller
             'price' => 'nullable|numeric',
         ]);
 
-        $validated['is_active'] = $request->has('is_active') ? 1 : 0;
+        $validated['is_active'] = $request->has('is_active') ? $request->boolean('is_active') : true;
 
         $type->update($validated);
 

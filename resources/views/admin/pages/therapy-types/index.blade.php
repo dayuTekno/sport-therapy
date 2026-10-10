@@ -33,6 +33,7 @@
                 <th class="px-6 py-3 text-left font-semibold text-gray-600 uppercase tracking-wider text-xs">Nama Tahapan Terapi</th>
                 <th class="px-6 py-3 text-left font-semibold text-gray-600 uppercase tracking-wider text-xs">Durasi</th>
                 <th class="px-6 py-3 text-left font-semibold text-gray-600 uppercase tracking-wider text-xs">Tarif</th>
+                <th class="px-6 py-3 text-left font-semibold text-gray-600 uppercase tracking-wider text-xs">Status</th>
                 <th class="px-6 py-3 text-right font-semibold text-gray-600 uppercase tracking-wider text-xs">Aksi</th>
             </tr>
         </thead>
@@ -53,6 +54,17 @@
                     <td class="px-6 py-4 font-medium text-gray-900">
                         {{ $type->price ? 'Rp ' . number_format($type->price, 0, ',', '.') : '-' }}
                     </td>
+                    <td class="px-6 py-4">
+                        @if($type->is_active)
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-800">
+                                Aktif
+                            </span>
+                        @else
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-600">
+                                Nonaktif
+                            </span>
+                        @endif
+                    </td>
                     <td class="px-6 py-4 text-right space-x-2">
                         <a href="{{ route('therapy-types.edit', $type->id) }}" class="text-blue-600 hover:text-blue-800 font-medium text-xs">Edit</a>
                         <form action="{{ route('therapy-types.destroy', $type->id) }}" method="POST" class="inline-block" onsubmit="return confirm('Hapus jenjang terapi ini?')">
@@ -64,7 +76,7 @@
                 </tr>
             @empty
                 <tr>
-                    <td colspan="6" class="px-6 py-8 text-center text-gray-400">Belum ada katalog jenjang terapi.</td>
+                    <td colspan="7" class="px-6 py-8 text-center text-gray-400">Belum ada katalog jenjang terapi.</td>
                 </tr>
             @endforelse
         </tbody>

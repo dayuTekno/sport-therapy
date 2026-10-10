@@ -128,6 +128,16 @@ location / {
 EOF
 fi
 
+# Sinkronkan migrasi database & bersihkan cache Laravel
+cd "$PROJECT_DIR"
+if command -v php &>/dev/null; then
+    php artisan migrate --force 2>/dev/null || true
+    php artisan optimize:clear 2>/dev/null || true
+elif [ -x "/usr/bin/php" ]; then
+    /usr/bin/php artisan migrate --force 2>/dev/null || true
+    /usr/bin/php artisan optimize:clear 2>/dev/null || true
+fi
+
 # 5. Optimasi FastCGI Nginx & Reload
 echo "5. Mengoptimasi buffer & timeout FastCGI serta me-reload Nginx..."
 ENABLE_PHP_83="/www/server/nginx/conf/enable-php-83.conf"
