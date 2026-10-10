@@ -186,7 +186,7 @@ Route::middleware(['auth'])->group(function () {
 
     Route::resource('registrasi', RegistrasiController::class);
     Route::post('registrasi/check', [RegistrasiController::class, 'check'])->name('registrasi.check');
-    Route::post('registrasi/create', [RegistrasiController::class, 'store'])->name('registrasi.store');
+    Route::post('registrasi/create', [RegistrasiController::class, 'store'])->name('registrasi.create.post');
     Route::get('registrasi/queue/{patient_id}', [RegistrasiController::class, 'queueForm'])->name('registrasi.queue');
     Route::post('registrasi/queue/{patient_id}', [RegistrasiController::class, 'queueStore'])->name('registrasi.queue.store');
     
