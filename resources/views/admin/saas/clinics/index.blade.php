@@ -40,7 +40,7 @@
             <select name="status" class="px-3 py-2 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
                 <option value="">Semua Status</option>
                 <option value="active" {{ request('status') === 'active' ? 'selected' : '' }}>Aktif</option>
-                <option value="trial" {{ request('status') === 'trial' ? 'selected' : '' }}>Trial 14 Hari</option>
+                <option value="trial" {{ request('status') === 'trial' ? 'selected' : '' }}>Trial (Masa Uji Coba)</option>
                 <option value="suspended" {{ request('status') === 'suspended' ? 'selected' : '' }}>Suspended</option>
             </select>
 

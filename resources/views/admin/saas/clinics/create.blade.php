@@ -77,7 +77,7 @@
                     </label>
                     <select name="status" required class="w-full px-3.5 py-2.5 text-xs border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 font-semibold text-gray-800">
                         <option value="active" selected>Aktif Langsung</option>
-                        <option value="trial">Trial (14 Hari)</option>
+                        <option value="trial">Trial ({{ \App\Models\LandingPageSetting::getTrialDays() }} Hari)</option>
                         <option value="suspended">Suspended</option>
                     </select>
                 </div>

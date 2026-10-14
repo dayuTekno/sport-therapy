@@ -1,3 +1,6 @@
+@php
+    $trialDays = $trialDays ?? \App\Models\LandingPageSetting::getTrialDays();
+@endphp
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -7,7 +10,7 @@
     {{-- Primary SEO Meta Tags --}}
     <title>Daftarkan Klinik Mitra Baru — Smart Clinic Therapy</title>
     <meta name="title" content="Daftarkan Klinik Mitra Baru — Smart Clinic Therapy">
-    <meta name="description" content="Daftarkan klinik fisioterapi atau pusat terapi rehabilitasi olahraga Anda ke platform cloud Smart Clinic Therapy. Dapatkan akses langsung dengan 14 hari masa uji coba gratis tanpa kartu kredit.">
+    <meta name="description" content="Daftarkan klinik fisioterapi atau pusat terapi rehabilitasi olahraga Anda ke platform cloud Smart Clinic Therapy. Dapatkan akses langsung dengan {{ $trialDays }} hari masa uji coba gratis tanpa kartu kredit.">
     <meta name="keywords" content="daftar klinik fisioterapi, registrasi klinik olahraga, aplikasi fisioterapi, rekam medis digital, Smart Clinic Therapy">
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="{{ route('register.clinic') }}">
@@ -19,13 +22,13 @@
     <meta property="og:site_name" content="Smart Clinic Therapy">
     <meta property="og:locale" content="id_ID">
     <meta property="og:title" content="Daftarkan Klinik Mitra Baru — Smart Clinic Therapy">
-    <meta property="og:description" content="Mulai 14 hari uji coba gratis platform manajemen klinik fisioterapi modern tanpa kartu kredit.">
+    <meta property="og:description" content="Mulai {{ $trialDays }} hari uji coba gratis platform manajemen klinik fisioterapi modern tanpa kartu kredit.">
     <meta property="og:image" content="{{ asset('images/logo-icon.svg') }}">
 
     {{-- Twitter Card --}}
     <meta name="twitter:card" content="summary">
     <meta name="twitter:title" content="Daftarkan Klinik Mitra Baru — Smart Clinic Therapy">
-    <meta name="twitter:description" content="Mulai 14 hari uji coba gratis platform manajemen klinik fisioterapi modern tanpa kartu kredit.">
+    <meta name="twitter:description" content="Mulai {{ $trialDays }} hari uji coba gratis platform manajemen klinik fisioterapi modern tanpa kartu kredit.">
     <meta name="twitter:image" content="{{ asset('images/logo-icon.svg') }}">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -45,7 +48,7 @@
                 ⚡
             </div>
             <h1 class="text-2xl font-black text-gray-900 tracking-tight">Daftarkan Klinik Terapi Anda</h1>
-            <p class="text-xs text-gray-500 mt-1">Dapatkan akses langsung ke platform PaaS Smart Clinic Therapy dengan <strong>14 hari masa uji coba gratis</strong> tanpa kartu kredit.</p>
+            <p class="text-xs text-gray-500 mt-1">Dapatkan akses langsung ke platform PaaS Smart Clinic Therapy dengan <strong>{{ $trialDays }} hari masa uji coba gratis</strong> tanpa kartu kredit.</p>
         </div>
 
         @if($errors->any())
@@ -152,7 +155,7 @@
             <div class="pt-4">
                 <button type="submit" 
                         class="w-full py-3.5 px-4 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs uppercase tracking-wider rounded-xl shadow-lg shadow-blue-500/25 transition cursor-pointer">
-                    🚀 Mulai Uji Coba Gratis 14 Hari
+                    🚀 Mulai Uji Coba Gratis {{ $trialDays }} Hari
                 </button>
             </div>
         </form>

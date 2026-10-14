@@ -111,7 +111,7 @@
                     <p class="text-xs text-gray-500 dark:text-gray-400">
                         Belum mendaftarkan klinik?
                         <a href="{{ route('register.clinic') }}" class="font-bold text-blue-600 dark:text-blue-400 hover:underline">
-                            Daftar Uji Coba Gratis 14 Hari
+                            Daftar Uji Coba Gratis {{ \App\Models\LandingPageSetting::getTrialDays() }} Hari
                         </a>
                     </p>
                 </div>

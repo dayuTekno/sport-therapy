@@ -69,7 +69,7 @@ class SaasClinicController extends Controller
             'phone_number' => $request->phone_number,
             'address' => $request->address,
             'status' => $request->status,
-            'trial_ends_at' => $request->status === 'trial' ? now()->addDays(14) : null,
+            'trial_ends_at' => $request->status === 'trial' ? now()->addDays($plan->trial_days ?: \App\Models\LandingPageSetting::getTrialDays()) : null,
             'subscription_ends_at' => $request->subscription_ends_at,
             'subscription_plan_id' => $plan->id,
             'max_therapists' => $plan->max_therapists,

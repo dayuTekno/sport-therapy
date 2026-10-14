@@ -20,17 +20,20 @@ class PublicController extends Controller
         $features = LandingPageSetting::getSection('features');
         $contact = LandingPageSetting::getSection('contact');
         $plans = SubscriptionPlan::where('is_active', true)->orderBy('sort_order')->get();
+        $trialDays = LandingPageSetting::getTrialDays();
 
-        return view('public.landing', compact('hero', 'features', 'contact', 'plans'));
+        return view('public.landing', compact('hero', 'features', 'contact', 'plans', 'trialDays'));
     }
 
     /**
-     * Halaman Pendaftaran Mitra Klinik Baru (Free Trial 14 Hari)
+     * Halaman Pendaftaran Mitra Klinik Baru (Free Trial)
      */
     public function registerClinicForm()
     {
         $plans = SubscriptionPlan::where('is_active', true)->orderBy('sort_order')->get();
-        return view('public.register-clinic', compact('plans'));
+        $trialDays = LandingPageSetting::getTrialDays();
+
+        return view('public.register-clinic', compact('plans', 'trialDays'));
     }
 
     /**
@@ -55,6 +58,7 @@ class PublicController extends Controller
         }
 
         $plan = SubscriptionPlan::findOrFail($request->subscription_plan_id);
+        $trialDays = $plan->trial_days ?: LandingPageSetting::getTrialDays();
 
         // Buat Tenant / Klinik Baru
         $clinic = Clinic::create([
@@ -66,7 +70,7 @@ class PublicController extends Controller
             'phone_number' => $request->phone_number,
             'address' => $request->address,
             'status' => 'trial',
-            'trial_ends_at' => now()->addDays(14),
+            'trial_ends_at' => now()->addDays($trialDays),
             'subscription_plan_id' => $plan->id,
             'max_therapists' => $plan->max_therapists,
             'max_patients' => $plan->max_patients,
@@ -88,7 +92,7 @@ class PublicController extends Controller
         // Otomatis login
         auth()->login($user);
 
-        return redirect()->route('dashboard')->with('success', "Selamat datang di Smart Clinic Therapy! Klinik {$clinic->name} berhasil didaftarkan dengan masa uji coba gratis 14 hari.");
+        return redirect()->route('dashboard')->with('success', "Selamat datang di Smart Clinic Therapy! Klinik {$clinic->name} berhasil didaftarkan dengan masa uji coba gratis {$trialDays} hari.");
     }
 
     /**

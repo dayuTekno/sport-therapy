@@ -28,9 +28,12 @@ class SaasCmsController extends Controller
             'title' => 'required|string|max:255',
             'subtitle' => 'required|string',
             'badge_text' => 'nullable|string|max:100',
+            'trial_days' => 'nullable|integer|min:1|max:365',
             'cta_primary_text' => 'required|string|max:100',
             'cta_secondary_text' => 'required|string|max:100',
         ]);
+
+        $trialDays = $request->filled('trial_days') ? (int) $request->trial_days : LandingPageSetting::getTrialDays();
 
         $hero = LandingPageSetting::getSection('hero');
         $hero->update([
@@ -38,6 +41,7 @@ class SaasCmsController extends Controller
             'subtitle' => $request->subtitle,
             'content_json' => [
                 'badge_text' => $request->badge_text,
+                'trial_days' => $trialDays,
                 'cta_primary_text' => $request->cta_primary_text,
                 'cta_primary_url' => '/register-clinic',
                 'cta_secondary_text' => $request->cta_secondary_text,

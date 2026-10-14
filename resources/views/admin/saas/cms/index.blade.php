@@ -87,12 +87,25 @@
                           class="w-full px-3.5 py-2.5 text-xs border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 leading-relaxed">{{ old('subtitle', $hero->subtitle) }}</textarea>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div>
+                    <label class="block font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+                        Durasi Trial Gratis <span class="text-rose-500">*</span>
+                    </label>
+                    <div class="relative">
+                        <input type="number" name="trial_days" min="1" max="365"
+                               value="{{ old('trial_days', $hero->content_json['trial_days'] ?? \App\Models\LandingPageSetting::getTrialDays()) }}" required
+                               class="w-full px-3.5 py-2.5 text-xs border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 font-bold pr-14">
+                        <span class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-xs font-bold text-gray-500">
+                            Hari
+                        </span>
+                    </div>
+                </div>
                 <div>
                     <label class="block font-bold text-gray-700 uppercase tracking-wider mb-1.5">
                         Teks Tombol CTA Utama (Daftar) <span class="text-rose-500">*</span>
                     </label>
-                    <input type="text" name="cta_primary_text" value="{{ old('cta_primary_text', $hero->content_json['cta_primary_text'] ?? 'Daftar Uji Coba Gratis (14 Hari)') }}" required
+                    <input type="text" name="cta_primary_text" value="{{ old('cta_primary_text', $hero->content_json['cta_primary_text'] ?? 'Daftar Uji Coba Gratis (30 Hari)') }}" required
                            class="w-full px-3.5 py-2.5 text-xs border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500">
                 </div>
                 <div>

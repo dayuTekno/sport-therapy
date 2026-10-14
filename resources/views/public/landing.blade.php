@@ -1,3 +1,6 @@
+@php
+    $trialDays = $trialDays ?? \App\Models\LandingPageSetting::getTrialDays();
+@endphp
 <!DOCTYPE html>
 <html lang="id" class="scroll-smooth">
 <head>
@@ -126,7 +129,7 @@
               'name' => 'Apakah kami perlu membayar sebelum mencoba fitur-fiturnya?',
               'acceptedAnswer' => [
                 '@type' => 'Answer',
-                'text' => 'Tidak. Anda dapat langsung mendaftarkan klinik dan menikmati masa uji coba gratis (Free Trial) selama 14 hari penuh dengan semua fitur aktif tanpa kewajiban memasukkan nomor kartu kredit.',
+                'text' => "Tidak. Anda dapat langsung mendaftarkan klinik dan menikmati masa uji coba gratis (Free Trial) selama {$trialDays} hari penuh dengan semua fitur aktif tanpa kewajiban memasukkan nomor kartu kredit.",
               ],
             ],
           ],
@@ -193,7 +196,7 @@
                     </a>
                     <a href="{{ route('register.clinic') }}" 
                        class="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl shadow-md shadow-blue-500/25 transition flex items-center gap-1.5">
-                        <span>Coba Gratis 14 Hari</span>
+                        <span>Coba Gratis {{ $trialDays }} Hari</span>
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                     </a>
                 @endauth
@@ -225,7 +228,7 @@
                         Masuk Portal Klinik
                     </a>
                     <a href="{{ route('register.clinic') }}" class="w-full text-center py-2.5 bg-blue-600 text-white rounded-xl text-xs font-bold shadow-md shadow-blue-500/25">
-                        Daftar Uji Coba Gratis
+                        Coba Gratis {{ $trialDays }} Hari
                     </a>
                 @endauth
             </div>
@@ -269,7 +272,7 @@
                         <a href="{{ route('register.clinic') }}" 
                            class="w-full sm:w-auto px-7 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-sm rounded-xl shadow-xl shadow-blue-500/25 transition transform hover:-translate-y-0.5 flex items-center justify-center gap-2">
                             <span>🚀</span>
-                            <span>{{ $hero->content_json['cta_primary_text'] ?? 'Mulai Uji Coba Gratis (14 Hari)' }}</span>
+                            <span>{{ $hero->content_json['cta_primary_text'] ?? "Mulai Uji Coba Gratis ({$trialDays} Hari)" }}</span>
                         </a>
 
                         <a href="#pricing" 
@@ -713,7 +716,7 @@
                                         ⚡ Kuota 5 Terapis & 500 Pasien/bln
                                     </span>
                                     <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">
-                                        ✓ Coba 14 Hari Gratis
+                                        ✓ Coba {{ $plan6->trial_days ?? $trialDays }} Hari Gratis
                                     </span>
                                 </div>
                             </td>
@@ -826,7 +829,7 @@
                                     <span class="text-blue-600">📌</span>
                                     <span>{{ $plan->formatted_commitment }}</span>
                                 </div>
-                                <span class="text-[11px] text-emerald-600 font-bold block mt-2">✓ Termasuk Uji Coba Gratis 14 Hari Pertama</span>
+                                <span class="text-[11px] text-emerald-600 font-bold block mt-2">✓ Termasuk Uji Coba Gratis {{ $plan->trial_days ?? $trialDays }} Hari Pertama</span>
                             </div>
 
                             {{-- Core Limits & Features --}}
@@ -851,7 +854,7 @@
                         <div class="mt-8 pt-4">
                             <a href="{{ route('register.clinic', ['plan_id' => $plan->id]) }}" 
                                class="w-full py-3.5 px-4 rounded-xl text-center text-xs font-bold transition block {{ $isFeatured ? 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg shadow-blue-500/25' : 'bg-slate-900 hover:bg-slate-800 text-white' }}">
-                                Daftar {{ $plan->name }} (Coba 14 Hari) →
+                                Daftar {{ $plan->name }} (Coba {{ $plan->trial_days ?? $trialDays }} Hari) →
                             </a>
                         </div>
                     </div>
@@ -932,7 +935,7 @@
                         <span class="text-slate-400 font-mono text-lg" x-text="activeFaq === 4 ? '−' : '+'"></span>
                     </button>
                     <div x-show="activeFaq === 4" x-collapse class="px-6 pb-5 text-xs sm:text-sm text-slate-600 leading-relaxed border-t border-slate-100 pt-3">
-                        Tidak. Anda dapat langsung mendaftarkan klinik dan menikmati masa uji coba gratis (Free Trial) selama 14 hari penuh dengan semua fitur aktif tanpa kewajiban memasukkan nomor kartu kredit.
+                        Tidak. Anda dapat langsung mendaftarkan klinik dan menikmati masa uji coba gratis (Free Trial) selama {{ $trialDays }} hari penuh dengan semua fitur aktif tanpa kewajiban memasukkan nomor kartu kredit.
                     </div>
                 </div>
 
@@ -949,7 +952,7 @@
                 Siap Membawa Pengalaman Terapi Klinik Anda ke Level Berikutnya?
             </h2>
             <p class="text-sm sm:text-base text-blue-100 max-w-2xl mx-auto leading-relaxed">
-                Bergabunglah dengan klinik fisioterapi modern di Indonesia. Mulai uji coba gratis 14 hari Anda sekarang dan rasakan kemudahannya.
+                Bergabunglah dengan klinik fisioterapi modern di Indonesia. Mulai uji coba gratis {{ $trialDays }} hari Anda sekarang dan rasakan kemudahannya.
             </p>
             <div class="pt-4 flex flex-col sm:flex-row items-center justify-center gap-4">
                 <a href="{{ route('register.clinic') }}" 

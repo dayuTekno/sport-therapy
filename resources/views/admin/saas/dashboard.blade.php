@@ -168,8 +168,11 @@
                                     ✓ Aktif
                                 </span>
                             @elseif($c->status === 'trial')
+                                @php
+                                    $remaining = $c->trial_ends_at ? max(0, (int) now()->diffInDays($c->trial_ends_at, false)) : null;
+                                @endphp
                                 <span class="px-2.5 py-1 text-xs font-bold rounded-full bg-amber-50 text-amber-700 border border-amber-200">
-                                    ⏳ Trial 14 Hari
+                                    ⏳ Trial {{ $remaining !== null ? "({$remaining}h sisa)" : 'Masa Uji Coba' }}
                                 </span>
                             @else
                                 <span class="px-2.5 py-1 text-xs font-bold rounded-full bg-rose-50 text-rose-700 border border-rose-200">

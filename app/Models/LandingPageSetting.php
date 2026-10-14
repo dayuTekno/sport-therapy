@@ -33,4 +33,32 @@ class LandingPageSetting extends Model
             ]
         );
     }
+
+    /**
+     * Dapatkan jumlah hari masa uji coba gratis dari setting database
+     */
+    public static function getTrialDays(): int
+    {
+        $hero = self::where('section_key', 'hero')->first();
+        $content = $hero->content_json ?? [];
+
+        if (!empty($content['trial_days']) && is_numeric($content['trial_days'])) {
+            return (int) $content['trial_days'];
+        }
+
+        // Cek fallback jika ada di cta_primary_text
+        if (!empty($content['cta_primary_text']) && preg_match('/(\d+)\s*(?:hari|day)/i', $content['cta_primary_text'], $matches)) {
+            return (int) $matches[1];
+        }
+
+        // Cek dari subscription_plans
+        if (\Illuminate\Support\Facades\Schema::hasTable('subscription_plans') && \Illuminate\Support\Facades\Schema::hasColumn('subscription_plans', 'trial_days')) {
+            $planDays = SubscriptionPlan::where('is_active', true)->whereNotNull('trial_days')->value('trial_days');
+            if ($planDays) {
+                return (int) $planDays;
+            }
+        }
+
+        return 14;
+    }
 }

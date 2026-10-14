@@ -18,6 +18,7 @@ class SubscriptionPlan extends Model
         'features_json' => 'array',
         'max_therapists' => 'integer',
         'max_patients' => 'integer',
+        'trial_days' => 'integer',
         'sort_order' => 'integer',
     ];
 
