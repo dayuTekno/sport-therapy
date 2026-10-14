@@ -56,13 +56,15 @@ class ReservationController extends Controller
     public function create()
     {
         $therapists = Therapist::where('is_active', true)->get();
-        return view('admin.pages.reservations.create', compact('therapists'));
+        $patients = MasterPatients::orderBy('full_name')->get();
+        return view('admin.pages.reservations.create', compact('therapists', 'patients'));
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'phone_number' => 'required|string',
+            'patient_id' => 'required_without:phone_number|nullable|exists:master_patients,id',
+            'phone_number' => 'required_without:patient_id|nullable|string',
             'chief_complaint' => 'required|string',
             'complaint_duration' => 'required|string',
             'medical_history' => 'nullable|string',
@@ -70,12 +72,13 @@ class ReservationController extends Controller
             'preferred_date' => 'nullable|date',
             'preferred_time' => 'nullable|string',
             'therapist_id' => 'nullable|exists:therapists,id',
-            'patient_id' => 'nullable|exists:master_patients,id',
+        ], [
+            'patient_id.required_without' => 'Silakan pilih pasien dari dropdown Master Data.',
+            'patient_id.exists' => 'Data pasien yang dipilih tidak valid di Master Data.',
+            'phone_number.required_without' => 'Pilihan pasien atau nomor HP wajib diisi.',
+            'chief_complaint.required' => 'Keluhan utama wajib diisi.',
+            'complaint_duration.required' => 'Durasi keluhan wajib diisi.',
         ]);
-
-        // Clean phone number
-        $cleanedPhone = preg_replace('/\D/', '', $request->phone_number);
-        $searchPhone = str_starts_with($cleanedPhone, '0') ? substr($cleanedPhone, 1) : $cleanedPhone;
 
         // Find Master Patient
         $patient = null;
@@ -83,7 +86,9 @@ class ReservationController extends Controller
             $patient = MasterPatients::find($request->patient_id);
         }
 
-        if (!$patient) {
+        if (!$patient && $request->filled('phone_number')) {
+            $cleanedPhone = preg_replace('/\D/', '', $request->phone_number);
+            $searchPhone = str_starts_with($cleanedPhone, '0') ? substr($cleanedPhone, 1) : $cleanedPhone;
             $patient = MasterPatients::where('phone_number', 'ilike', "%{$searchPhone}%")
                 ->orWhere('phone_number', 'ilike', "%{$cleanedPhone}%")
                 ->first();
@@ -92,8 +97,13 @@ class ReservationController extends Controller
         if (!$patient) {
             return redirect()->back()
                 ->withInput()
-                ->with('error', 'Nomor HP belum terdaftar di Master Data Pasien. Silakan daftarkan pasien terlebih dahulu.');
+                ->with('error', 'Pasien belum terdaftar di Master Data Pasien. Silakan pilih atau daftarkan pasien terlebih dahulu.');
         }
+
+        // Clean phone number from request or fallback from patient
+        $rawPhone = $request->phone_number ?: $patient->phone_number;
+        $cleanedPhone = preg_replace('/\D/', '', $rawPhone);
+        $searchPhone = str_starts_with($cleanedPhone, '0') ? substr($cleanedPhone, 1) : $cleanedPhone;
 
         // Optional sync if details were passed
         if ($request->filled('full_name') || $request->filled('age') || $request->filled('occupation') || $request->filled('address')) {
@@ -347,6 +357,61 @@ class ReservationController extends Controller
 
     public function lookupPatient(Request $request)
     {
+        // 1. Lookup by ID
+        if ($request->filled('id')) {
+            $patient = MasterPatients::find($request->id);
+            if ($patient) {
+                return response()->json([
+                    'found' => true,
+                    'patient' => [
+                        'id' => $patient->id,
+                        'patient_code' => $patient->patient_code,
+                        'full_name' => $patient->full_name,
+                        'age' => $patient->age,
+                        'gender' => $patient->gender,
+                        'gender_label' => $patient->gender === 'female' ? 'Perempuan' : 'Laki-laki',
+                        'occupation' => $patient->occupation,
+                        'address' => $patient->address,
+                        'phone_number' => $patient->phone_number,
+                        'nik' => $patient->nik,
+                    ],
+                ]);
+            }
+        }
+
+        // 2. Search by query string (q / name / address / phone / RM)
+        if ($request->filled('q')) {
+            $q = $request->get('q');
+            $patients = MasterPatients::where(function($query) use ($q) {
+                $query->where('full_name', 'ilike', "%{$q}%")
+                      ->orWhere('address', 'ilike', "%{$q}%")
+                      ->orWhere('phone_number', 'ilike', "%{$q}%")
+                      ->orWhere('patient_code', 'ilike', "%{$q}%");
+            })
+            ->limit(30)
+            ->get()
+            ->map(function($patient) {
+                return [
+                    'id' => $patient->id,
+                    'patient_code' => $patient->patient_code,
+                    'full_name' => $patient->full_name,
+                    'age' => $patient->age,
+                    'gender' => $patient->gender,
+                    'gender_label' => $patient->gender === 'female' ? 'Perempuan' : 'Laki-laki',
+                    'occupation' => $patient->occupation,
+                    'address' => $patient->address,
+                    'phone_number' => $patient->phone_number,
+                    'nik' => $patient->nik,
+                ];
+            });
+
+            return response()->json([
+                'success' => true,
+                'patients' => $patients,
+            ]);
+        }
+
+        // 3. Fallback: Lookup by phone
         $phone = $request->get('phone');
         if (!$phone) {
             return response()->json(['found' => false]);

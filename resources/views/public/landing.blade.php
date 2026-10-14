@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SportClinic.io — Platform SaaS Manajemen Klinik Fisioterapi & Olahraga Modern</title>
+    <title>Smart Clinic Therapy — Platform SaaS Manajemen Klinik Fisioterapi & Olahraga Modern</title>
     <meta name="description" content="Platform cloud multi-tenant untuk manajemen klinik fisioterapi, rehabilitasi cedera olahraga berjenjang, otomasi booking WhatsApp, kasir dan rekam medis digital.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -31,7 +31,7 @@
                 </div>
                 <div>
                     <span class="text-xl font-extrabold tracking-tight text-slate-900 flex items-center leading-tight">
-                        SportClinic<span class="text-blue-600">.io</span>
+                        Smart Clinic <span class="text-blue-600">Therapy</span>
                     </span>
                     <span class="text-[10px] font-bold uppercase tracking-wider text-indigo-700 bg-indigo-50 border border-indigo-100/80 px-1.5 py-0.5 rounded-md inline-block">
                         PaaS / SaaS Platform
@@ -121,7 +121,7 @@
                             <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
                             <span class="relative inline-flex rounded-full h-2 w-2 bg-blue-600"></span>
                         </span>
-                        <span>{{ $hero->content_json['badge_text'] ?? 'Platform Operasional Fisioterapi & Sport Clinic No. 1' }}</span>
+                        <span>{{ $hero->content_json['badge_text'] ?? 'Platform Operasional Fisioterapi & Smart Clinic Therapy No. 1' }}</span>
                     </div>
 
                     {{-- Main Headline --}}
@@ -200,7 +200,7 @@
                                 </div>
                                 <div class="px-3 py-1 rounded-md bg-white border border-slate-200 text-[11px] font-mono text-slate-500 flex items-center gap-1.5">
                                     <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-                                    <span>app.sportclinic.io/sessions/active</span>
+                                    <span>app.smartclinictherapy.com/sessions/active</span>
                                 </div>
                                 <span class="text-[10px] font-bold font-mono text-slate-400">v2.5 PRO</span>
                             </div>
@@ -340,7 +340,7 @@
                     Dirancang Khusus Fisioterapi
                 </span>
                 <h2 class="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-900 tracking-tight mt-4">
-                    {{ $features->title ?? 'Fitur Unggulan Dirancang Khusus untuk Fisioterapi & Sport Clinic' }}
+                    {{ $features->title ?? 'Fitur Unggulan Dirancang Khusus untuk Fisioterapi & Smart Clinic Therapy' }}
                 </h2>
                 <p class="text-sm sm:text-base text-slate-600 mt-3 leading-relaxed">
                     {{ $features->subtitle ?? 'Bukan sekadar sistem rumah sakit umum yang kaku. Setiap fitur dioptimalkan untuk alur pemulihan fisik atlet, penanganan cedera ligamen, dan kepuasan pasien aktif.' }}
@@ -444,7 +444,7 @@
     </section>
 
     {{-- ========================================================================= --}}
-    {{-- 6. PERBANDINGAN: CARA LAMA VS SPORTCLINIC.IO                             --}}
+    {{-- 6. PERBANDINGAN: CARA LAMA VS SMART CLINIC THERAPY                         --}}
     {{-- ========================================================================= --}}
     <section id="komparasi" class="py-20 bg-slate-50 border-t border-slate-200/80">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -454,7 +454,7 @@
                     Mengapa Beralih?
                 </span>
                 <h2 class="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-900 tracking-tight mt-4">
-                    Cara Manual vs Kecepatan SportClinic.io
+                    Cara Manual vs Kecepatan Smart Clinic Therapy
                 </h2>
                 <p class="text-sm text-slate-500 mt-2">
                     Lihat bagaimana efisiensi operasional meningkat drastis setelah mendigitalisasi klinik Anda.
@@ -495,11 +495,11 @@
                         </div>
                     </div>
 
-                    {{-- Dengan SportClinic.io --}}
+                    {{-- Dengan Smart Clinic Therapy --}}
                     <div class="p-8 space-y-4 bg-emerald-50/20">
                         <div class="flex items-center gap-2 text-emerald-700 font-extrabold text-base mb-6">
                             <span class="text-xl">✅</span>
-                            <span>Dengan SportClinic.io Cloud Platform</span>
+                            <span>Dengan Smart Clinic Therapy Cloud Platform</span>
                         </div>
 
                         <div class="space-y-3 text-xs sm:text-sm text-slate-700">
@@ -543,7 +543,7 @@
                     Investasi Transparan & Fleksibel
                 </span>
                 <h2 class="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-900 tracking-tight mt-4">
-                    Pilihan Paket Berlangganan Smart SportClinic
+                    Pilihan Paket Berlangganan Smart Clinic Therapy
                 </h2>
                 <p class="text-sm text-slate-500 mt-2">
                     Skema langganan fleksibel tanpa biaya tersembunyi. Termasuk seluruh modul operasional terapi berjenjang, kasir, dan rekam medis.
@@ -780,7 +780,7 @@
                         <span class="text-slate-400 font-mono text-lg" x-text="activeFaq === 2 ? '−' : '+'"></span>
                     </button>
                     <div x-show="activeFaq === 2" x-collapse class="px-6 pb-5 text-xs sm:text-sm text-slate-600 leading-relaxed border-t border-slate-100 pt-3">
-                        Ya! Seluruh tampilan SportClinic.io didesain 100% responsif. Terapis dapat membawa tablet atau iPad saat menangani pasien untuk mencatat evaluasi dan langsung menyimpan data pemulihan secara real-time.
+                        Ya! Seluruh tampilan Smart Clinic Therapy didesain 100% responsif. Terapis dapat membawa tablet atau iPad saat menangani pasien untuk mencatat evaluasi dan langsung menyimpan data pemulihan secara real-time.
                     </div>
                 </div>
 
@@ -847,7 +847,7 @@
                         <div class="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center text-white font-bold text-base">
                             ⚡
                         </div>
-                        <span class="text-lg font-black tracking-tight text-white">SportClinic<span class="text-blue-500">.io</span></span>
+                        <span class="text-lg font-black tracking-tight text-white">Smart Clinic <span class="text-blue-500">Therapy</span></span>
                     </div>
                     <p class="text-slate-400 max-w-sm leading-relaxed">
                         Platform PaaS / SaaS operasional klinik fisioterapi, rehabilitasi cedera fisik atlet, dan manajemen kasir terpadu nomor satu di Indonesia.
@@ -855,7 +855,7 @@
                     <div class="text-slate-400 space-y-1.5 pt-2">
                         <div class="flex items-center gap-2">
                             <span>📧</span>
-                            <span>{{ $contact->content_json['email'] ?? 'support@sportclinic.io' }}</span>
+                            <span>{{ $contact->content_json['email'] ?? 'support@smartclinictherapy.com' }}</span>
                         </div>
                         <div class="flex items-center gap-2">
                             <span>📱</span>
@@ -908,7 +908,7 @@
             {{-- Bottom Copyright Strip --}}
             <div class="pt-8 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-4">
                 <div>
-                    &copy; {{ date('Y') }} SportClinic.io — Dikembangkan oleh <strong>Darma Ayu Tekno</strong>. Seluruh Hak Cipta Dilindungi.
+                    &copy; {{ date('Y') }} Smart Clinic Therapy — Dikembangkan oleh <strong>Darma Ayu Tekno</strong>. Seluruh Hak Cipta Dilindungi.
                 </div>
                 <div class="font-mono text-[11px] text-slate-600">
                     Platform as a Service (PaaS) • Multi-Tenancy Architecture

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Daftarkan Klinik Mitra Baru - SportClinic.io</title>
+    <title>Daftarkan Klinik Mitra Baru - Smart Clinic Therapy</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
@@ -21,7 +21,7 @@
                 ⚡
             </div>
             <h1 class="text-2xl font-black text-gray-900 tracking-tight">Daftarkan Klinik Terapi Anda</h1>
-            <p class="text-xs text-gray-500 mt-1">Dapatkan akses langsung ke platform PaaS Sport Clinic dengan <strong>14 hari masa uji coba gratis</strong> tanpa kartu kredit.</p>
+            <p class="text-xs text-gray-500 mt-1">Dapatkan akses langsung ke platform PaaS Smart Clinic Therapy dengan <strong>14 hari masa uji coba gratis</strong> tanpa kartu kredit.</p>
         </div>
 
         @if($errors->any())

@@ -88,6 +88,6 @@ class PublicController extends Controller
         // Otomatis login
         auth()->login($user);
 
-        return redirect()->route('dashboard')->with('success', "Selamat datang di SportClinic.io! Klinik {$clinic->name} berhasil didaftarkan dengan masa uji coba gratis 14 hari.");
+        return redirect()->route('dashboard')->with('success', "Selamat datang di Smart Clinic Therapy! Klinik {$clinic->name} berhasil didaftarkan dengan masa uji coba gratis 14 hari.");
     }
 }

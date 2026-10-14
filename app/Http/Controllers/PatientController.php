@@ -108,8 +108,8 @@ class PatientController extends Controller
         ]);
 
         if ($request->get('from') === 'reservation') {
-            return redirect()->route('reservations.create', ['phone' => $patient->phone_number])
-                ->with('success', "Pasien {$patient->full_name} berhasil didaftarkan! Data langsung dimuat di formulir reservasi.");
+            return redirect()->route('reservations.create', ['patient_id' => $patient->id, 'phone' => $patient->phone_number])
+                ->with('success', "Pasien {$patient->full_name} berhasil didaftarkan! Data langsung terpilih di formulir reservasi.");
         }
 
         return redirect()->route('patients.index')->with('success', 'Data Pasien berhasil ditambahkan ke Master Data');

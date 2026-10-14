@@ -12,7 +12,7 @@
 <div class="max-w-3xl mx-auto bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-gray-100">
     <div class="border-b border-gray-100 pb-5 mb-6">
         <h2 class="text-xl font-bold text-gray-900">📋 Formulir Reservasi Terapi Pasien</h2>
-        <p class="text-xs text-gray-500 mt-1">Cukup input nomor HP pasien untuk memuat data dari Master Data Pasien. Jika belum terdaftar, Anda dapat mendaftarkan pasien ke Master Data.</p>
+        <p class="text-xs text-gray-500 mt-1">Pilih nama pasien dari dropdown Master Data. Pilihan dropdown menampilkan <strong>Nama</strong> dan <strong>Alamat</strong> pasien terdaftar. Jika belum terdaftar, Anda dapat mendaftarkan pasien baru ke Master Data.</p>
     </div>
 
     {{-- Notification Message --}}
@@ -33,59 +33,92 @@
     <form action="{{ route('reservations.store') }}" method="POST" id="reservationForm" class="space-y-6">
         @csrf
 
-        {{-- SECTION A: IDENTITAS PASIEN (CUKUP INPUT NO HP) --}}
+        {{-- SECTION A: IDENTITAS PASIEN (DROPDOWN CARI NAMA, TAMPIL NAMA & ALAMAT) --}}
         <div class="bg-gray-50/70 p-5 rounded-2xl border border-gray-200/80 space-y-4">
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-2">
                     <span class="flex h-6 w-6 items-center justify-center rounded-full bg-blue-600 text-xs font-bold text-white">A</span>
-                    <h3 class="text-xs font-bold uppercase tracking-wider text-gray-800">Identitas Pasien (Input Nomor HP)</h3>
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-gray-800">Identitas Pasien (Pilih Pasien Terdaftar)</h3>
                 </div>
+                <a href="{{ route('patients.create', ['from' => 'reservation']) }}" 
+                   class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-semibold rounded-xl border border-blue-200 transition">
+                    <span>+ Pasien Baru</span>
+                </a>
             </div>
 
-            {{-- Input Nomor HP --}}
+            {{-- Searchable Dropdown: Cari Nama, Tampil Nama dan Alamat --}}
             <div>
                 <label class="block text-xs font-bold uppercase text-gray-700 mb-1.5">
-                    Nomor HP / WhatsApp Pasien <span class="text-red-500">*</span>
+                    Pilih Pasien (Cari Berdasarkan Nama) <span class="text-red-500">*</span>
                 </label>
-                <div class="flex flex-col sm:flex-row gap-2">
-                    <div class="relative flex-1">
-                        <input type="tel" name="phone_number" id="phone_number" 
-                               value="{{ old('phone_number', request('phone')) }}" required
-                               inputmode="tel"
-                               autocomplete="tel"
-                               placeholder="Ketik nomor HP (Contoh: 08123456789 atau 85183036722)"
-                               class="w-full text-sm font-mono border border-gray-300 rounded-xl px-3.5 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 pl-10 bg-white">
-                        <span class="absolute left-3.5 top-2.5 text-gray-400">📱</span>
-                        <span id="phoneLoading" class="hidden absolute right-3.5 top-3 text-xs text-blue-600 animate-pulse font-medium">
-                            Mengecek Master Data...
-                        </span>
+
+                <div class="relative" id="patientComboboxWrapper">
+                    {{-- Input Pencarian Pasien --}}
+                    <div class="relative">
+                        <input type="text" id="patientSearchInput"
+                               autocomplete="off"
+                               placeholder="🔍 Ketik nama pasien untuk mencari... (Tampil nama & alamat)"
+                               class="w-full text-sm border border-gray-300 rounded-xl px-3.5 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 pl-10 pr-20 bg-white shadow-xs cursor-pointer">
+                        <span class="absolute left-3.5 top-2.5 text-gray-400 pointer-events-none">👤</span>
+                        
+                        {{-- Icon Clear & Chevron --}}
+                        <div class="absolute right-3 top-2.5 flex items-center gap-1.5">
+                            <button type="button" id="btnClearPatient" class="hidden text-gray-400 hover:text-gray-600 p-0.5 rounded-full hover:bg-gray-100 transition" title="Bersihkan & Pilih Ulang">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                            </button>
+                            <button type="button" id="btnToggleDropdown" class="text-gray-400 hover:text-gray-600 p-0.5 rounded-full hover:bg-gray-100 transition" title="Buka / Tutup Pilihan">
+                                <svg id="dropdownChevron" class="w-4 h-4 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                </svg>
+                            </button>
+                        </div>
                     </div>
-                    <button type="button" id="btnSearchPatient"
-                            class="px-5 py-2.5 bg-gray-800 hover:bg-gray-900 text-white text-xs font-semibold rounded-xl transition flex items-center justify-center gap-2 shrink-0 shadow-sm">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                        </svg>
-                        Cek Pasien
-                    </button>
+
+                    {{-- Dropdown Menu List: Menampilkan Nama dan Alamat --}}
+                    <div id="patientDropdownMenu" class="hidden absolute z-30 left-0 right-0 mt-1.5 bg-white border border-gray-200 rounded-2xl shadow-xl max-h-72 overflow-y-auto divide-y divide-gray-100">
+                        <div id="patientDropdownList">
+                            {{-- Populated by JS --}}
+                        </div>
+                        <div class="p-3 bg-gray-50 border-t border-gray-100 flex items-center justify-between text-xs sticky bottom-0">
+                            <span class="text-gray-500">Pasien tidak ada di daftar?</span>
+                            <a href="{{ route('patients.create', ['from' => 'reservation']) }}" class="text-blue-600 hover:text-blue-800 font-bold flex items-center gap-1">
+                                <span>+ Daftarkan Pasien Baru</span>
+                            </a>
+                        </div>
+                    </div>
                 </div>
-                <p class="text-[11px] text-gray-500 mt-1">Sistem akan otomatis mengecek nomor HP ini di Master Data Pasien.</p>
-                @error('phone_number') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
+
+                <p class="text-[11px] text-gray-500 mt-1.5 flex items-center gap-1">
+                    <span>💡</span>
+                    <span>Pilihan dropdown menampilkan <strong>Nama</strong> dan <strong>Alamat</strong> pasien dari Master Data Pasien.</span>
+                </p>
+                @error('patient_id') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
             </div>
 
-            {{-- STATE 1: PASIEN DITEMUKAN (TAMPIL OTOMATIS) --}}
-            <div id="patientFoundCard" class="hidden bg-emerald-50/50 border border-emerald-200 rounded-xl p-4 sm:p-5 transition">
+            {{-- STATE 1: PASIEN DITEMUKAN / TERPILIH --}}
+            <div id="patientFoundCard" class="hidden bg-emerald-50/60 border border-emerald-200 rounded-xl p-4 sm:p-5 transition shadow-xs">
                 <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-emerald-200/60 pb-3 mb-3">
                     <div class="flex items-center gap-2">
                         <span class="inline-flex items-center justify-center h-6 w-6 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold">✓</span>
-                        <span class="text-xs font-bold text-emerald-800 uppercase tracking-wide">Data Pasien Ditemukan di Master Data</span>
+                        <span class="text-xs font-bold text-emerald-800 uppercase tracking-wide">Data Pasien Terpilih dari Master Data</span>
                     </div>
-                    <span id="disp_code" class="text-[11px] font-mono font-medium text-emerald-700 bg-emerald-100/70 px-2.5 py-0.5 rounded-full"></span>
+                    <div class="flex items-center gap-2">
+                        <span id="disp_code" class="text-[11px] font-mono font-medium text-emerald-700 bg-emerald-100/70 px-2.5 py-0.5 rounded-full"></span>
+                        <button type="button" id="btnChangePatient" class="text-[11px] font-semibold text-emerald-700 hover:text-emerald-900 bg-white border border-emerald-200 px-2.5 py-0.5 rounded-lg hover:bg-emerald-50 transition shadow-2xs">
+                            Ganti Pasien
+                        </button>
+                    </div>
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3.5 text-xs">
                     <div class="bg-white/80 p-3 rounded-lg border border-emerald-100">
                         <span class="text-gray-400 block text-[10px] uppercase font-semibold">Nama Lengkap</span>
                         <strong id="disp_full_name" class="text-sm font-bold text-gray-900 block mt-0.5">-</strong>
+                    </div>
+
+                    <div class="bg-white/80 p-3 rounded-lg border border-emerald-100">
+                        <span class="text-gray-400 block text-[10px] uppercase font-semibold">Nomor WhatsApp / HP</span>
+                        <strong id="disp_phone" class="text-sm font-mono font-bold text-gray-900 block mt-0.5">-</strong>
                     </div>
 
                     <div class="bg-white/80 p-3 rounded-lg border border-emerald-100">
@@ -103,7 +136,7 @@
                         <strong id="disp_occupation" class="text-sm font-bold text-gray-900 block mt-0.5">-</strong>
                     </div>
 
-                    <div class="bg-white/80 p-3 rounded-lg border border-emerald-100 sm:col-span-2">
+                    <div class="bg-white/80 p-3 rounded-lg border border-emerald-100 sm:col-span-1 md:col-span-1">
                         <span class="text-gray-400 block text-[10px] uppercase font-semibold">Alamat Domisili</span>
                         <p id="disp_address" class="text-xs text-gray-800 font-medium mt-0.5">-</p>
                     </div>
@@ -117,7 +150,8 @@
                 </div>
 
                 {{-- Hidden Inputs to pass to Reservation Controller --}}
-                <input type="hidden" name="patient_id" id="patient_id" value="{{ old('patient_id') }}">
+                <input type="hidden" name="patient_id" id="patient_id" value="{{ old('patient_id', request('patient_id')) }}">
+                <input type="hidden" name="phone_number" id="phone_number" value="{{ old('phone_number', request('phone')) }}">
                 <input type="hidden" name="full_name" id="full_name" value="{{ old('full_name') }}">
                 <input type="hidden" name="age" id="age" value="{{ old('age') }}">
                 <input type="hidden" name="gender" id="gender" value="{{ old('gender') }}">
@@ -125,36 +159,11 @@
                 <input type="hidden" name="address" id="address" value="{{ old('address') }}">
             </div>
 
-            {{-- STATE 2: NOMOR TIDAK DITEMUKAN (TOMBOL KE MASTER DATA PASIEN) --}}
-            <div id="patientNotFoundCard" class="hidden bg-amber-50 border border-amber-200 rounded-xl p-5 text-xs text-amber-900">
-                <div class="flex items-start gap-3">
-                    <span class="text-2xl leading-none">⚠️</span>
-                    <div class="space-y-2 flex-1">
-                        <div>
-                            <h4 class="font-bold text-sm text-amber-900">Nomor HP Tidak Ditemukan di Master Data Pasien!</h4>
-                            <p class="text-xs text-amber-800 mt-1 leading-relaxed">
-                                Pasien dengan nomor HP <span id="notFoundPhoneDisp" class="font-mono font-bold text-amber-950 bg-amber-100 px-1.5 py-0.5 rounded"></span> belum terdaftar di Master Data Pasien.
-                                Silakan daftarkan data pasien terlebih dahulu di Master Data untuk melanjutkan pembuatan reservasi terapi.
-                            </p>
-                        </div>
-                        <div class="pt-2">
-                            <a id="btnGoToMasterPatient" href="{{ route('patients.create') }}" 
-                               class="inline-flex items-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs rounded-xl shadow-md shadow-blue-200 transition">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-                                </svg>
-                                Input Data Pasien di Master Data Pasien
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {{-- STATE 3: BELUM MENGISI NOMOR HP --}}
+            {{-- STATE 2: BELUM MEMILIH PASIEN --}}
             <div id="patientInitialPrompt" class="bg-blue-50/70 border border-blue-100 rounded-xl p-4 text-xs text-blue-800 flex items-center gap-3">
                 <span class="text-lg">💡</span>
                 <div>
-                    Cukup ketik nomor HP pasien di atas. Jika pasien sudah pernah berobat/terdaftar, biodata akan langsung dimuat secara otomatis.
+                    Pilih nama pasien dari dropdown di atas. Anda dapat mengetik nama untuk mencari pasien dengan cepat. Pilihan dropdown memuat informasi <strong>Nama</strong> dan <strong>Alamat</strong> pasien.
                 </div>
             </div>
         </div>
@@ -332,140 +341,304 @@
     </form>
 </div>
 
-{{-- Auto-complete Patient Lookup Script --}}
+{{-- Searchable Patient Dropdown Script (Cari Nama, Tampil Nama & Alamat) --}}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const phoneInput = document.getElementById('phone_number');
-    const searchBtn = document.getElementById('btnSearchPatient');
-    const loading = document.getElementById('phoneLoading');
-    
+    // Master data pasien yang di-inject langsung dari controller
+    const allPatients = @json($patients ?? []);
+
+    // UI Elements
+    const searchInput = document.getElementById('patientSearchInput');
+    const dropdownMenu = document.getElementById('patientDropdownMenu');
+    const dropdownList = document.getElementById('patientDropdownList');
+    const btnClearPatient = document.getElementById('btnClearPatient');
+    const btnToggleDropdown = document.getElementById('btnToggleDropdown');
+    const dropdownChevron = document.getElementById('dropdownChevron');
+    const btnChangePatient = document.getElementById('btnChangePatient');
+    const comboboxWrapper = document.getElementById('patientComboboxWrapper');
+
     const cardFound = document.getElementById('patientFoundCard');
-    const cardNotFound = document.getElementById('patientNotFoundCard');
     const cardInitial = document.getElementById('patientInitialPrompt');
-    
-    const notFoundPhoneDisp = document.getElementById('notFoundPhoneDisp');
-    const btnGoToMasterPatient = document.getElementById('btnGoToMasterPatient');
-    const linkEditPatient = document.getElementById('linkEditPatient');
-    
-    // Display elements in Found Card
+
+    // Display fields in Found Card
     const dispCode = document.getElementById('disp_code');
     const dispFullName = document.getElementById('disp_full_name');
+    const dispPhone = document.getElementById('disp_phone');
     const dispAge = document.getElementById('disp_age');
     const dispGender = document.getElementById('disp_gender');
     const dispOccupation = document.getElementById('disp_occupation');
     const dispAddress = document.getElementById('disp_address');
+    const linkEditPatient = document.getElementById('linkEditPatient');
 
     // Hidden form inputs
     const inputPatientId = document.getElementById('patient_id');
+    const inputPhoneNumber = document.getElementById('phone_number');
     const inputFullName = document.getElementById('full_name');
     const inputAge = document.getElementById('age');
     const inputGender = document.getElementById('gender');
     const inputOccupation = document.getElementById('occupation');
     const inputAddress = document.getElementById('address');
 
-    let debounceTimer;
+    let selectedPatient = null;
 
-    function resetCards() {
-        cardFound.classList.add('hidden');
-        cardNotFound.classList.add('hidden');
-        cardInitial.classList.remove('hidden');
-        inputPatientId.value = '';
+    function escapeHtml(text) {
+        if (!text) return '';
+        const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+        return String(text).replace(/[&<>"']/g, m => map[m]);
     }
 
-    function checkPatient(phone) {
-        const trimmed = (phone || '').trim();
-        if (!trimmed || trimmed.length < 5) {
-            resetCards();
+    function openDropdown() {
+        dropdownMenu.classList.remove('hidden');
+        if (dropdownChevron) dropdownChevron.classList.add('rotate-180');
+    }
+
+    function closeDropdown() {
+        dropdownMenu.classList.add('hidden');
+        if (dropdownChevron) dropdownChevron.classList.remove('rotate-180');
+    }
+
+    function toggleDropdown() {
+        if (dropdownMenu.classList.contains('hidden')) {
+            openDropdown();
+        } else {
+            closeDropdown();
+        }
+    }
+
+    // Render list pasien di dalam dropdown (Menampilkan Nama & Alamat)
+    function renderDropdown(items) {
+        dropdownList.innerHTML = '';
+
+        if (!items || items.length === 0) {
+            const query = searchInput.value.trim();
+            dropdownList.innerHTML = `
+                <div class="p-5 text-center text-xs text-gray-500">
+                    <div class="text-2xl mb-1">🔍</div>
+                    <p class="font-bold text-gray-800">Pasien Tidak Ditemukan</p>
+                    <p class="text-gray-400 mt-0.5 text-[11px]">
+                        Tidak ada pasien dengan kata kunci "${escapeHtml(query)}".
+                    </p>
+                    <div class="pt-3">
+                        <a href="{{ route('patients.create') }}?from=reservation&name=${encodeURIComponent(query)}" 
+                           class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs rounded-xl shadow-xs transition">
+                            <span>+ Daftarkan Pasien Baru</span>
+                        </a>
+                    </div>
+                </div>
+            `;
             return;
         }
 
-        loading.classList.remove('hidden');
+        items.forEach(p => {
+            const itemEl = document.createElement('div');
+            itemEl.className = 'px-4 py-3 hover:bg-blue-50/80 cursor-pointer transition border-b border-gray-100 last:border-b-0 flex items-start justify-between gap-3 group';
+            
+            const genderLabel = p.gender === 'female' ? 'Perempuan' : (p.gender === 'male' ? 'Laki-laki' : '');
+            const ageLabel = p.age ? `${p.age} Th` : '';
+            const codeBadge = p.patient_code 
+                ? `<span class="text-[10px] font-mono text-blue-700 bg-blue-50 border border-blue-200 px-1.5 py-0.5 rounded font-semibold">${escapeHtml(p.patient_code.substring(0, 10))}</span>` 
+                : '';
+            const addressText = p.address ? escapeHtml(p.address) : '<span class="italic text-gray-400">Alamat belum diisi</span>';
+            const phoneText = p.phone_number ? `📱 ${escapeHtml(p.phone_number)}` : '';
 
-        fetch(`{{ route('api.patients.lookup') }}?phone=${encodeURIComponent(trimmed)}`)
-            .then(res => res.json())
-            .then(data => {
-                loading.classList.add('hidden');
-                cardInitial.classList.add('hidden');
+            itemEl.innerHTML = `
+                <div class="space-y-1 flex-1 min-w-0">
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <span class="font-bold text-gray-900 text-sm group-hover:text-blue-700 transition-colors">${escapeHtml(p.full_name)}</span>
+                        ${codeBadge}
+                    </div>
+                    {{-- TAMPILKAN ALAMAT SECARA JELAS --}}
+                    <div class="text-xs text-gray-600 flex items-start gap-1.5">
+                        <span class="text-gray-400 shrink-0 mt-0.5">📍</span>
+                        <span class="line-clamp-2 leading-relaxed">${addressText}</span>
+                    </div>
+                    {{-- DETAIL PENDUKUNG (NO HP & USIA) --}}
+                    <div class="text-[11px] text-gray-400 flex items-center gap-2 pt-0.5 flex-wrap">
+                        ${phoneText ? `<span class="font-mono text-gray-500">${phoneText}</span>` : ''}
+                        ${ageLabel ? `<span>• Usia: ${ageLabel}</span>` : ''}
+                        ${genderLabel ? `<span>• ${genderLabel}</span>` : ''}
+                    </div>
+                </div>
+                <div class="shrink-0 self-center">
+                    <span class="text-[11px] font-bold text-blue-600 bg-white group-hover:bg-blue-600 group-hover:text-white border border-blue-200 group-hover:border-blue-600 px-2.5 py-1 rounded-lg transition shadow-2xs">
+                        Pilih Pasien
+                    </span>
+                </div>
+            `;
 
-                if (data.found && data.patient) {
-                    // Populate display
-                    cardNotFound.classList.add('hidden');
-                    cardFound.classList.remove('hidden');
-
-                    dispCode.textContent = data.patient.patient_code ? 'RM: ' + data.patient.patient_code.substring(0, 8) : 'Pasien Terdaftar';
-                    dispFullName.textContent = data.patient.full_name || '-';
-                    dispAge.textContent = (data.patient.age ? data.patient.age + ' Tahun' : '-');
-                    dispGender.textContent = data.patient.gender_label || (data.patient.gender === 'male' ? 'Laki-laki' : 'Perempuan');
-                    dispOccupation.textContent = data.patient.occupation || '-';
-                    dispAddress.textContent = data.patient.address || '-';
-
-                    // Set hidden inputs
-                    inputPatientId.value = data.patient.id || '';
-                    inputFullName.value = data.patient.full_name || '';
-                    inputAge.value = data.patient.age || '';
-                    inputGender.value = data.patient.gender || '';
-                    inputOccupation.value = data.patient.occupation || '';
-                    inputAddress.value = data.patient.address || '';
-
-                    // Edit link
-                    linkEditPatient.href = `/patients/${data.patient.id}/edit`;
-                } else {
-                    // Patient not found
-                    cardFound.classList.add('hidden');
-                    cardNotFound.classList.remove('hidden');
-                    inputPatientId.value = '';
-
-                    notFoundPhoneDisp.textContent = trimmed;
-                    const createUrl = `{{ route('patients.create') }}?phone=${encodeURIComponent(trimmed)}&from=reservation`;
-                    btnGoToMasterPatient.href = createUrl;
-                }
-            })
-            .catch(() => {
-                loading.classList.add('hidden');
+            itemEl.addEventListener('click', function(e) {
+                e.stopPropagation();
+                selectPatient(p);
             });
+
+            dropdownList.appendChild(itemEl);
+        });
     }
 
-    // Event: Input typing debounced
-    phoneInput.addEventListener('input', function() {
-        clearTimeout(debounceTimer);
-        const val = this.value.trim();
+    // Pilih pasien dari dropdown
+    function selectPatient(p) {
+        selectedPatient = p;
+        searchInput.value = p.full_name || '';
+        btnClearPatient.classList.remove('hidden');
+        closeDropdown();
 
-        if (val.length >= 8) {
-            debounceTimer = setTimeout(() => {
-                checkPatient(val);
-            }, 450);
-        } else {
-            resetCards();
+        // Populate card view
+        dispCode.textContent = p.patient_code ? 'RM: ' + p.patient_code.substring(0, 8) : 'Pasien Terdaftar';
+        dispFullName.textContent = p.full_name || '-';
+        dispPhone.textContent = p.phone_number || '-';
+        dispAge.textContent = (p.age ? p.age + ' Tahun' : '-');
+        dispGender.textContent = p.gender_label || (p.gender === 'female' ? 'Perempuan' : (p.gender === 'male' ? 'Laki-laki' : '-'));
+        dispOccupation.textContent = p.occupation || '-';
+        dispAddress.textContent = p.address || '-';
+
+        // Set form hidden inputs
+        inputPatientId.value = p.id || '';
+        inputPhoneNumber.value = p.phone_number || '';
+        inputFullName.value = p.full_name || '';
+        inputAge.value = p.age || '';
+        inputGender.value = p.gender || '';
+        inputOccupation.value = p.occupation || '';
+        inputAddress.value = p.address || '';
+
+        // Edit link di master data
+        if (linkEditPatient) {
+            linkEditPatient.href = `/patients/${p.id}/edit`;
+        }
+
+        // Tampilkan card hasil terpilih
+        cardFound.classList.remove('hidden');
+        cardInitial.classList.add('hidden');
+    }
+
+    // Bersihkan pilihan pasien
+    function clearSelection() {
+        selectedPatient = null;
+        searchInput.value = '';
+        btnClearPatient.classList.add('hidden');
+
+        inputPatientId.value = '';
+        inputPhoneNumber.value = '';
+        inputFullName.value = '';
+        inputAge.value = '';
+        inputGender.value = '';
+        inputOccupation.value = '';
+        inputAddress.value = '';
+
+        cardFound.classList.add('hidden');
+        cardInitial.classList.remove('hidden');
+
+        renderDropdown(allPatients);
+        openDropdown();
+        searchInput.focus();
+    }
+
+    // Filter pasien saat mengetik nama di search input
+    searchInput.addEventListener('input', function() {
+        const query = this.value.trim().toLowerCase();
+        btnClearPatient.classList.toggle('hidden', query.length === 0);
+        openDropdown();
+
+        if (!query) {
+            renderDropdown(allPatients);
+            return;
+        }
+
+        const filtered = allPatients.filter(p => {
+            const name = (p.full_name || '').toLowerCase();
+            const addr = (p.address || '').toLowerCase();
+            const phone = (p.phone_number || '').toLowerCase();
+            const code = (p.patient_code || '').toLowerCase();
+            return name.includes(query) || addr.includes(query) || phone.includes(query) || code.includes(query);
+        });
+
+        renderDropdown(filtered);
+    });
+
+    // Buka dropdown saat input di-klik atau fokus
+    searchInput.addEventListener('focus', function() {
+        if (!selectedPatient) {
+            renderDropdown(allPatients);
+        }
+        openDropdown();
+    });
+
+    searchInput.addEventListener('click', function() {
+        openDropdown();
+    });
+
+    if (btnToggleDropdown) {
+        btnToggleDropdown.addEventListener('click', function(e) {
+            e.stopPropagation();
+            toggleDropdown();
+        });
+    }
+
+    if (btnClearPatient) {
+        btnClearPatient.addEventListener('click', function(e) {
+            e.stopPropagation();
+            clearSelection();
+        });
+    }
+
+    if (btnChangePatient) {
+        btnChangePatient.addEventListener('click', function() {
+            clearSelection();
+        });
+    }
+
+    // Tutup dropdown saat klik di luar combobox
+    document.addEventListener('click', function(e) {
+        if (comboboxWrapper && !comboboxWrapper.contains(e.target)) {
+            closeDropdown();
         }
     });
 
-    // Event: Click Search Button
-    searchBtn.addEventListener('click', function(e) {
-        e.preventDefault();
-        checkPatient(phoneInput.value);
-    });
-
-    // Event: Enter key on phone input triggers search instead of early form submission
-    phoneInput.addEventListener('keydown', function(e) {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            checkPatient(this.value);
+    // Tombol Escape menutup dropdown
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeDropdown();
         }
     });
 
-    // Validation on form submission: check if patient is verified
+    // Validasi form sebelum kirim: pastikan pasien sudah dipilih
     document.getElementById('reservationForm').addEventListener('submit', function(e) {
         if (!inputPatientId.value) {
             e.preventDefault();
-            alert('Silakan masukkan nomor HP pasien yang terdaftar di Master Data atau daftarkan pasien baru terlebih dahulu melalui tombol yang tersedia.');
-            phoneInput.focus();
+            alert('Silakan pilih pasien dari dropdown Master Data atau daftarkan pasien baru terlebih dahulu.');
+            searchInput.focus();
+            openDropdown();
         }
     });
 
-    // Auto-check on load if phone parameter is present
-    const initialPhone = phoneInput.value.trim();
-    if (initialPhone && initialPhone.length >= 6) {
-        checkPatient(initialPhone);
+    // Initial render dropdown
+    renderDropdown(allPatients);
+
+    // Auto-select jika ada query param atau old value
+    const initialPatientId = "{{ old('patient_id', request('patient_id')) }}";
+    const initialPhone = "{{ old('phone_number', request('phone')) }}";
+
+    if (initialPatientId) {
+        const found = allPatients.find(p => String(p.id) === String(initialPatientId));
+        if (found) {
+            selectPatient(found);
+        } else {
+            fetch(`{{ route('api.patients.lookup') }}?id=${encodeURIComponent(initialPatientId)}`)
+                .then(r => r.json())
+                .then(d => { if (d.found && d.patient) selectPatient(d.patient); });
+        }
+    } else if (initialPhone) {
+        const cleanInitial = initialPhone.replace(/\D/g, '');
+        const found = allPatients.find(p => {
+            const pPhone = (p.phone_number || '').replace(/\D/g, '');
+            return pPhone.includes(cleanInitial) || cleanInitial.includes(pPhone);
+        });
+        if (found) {
+            selectPatient(found);
+        } else {
+            fetch(`{{ route('api.patients.lookup') }}?phone=${encodeURIComponent(initialPhone)}`)
+                .then(r => r.json())
+                .then(d => { if (d.found && d.patient) selectPatient(d.patient); });
+        }
     }
 
     // Elements untuk Schedule Picker

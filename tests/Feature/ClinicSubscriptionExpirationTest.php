@@ -104,7 +104,7 @@ class ClinicSubscriptionExpirationTest extends TestCase
     public function test_saas_admin_is_not_blocked_even_if_clinic_is_expired()
     {
         $saasAdmin = User::firstOrCreate(
-            ['email' => 'superadmin@sportclinic.io'],
+            ['email' => 'superadmin@smartclinictherapy.com'],
             [
                 'name' => 'Super Administrator',
                 'password' => bcrypt('password'),

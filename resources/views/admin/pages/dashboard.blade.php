@@ -234,7 +234,7 @@
                     </svg>
                     Ringkasan Klinik
                 </h3>
-                <span class="text-[10px] font-bold uppercase text-gray-400 tracking-wider">Sport Clinic</span>
+                <span class="text-[10px] font-bold uppercase text-gray-400 tracking-wider">Smart Clinic Therapy</span>
             </div>
 
             {{-- Highlight Status Alur Terapi --}}

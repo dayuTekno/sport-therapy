@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Script to generate high-impact presentation deck in PPTX format:
-SportClinic.io - Platform SaaS Manajemen Klinik Fisioterapi & Cedera Olahraga Modern
+Smart Clinic Therapy - Platform SaaS Manajemen Klinik Fisioterapi & Cedera Olahraga Modern
 """
 
 import sys
@@ -12,7 +12,7 @@ from pptx.dml.color import RGBColor
 from pptx.enum.text import PP_ALIGN, MSO_ANCHOR
 from pptx.enum.shapes import MSO_SHAPE
 
-def create_deck(filename="SportClinic_Presentation.pptx"):
+def create_deck(filename="Smart_Clinic_Therapy_Presentation.pptx"):
     prs = Presentation()
     # 16:9 widescreen layout
     prs.slide_width = Inches(13.333)
@@ -101,7 +101,7 @@ def create_deck(filename="SportClinic_Presentation.pptx"):
     p.font.color.rgb = RGBColor(96, 165, 250)
 
     p2 = tf1.add_paragraph()
-    p2.text = "SportClinic.io"
+    p2.text = "Smart Clinic Therapy"
     p2.font.size = Pt(44)
     p2.font.bold = True
     p2.font.color.rgb = COLOR_WHITE
@@ -211,10 +211,10 @@ def create_deck(filename="SportClinic_Presentation.pptx"):
     tbl = table_shape.table
     tbl.columns[0].width = Inches(2.8)   # Aspek
     tbl.columns[1].width = Inches(4.45)  # Excel
-    tbl.columns[2].width = Inches(4.45)  # Website SportClinic
+    tbl.columns[2].width = Inches(4.45)  # Website Smart Clinic Therapy
 
     comparisons = [
-        ("ASPEK OPERASIONAL", "PENGGUNAAN MICROSOFT EXCEL", "WEBSITE SPORTCLINIC.IO"),
+        ("ASPEK OPERASIONAL", "PENGGUNAAN MICROSOFT EXCEL", "WEBSITE SMART CLINIC THERAPY"),
         ("Akses & Kolaborasi", "Satu file dibuka bergantian; rentan file lock & bentrok versi", "Multi-user realtime (Admisi, Terapis, Kasir) dengan hak akses ketat (RBAC)"),
         ("Penjadwalan & Slot Jam", "Manual; risiko tinggi jadwal terapis bertabrakan", "Otomatis mengunci kuota & jam terapis, no double-booking"),
         ("Notifikasi Pasien", "Harus simpan nomor WhatsApp manual di ponsel staf", "1-Klik kirim konfirmasi jadwal & tiket WhatsApp langsung dari sistem"),
@@ -557,7 +557,7 @@ def create_deck(filename="SportClinic_Presentation.pptx"):
                "Dapatkan solusi terlengkap: operasional klinik rapi di dalam, dan website profil profesional di luar untuk memikat pasien baru.")
 
     trial_cards = [
-        ("🎁 14 Hari SportClinic.io", 
+        ("🎁 14 Hari Smart Clinic Therapy", 
          "Akses penuh tanpa batasan ke modul Reservasi WA, Antrean, Lembar Terapi Berjenjang (A-D), Kasir, dan Rekam Medis.",
          COLOR_BLUE_MAIN, COLOR_BLUE_LIGHT),
         ("🌐 BONUS: 2 Bulan CorpShow", 
@@ -619,7 +619,7 @@ def create_deck(filename="SportClinic_Presentation.pptx"):
     bp1.alignment = PP_ALIGN.CENTER
 
     bp2 = btf.add_paragraph()
-    bp2.text = "Sistem SportClinic (Trial 14 Hari)  +  Website Company Profile CorpShow (Gratis 2 Bulan)"
+    bp2.text = "Sistem Smart Clinic Therapy (Trial 14 Hari)  +  Website Company Profile CorpShow (Gratis 2 Bulan)"
     bp2.font.size = Pt(13.5)
     bp2.font.bold = True
     bp2.font.color.rgb = COLOR_GREEN_MAIN
@@ -651,7 +651,7 @@ def create_deck(filename="SportClinic_Presentation.pptx"):
     p.alignment = PP_ALIGN.CENTER
 
     p2 = ctf10.add_paragraph()
-    p2.text = "Tinggalkan Cara Lama yang Melelahkan.\nBeralihlah ke Solusi Cerdas SportClinic.io"
+    p2.text = "Tinggalkan Cara Lama yang Melelahkan.\nBeralihlah ke Solusi Cerdas Smart Clinic Therapy"
     p2.font.size = Pt(28)
     p2.font.bold = True
     p2.font.color.rgb = COLOR_WHITE
@@ -687,5 +687,5 @@ def create_deck(filename="SportClinic_Presentation.pptx"):
     print(f"Presentation successfully created at: {filename}")
 
 if __name__ == "__main__":
-    out_file = sys.argv[1] if len(sys.argv) > 1 else "SportClinic_Presentation.pptx"
+    out_file = sys.argv[1] if len(sys.argv) > 1 else "Smart_Clinic_Therapy_Presentation.pptx"
     create_deck(out_file)

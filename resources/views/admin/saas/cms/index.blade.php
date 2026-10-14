@@ -67,7 +67,7 @@
                     Badge Header Kecil
                 </label>
                 <input type="text" name="badge_text" value="{{ old('badge_text', $hero->content_json['badge_text'] ?? '') }}"
-                       placeholder="Contoh: ⚡ Platform Fisioterapi & Sport Clinic No. 1 di Indonesia"
+                       placeholder="Contoh: ⚡ Platform Fisioterapi & Smart Clinic Therapy No. 1 di Indonesia"
                        class="w-full px-3.5 py-2.5 text-xs border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 font-bold text-blue-800 bg-blue-50/30">
             </div>
 
@@ -197,7 +197,7 @@
                     <label class="block font-bold text-gray-700 uppercase tracking-wider mb-1.5">
                         Email Resmi SaaS <span class="text-rose-500">*</span>
                     </label>
-                    <input type="email" name="email" value="{{ old('email', $contact->content_json['email'] ?? 'sales@sportclinic.io') }}" required
+                    <input type="email" name="email" value="{{ old('email', $contact->content_json['email'] ?? 'sales@smartclinictherapy.com') }}" required
                            class="w-full px-3.5 py-2.5 text-xs border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500">
                 </div>
                 <div>

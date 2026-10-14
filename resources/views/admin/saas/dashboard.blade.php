@@ -13,7 +13,7 @@
 <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
     <div>
         <h1 class="text-xl font-bold text-gray-800 flex items-center gap-2">
-            <span>👑</span> Administrator SaaS - SportClinic.io
+            <span>👑</span> Administrator SaaS - Smart Clinic Therapy
         </h1>
         <p class="text-xs text-gray-500 mt-1">Pusat kendali ekosistem multi-tenant, analitik pendapatan, dan manajemen klinik mitra.</p>
     </div>

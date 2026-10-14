@@ -78,7 +78,7 @@
                     <td class="px-6 py-4">
                         <span class="font-mono text-[10px] text-gray-400 font-bold block">{{ $c->clinic_code }}</span>
                         <span class="font-bold text-gray-900 text-sm block">{{ $c->name }}</span>
-                        <span class="text-[10px] text-blue-600 font-mono">{{ $c->subdomain ? $c->subdomain . '.sportclinic.io' : '-' }}</span>
+                        <span class="text-[10px] text-blue-600 font-mono">{{ $c->subdomain ? $c->subdomain . '.smartclinictherapy.com' : '-' }}</span>
                     </td>
 
                     <td class="px-6 py-4">

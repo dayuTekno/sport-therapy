@@ -80,7 +80,7 @@ class HomeController extends Controller
             $revenue += max(0, $itemTotal - ($record->discount ?? 0));
         }
 
-        // Pendapatan dari Kasir Terapi Sport Clinic Hari Ini (Per Reservasi)
+        // Pendapatan dari Kasir Terapi Smart Clinic Therapy Hari Ini (Per Reservasi)
         $therapyRevenue = Reservation::whereDate('paid_at', $today)
             ->where('payment_status', 'paid')
             ->sum('paid_amount');

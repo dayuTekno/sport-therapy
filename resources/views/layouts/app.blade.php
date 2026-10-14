@@ -10,7 +10,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="format-detection" content="telephone=no">
 
-    <title>{{ config('app.name', 'SportClinic') }}</title>
+    <title>{{ config('app.name', 'Smart Clinic Therapy') }}</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="font-sans antialiased text-gray-900 bg-gray-50 min-h-screen">

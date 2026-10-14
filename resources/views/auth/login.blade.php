@@ -15,7 +15,7 @@
                         <img class="w-6 h-6 object-contain brightness-0 invert" src="{{ asset('storage/icons/hospital.png') }}" alt="Logo" onerror="this.outerHTML='🏥'">
                     </div>
                     <div>
-                        <h2 class="text-base font-black tracking-tight text-gray-900 dark:text-white">SportClinic<span class="text-blue-600">.io</span></h2>
+                        <h2 class="text-base font-black tracking-tight text-gray-900 dark:text-white">Smart Clinic <span class="text-blue-600">Therapy</span></h2>
                         <p class="text-[10px] text-gray-500 dark:text-gray-400 font-medium">Sistem Rumah Terapi</p>
                     </div>
                 </div>
@@ -134,7 +134,7 @@
                     🏥
                 </div>
                 <h2 class="text-3xl lg:text-4xl font-extrabold text-white mb-3 tracking-tight">
-                    SportClinic SaaS Platform
+                    Smart Clinic Therapy SaaS Platform
                 </h2>
                 <p class="text-sm text-white/90 max-w-md leading-relaxed">
                     Transformasi Digital Terintegrasi: Rekam Medis Fisioterapi Berjenjang, Otomasi Antrian & WhatsApp, Kasir, dan Manajemen Peralatan.

@@ -10,7 +10,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="format-detection" content="telephone=no" />
-    <title>@yield('title', 'Admin Dashboard') - SportClinic</title>
+    <title>@yield('title', 'Admin Dashboard') - Smart Clinic Therapy</title>
 
     @vite(['resources/css/admin.css', 'resources/js/admin.js'])
 </head>

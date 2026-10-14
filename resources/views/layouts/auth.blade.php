@@ -11,7 +11,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="format-detection" content="telephone=no">
 
-  <title>@yield('title', 'Auth') - SportClinic</title>
+  <title>@yield('title', 'Auth') - Smart Clinic Therapy</title>
 
   @vite([
     'resources/css/admin.css',
