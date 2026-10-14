@@ -15,6 +15,14 @@
         <p class="text-xs text-gray-500 mt-1">Kelola data pasien terdaftar untuk keperluan reservasi dan rekam terapi.</p>
     </div>
     <div class="flex items-center gap-3">
+        <a href="{{ route('patients.export-pdf', ['search' => request('search')]) }}"
+           class="inline-flex items-center gap-2 px-3.5 py-2 bg-red-50 text-red-700 hover:bg-red-100 text-xs font-semibold rounded-xl border border-red-200 shadow-sm transition"
+           title="Export Seluruh Data Pasien ke PDF">
+            <svg class="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            Export PDF
+        </a>
         <a href="{{ route('reservations.create') }}"
            class="inline-flex items-center gap-2 px-3.5 py-2 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 text-xs font-semibold rounded-xl border border-emerald-200 transition">
             📋 Buat Reservasi

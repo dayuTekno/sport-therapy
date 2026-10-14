@@ -29,7 +29,7 @@
                     @if(auth()->user()->isSaasAdmin() && !session()->has('active_clinic_id'))
                         Platform Control Center
                     @else
-                        Sistem Klinik Fisioterapi
+                        Sistem Rumah Terapi
                     @endif
                 </span>
             </div>

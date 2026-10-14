@@ -82,6 +82,7 @@ Route::middleware(['auth'])->group(function () {
     // Route::resource('poly-procedures', PolyProcedureController::class);
     Route::resource('doctor-schedules', \App\Http\Controllers\DoctorScheduleController::class);
     
+    Route::get('patients/export-pdf', [PatientController::class, 'exportPdf'])->name('patients.export-pdf');
     Route::resource('patients', PatientController::class);
 
     Route::get('api/icds/search', function(Illuminate\Http\Request $request) {

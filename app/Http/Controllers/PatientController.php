@@ -4,11 +4,54 @@ namespace App\Http\Controllers;
 
 use App\Models\MasterPatients;
 use App\Models\MasterEselon;
+use App\Models\Clinic;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
 class PatientController extends Controller
 {
+    public function exportPdf(Request $request)
+    {
+        $query = MasterPatients::query();
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('full_name', 'ilike', '%' . $search . '%')
+                  ->orWhere('phone_number', 'ilike', '%' . $search . '%')
+                  ->orWhere('occupation', 'ilike', '%' . $search . '%')
+                  ->orWhere('nik', 'ilike', '%' . $search . '%')
+                  ->orWhere('patient_code', 'ilike', '%' . $search . '%');
+            });
+        }
+
+        $patients = $query->orderBy('full_name', 'asc')->get();
+
+        $clinic = null;
+        if (auth()->check()) {
+            $clinic = auth()->user()->clinic;
+        }
+        if (!$clinic) {
+            $clinic = Clinic::first();
+        }
+
+        $pdf = Pdf::loadView('admin.pages.master-patient.pdf', [
+            'patients' => $patients,
+            'clinic' => $clinic,
+            'search' => $request->search,
+            'generatedAt' => now()->format('d/m/Y H:i'),
+        ])->setPaper('a4', 'landscape');
+
+        $filename = 'data-pasien-' . date('Ymd-His') . '.pdf';
+
+        if ($request->get('mode') === 'stream' || $request->has('preview')) {
+            return $pdf->stream($filename);
+        }
+
+        return $pdf->download($filename);
+    }
+
     public function index(Request $request)
     {
         $query = MasterPatients::query();

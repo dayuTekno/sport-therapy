@@ -16,7 +16,7 @@
                     </div>
                     <div>
                         <h2 class="text-base font-black tracking-tight text-gray-900 dark:text-white">SportClinic<span class="text-blue-600">.io</span></h2>
-                        <p class="text-[10px] text-gray-500 dark:text-gray-400 font-medium">Platform Klinik Fisioterapi & Olahraga</p>
+                        <p class="text-[10px] text-gray-500 dark:text-gray-400 font-medium">Sistem Rumah Terapi</p>
                     </div>
                 </div>
 
