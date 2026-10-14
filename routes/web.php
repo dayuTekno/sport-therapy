@@ -66,8 +66,13 @@ Route::middleware(['auth'])->group(function () {
     // Sesi Terapi Pasien (Berjenjang & Mendukung >1 Terapi per Hari)
     Route::resource('therapy-sessions', \App\Http\Controllers\TherapySessionController::class);
     Route::post('therapy-sessions/{id}/complete', [\App\Http\Controllers\TherapySessionController::class, 'complete'])->name('therapy-sessions.complete');
+    Route::get('therapy-sessions/{id}/sick-letter', [\App\Http\Controllers\TherapySessionController::class, 'generateSickLetter'])->name('therapy-sessions.sick-letter');
     Route::get('therapy-sessions/patient/{patient_id}/history', [\App\Http\Controllers\TherapySessionController::class, 'patientHistory'])->name('therapy-sessions.patient-history');
     Route::get('api/patients/{id}/last-stage', [\App\Http\Controllers\TherapySessionController::class, 'getPatientLastStage'])->name('api.patients.last-stage');
+
+    // Pengaturan Klinik (Logo, Cap/Stempel, Tanda Tangan, Profil)
+    Route::get('clinic/settings', [\App\Http\Controllers\ClinicSettingController::class, 'index'])->name('clinic.settings');
+    Route::post('clinic/settings', [\App\Http\Controllers\ClinicSettingController::class, 'update'])->name('clinic.settings.update');
 
     // Route::resource('icds', IcdController::class);
     // Route::post('icds.import', [IcdController::class, 'import'])->name('icds.import');

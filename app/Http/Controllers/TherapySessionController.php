@@ -9,6 +9,8 @@ use App\Models\TherapySession;
 use App\Models\TherapyType;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class TherapySessionController extends Controller
 {
@@ -450,5 +452,83 @@ class TherapySessionController extends Controller
             'next_daily_order' => $dailyCount + 1,
             'total_sessions_history' => $allSessionsCount,
         ]);
+    }
+
+    /**
+     * Generate Surat Keterangan Sakit (PDF) berdasarkan hasil terapi pasien yang telah selesai
+     */
+    public function generateSickLetter($id, Request $request)
+    {
+        $session = TherapySession::with(['patient', 'therapist', 'therapyType', 'clinic'])->findOrFail($id);
+        $patient = $session->patient;
+
+        if (!$patient) {
+            return redirect()->back()->with('error', 'Data pasien untuk sesi terapi ini tidak ditemukan.');
+        }
+
+        $clinic = $session->clinic ?? auth()->user()?->clinic ?? \App\Models\Clinic::first();
+
+        // 1. Nomor Surat (default otomatis atau input kustom)
+        $monthNum = (int) now()->format('n');
+        $monthRoman = [1=>'01', 2=>'02', 3=>'03', 4=>'04', 5=>'05', 6=>'06', 7=>'07', 8=>'08', 9=>'09', 10=>'10', 11=>'11', 12=>'12'][$monthNum];
+        $defaultLetterNumber = sprintf('%03d/TOI/%s/%s', $session->id, $monthRoman, now()->format('Y'));
+        $letterNumber = $request->input('letter_number', $defaultLetterNumber);
+
+        // 2. Tanggal Surat & Tempat
+        $city = $clinic?->city ?: 'Indramayu';
+        $letterDate = $request->input('letter_date', $session->completed_at ? $session->completed_at->translatedFormat('d F Y') : now()->translatedFormat('d F Y'));
+
+        // 3. Tanggal & Jam Kontrol Ulang
+        $defaultControlDate = $session->completed_at ? $session->completed_at->copy()->addDays(7)->translatedFormat('d F Y') : now()->addDays(7)->translatedFormat('d F Y');
+        $controlDate = $request->input('control_date', $defaultControlDate);
+        $controlTime = $request->input('control_time', '18.00 - 20.30 WIB');
+
+        // 4. Diagnosa
+        $diagnosisInput = $request->input('diagnosis', $session->evaluation_notes ?: ($session->therapyType?->name ?? 'Cedera Fisik / Terapi Otot'));
+
+        // 5. Nama & Jabatan Tertanda Pemeriksa
+        $signerName = $request->input('signer_name', $clinic?->signer_name ?: ($session->therapist?->full_name ?: 'Iyon Pramulo, S.Or, M.Pd, AIFO'));
+        $signerTitle = $request->input('signer_title', $clinic?->signer_title ?: 'Sport Therapis Pemeriksa');
+
+        // 6. Konversi Gambar ke Base64 untuk kompatibilitas DomPDF
+        $logoBase64 = null;
+        if ($clinic?->logo_path && file_exists(storage_path('app/public/' . $clinic->logo_path))) {
+            $logoBase64 = 'data:image/' . pathinfo($clinic->logo_path, PATHINFO_EXTENSION) . ';base64,' . base64_encode(file_get_contents(storage_path('app/public/' . $clinic->logo_path)));
+        }
+
+        $stampBase64 = null;
+        if ($clinic?->stamp_path && file_exists(storage_path('app/public/' . $clinic->stamp_path))) {
+            $stampBase64 = 'data:image/' . pathinfo($clinic->stamp_path, PATHINFO_EXTENSION) . ';base64,' . base64_encode(file_get_contents(storage_path('app/public/' . $clinic->stamp_path)));
+        }
+
+        $signatureBase64 = null;
+        if ($clinic?->signature_path && file_exists(storage_path('app/public/' . $clinic->signature_path))) {
+            $signatureBase64 = 'data:image/' . pathinfo($clinic->signature_path, PATHINFO_EXTENSION) . ';base64,' . base64_encode(file_get_contents(storage_path('app/public/' . $clinic->signature_path)));
+        }
+
+        $pdf = Pdf::loadView('admin.pages.therapy-sessions.sick-letter-pdf', [
+            'session' => $session,
+            'patient' => $patient,
+            'clinic' => $clinic,
+            'letterNumber' => $letterNumber,
+            'city' => $city,
+            'letterDate' => $letterDate,
+            'controlDate' => $controlDate,
+            'controlTime' => $controlTime,
+            'diagnosisInput' => $diagnosisInput,
+            'signerName' => $signerName,
+            'signerTitle' => $signerTitle,
+            'logoBase64' => $logoBase64,
+            'stampBase64' => $stampBase64,
+            'signatureBase64' => $signatureBase64,
+        ])->setPaper('a4', 'portrait');
+
+        $filename = 'surat-keterangan-sakit-' . Str::slug($patient->full_name) . '-' . now()->format('Ymd') . '.pdf';
+
+        if ($request->get('download') == 1) {
+            return $pdf->download($filename);
+        }
+
+        return $pdf->stream($filename);
     }
 }

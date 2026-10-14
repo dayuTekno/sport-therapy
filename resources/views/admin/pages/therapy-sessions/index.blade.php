@@ -237,6 +237,16 @@
                         {{-- Aksi --}}
                         <td class="p-4 text-right whitespace-nowrap">
                             <div class="flex items-center justify-end gap-1.5">
+                                @if($session->status === 'completed')
+                                    <a href="{{ route('therapy-sessions.sick-letter', $session->id) }}" 
+                                       target="_blank"
+                                       title="Cetak Surat Keterangan Sakit (PDF)"
+                                       class="px-2.5 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold text-xs rounded-xl border border-rose-200 transition flex items-center gap-1">
+                                        <span>📄</span>
+                                        <span>Surat Sakit</span>
+                                    </a>
+                                @endif
+
                                 <a href="{{ route('therapy-sessions.show', $session->id) }}" 
                                    class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs rounded-xl shadow-sm transition flex items-center gap-1">
                                     <span>Lembar Kerja</span>

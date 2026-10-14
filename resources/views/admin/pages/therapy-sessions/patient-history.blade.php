@@ -122,7 +122,14 @@
                         @endif
                     </div>
 
-                    <div class="mt-3 pt-2 border-t border-gray-200/60 text-right">
+                    <div class="mt-3 pt-2 border-t border-gray-200/60 flex items-center justify-between">
+                        @if($sess->status === 'completed')
+                            <a href="{{ route('therapy-sessions.sick-letter', $sess->id) }}" target="_blank" class="text-xs text-rose-600 hover:text-rose-800 font-bold flex items-center gap-1">
+                                <span>📄</span> Cetak Surat Sakit
+                            </a>
+                        @else
+                            <div></div>
+                        @endif
                         <a href="{{ route('therapy-sessions.show', $sess->id) }}" class="text-xs text-blue-600 hover:text-blue-800 font-bold">
                             Lihat Lembar Sesi Ini →
                         </a>

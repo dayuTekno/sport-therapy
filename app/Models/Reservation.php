@@ -68,18 +68,53 @@ class Reservation extends Model
     public static function generateReservationCode(): string
     {
         $datePrefix = 'RSV-' . now()->format('Ymd');
-        $countToday = self::whereDate('created_at', now()->toDateString())->count();
-        $nextNumber = str_pad($countToday + 1, 3, '0', STR_PAD_LEFT);
-        return "{$datePrefix}-{$nextNumber}";
+        $latest = self::withoutGlobalScopes()
+            ->where('reservation_code', 'like', "{$datePrefix}-%")
+            ->orderBy('reservation_code', 'desc')
+            ->value('reservation_code');
+
+        if ($latest && preg_match('/-(\d+)$/', $latest, $matches)) {
+            $nextNum = (int)$matches[1] + 1;
+        } else {
+            $countToday = self::withoutGlobalScopes()
+                ->whereDate('created_at', now()->toDateString())
+                ->count();
+            $nextNum = $countToday + 1;
+        }
+
+        $code = "{$datePrefix}-" . str_pad($nextNum, 3, '0', STR_PAD_LEFT);
+        while (self::withoutGlobalScopes()->where('reservation_code', $code)->exists()) {
+            $nextNum++;
+            $code = "{$datePrefix}-" . str_pad($nextNum, 3, '0', STR_PAD_LEFT);
+        }
+
+        return $code;
     }
 
     public static function generateInvoiceCode(): string
     {
         $datePrefix = 'INV-' . now()->format('Ymd');
-        $countToday = self::whereNotNull('invoice_code')
-            ->whereDate('paid_at', now()->toDateString())
-            ->count();
-        $nextNumber = str_pad($countToday + 1, 3, '0', STR_PAD_LEFT);
-        return "{$datePrefix}-{$nextNumber}";
+        $latest = self::withoutGlobalScopes()
+            ->where('invoice_code', 'like', "{$datePrefix}-%")
+            ->orderBy('invoice_code', 'desc')
+            ->value('invoice_code');
+
+        if ($latest && preg_match('/-(\d+)$/', $latest, $matches)) {
+            $nextNum = (int)$matches[1] + 1;
+        } else {
+            $countToday = self::withoutGlobalScopes()
+                ->whereNotNull('invoice_code')
+                ->whereDate('paid_at', now()->toDateString())
+                ->count();
+            $nextNum = $countToday + 1;
+        }
+
+        $code = "{$datePrefix}-" . str_pad($nextNum, 3, '0', STR_PAD_LEFT);
+        while (self::withoutGlobalScopes()->where('invoice_code', $code)->exists()) {
+            $nextNum++;
+            $code = "{$datePrefix}-" . str_pad($nextNum, 3, '0', STR_PAD_LEFT);
+        }
+
+        return $code;
     }
 }

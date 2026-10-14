@@ -51,6 +51,13 @@
     </div>
 
     <div class="flex items-center gap-2">
+        @if($session->status === 'completed')
+            <a href="{{ route('therapy-sessions.sick-letter', $session->id) }}" 
+               target="_blank"
+               class="px-3.5 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-xl shadow-sm transition flex items-center gap-1.5">
+                <span>📄</span> Cetak Surat Keterangan Sakit (PDF)
+            </a>
+        @endif
         <a href="{{ route('therapy-sessions.patient-history', $session->patient_id) }}" 
            class="px-3.5 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold rounded-xl border border-indigo-200 transition flex items-center gap-1.5">
             <span>📜</span> Riwayat Lengkap Pasien

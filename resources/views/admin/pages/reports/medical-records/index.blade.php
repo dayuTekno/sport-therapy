@@ -241,14 +241,25 @@
 
                         {{-- Aksi --}}
                         <td class="p-4 text-right whitespace-nowrap">
-                            <a href="{{ route('reports.medical_records.show', $s->id) }}" 
-                               class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white rounded-xl text-xs font-bold transition"
-                               title="Lihat Lembar Rekam Terapi">
-                                <span>Lihat Detail</span>
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                                </svg>
-                            </a>
+                            <div class="inline-flex items-center gap-1.5 justify-end">
+                                @if($s->status === 'completed')
+                                    <a href="{{ route('therapy-sessions.sick-letter', $s->id) }}" 
+                                       target="_blank"
+                                       class="inline-flex items-center gap-1 px-2.5 py-1.5 bg-rose-50 text-rose-700 hover:bg-rose-100 rounded-xl text-xs font-bold border border-rose-200 transition"
+                                       title="Cetak Surat Keterangan Sakit (PDF)">
+                                        <span>📄</span>
+                                        <span>Surat Sakit</span>
+                                    </a>
+                                @endif
+                                <a href="{{ route('reports.medical_records.show', $s->id) }}" 
+                                   class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white rounded-xl text-xs font-bold transition"
+                                   title="Lihat Lembar Rekam Terapi">
+                                    <span>Lihat Detail</span>
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                    </svg>
+                                </a>
+                            </div>
                         </td>
                     </tr>
                 @empty
