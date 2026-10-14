@@ -15,9 +15,9 @@
                         src="{{ asset('images/logo-icon.svg') }}" 
                         onerror="this.onerror=null; this.src='{{ asset('admin/images/logo/logo-icon.svg') }}';" 
                         alt="Logo">
-                    <div>
-                        <h2 class="text-base font-black tracking-tight text-gray-900 dark:text-white">Smart Clinic <span class="text-blue-600">Therapy</span></h2>
-                        <p class="text-[10px] text-gray-500 dark:text-gray-400 font-medium">Sistem Rumah Terapi</p>
+                    <div class="flex flex-col justify-center">
+                        <h2 class="text-base font-black tracking-tight text-gray-900 dark:text-white leading-tight">Smart Clinic <span class="text-blue-600">Therapy</span></h2>
+                        <p class="text-[10px] text-gray-500 dark:text-gray-400 font-medium leading-tight">Sistem Rumah Terapi</p>
                     </div>
                 </div>
 
@@ -121,7 +121,7 @@
         </div>
 
         <!-- RIGHT: FULL IMAGE (DESKTOP ONLY) -->
-        <div class="relative hidden lg:block w-1/2 h-full min-h-[100dvh] bg-slate-900 overflow-hidden">
+        <div class="relative hidden lg:flex flex-col items-center justify-center w-1/2 min-h-screen min-h-[100dvh] bg-slate-900 overflow-hidden p-8">
             <!-- Background Image -->
             <img src="{{ asset('images/klinik.jpg') }}" alt="Klinik"
                 onerror="this.onerror=null; this.src='{{ asset('storage/images/klinik.jpg') }}';"
@@ -131,7 +131,7 @@
             <div class="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-900/50 to-slate-900/30"></div>
 
             <!-- Content -->
-            <div class="relative z-10 flex flex-col items-center justify-center h-full text-center px-8">
+            <div class="relative z-10 flex flex-col items-center justify-center text-center max-w-lg my-auto">
                 <img src="{{ asset('images/logo-icon.svg') }}" 
                     onerror="this.onerror=null; this.src='{{ asset('admin/images/logo/logo-icon.svg') }}';" 
                     alt="Smart Clinic Therapy Logo" 
