@@ -3,8 +3,138 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    {{-- Primary SEO Meta Tags --}}
     <title>Smart Clinic Therapy — Platform SaaS Manajemen Klinik Fisioterapi & Olahraga Modern</title>
-    <meta name="description" content="Platform cloud multi-tenant untuk manajemen klinik fisioterapi, rehabilitasi cedera olahraga berjenjang, otomasi booking WhatsApp, kasir dan rekam medis digital.">
+    <meta name="title" content="Smart Clinic Therapy — Platform SaaS Manajemen Klinik Fisioterapi & Olahraga Modern">
+    <meta name="description" content="Platform cloud PaaS & SaaS multi-tenant untuk manajemen klinik fisioterapi, rehabilitasi cedera olahraga berjenjang, otomasi booking WhatsApp, kasir dan rekam medis digital (EHR).">
+    <meta name="keywords" content="fisioterapi, klinik olahraga, software klinik, aplikasi fisioterapi, manajemen klinik, rekam medis digital, rehabilitasi cedera, sport clinic, Smart Clinic Therapy, SaaS klinik, jadwal terapis, SOAP fisioterapi">
+    <meta name="author" content="Smart Clinic Therapy">
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+    <meta name="googlebot" content="index, follow">
+    <link rel="canonical" href="{{ url('/') }}">
+    <meta name="theme-color" content="#2563eb">
+
+    {{-- Open Graph / Facebook / WhatsApp / Telegram --}}
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{ url('/') }}">
+    <meta property="og:site_name" content="Smart Clinic Therapy">
+    <meta property="og:locale" content="id_ID">
+    <meta property="og:title" content="Smart Clinic Therapy — Platform SaaS Manajemen Klinik Fisioterapi & Olahraga Modern">
+    <meta property="og:description" content="Transformasi digital klinik fisioterapi dan cedera olahraga: rekam medis berjenjang SOAP, booking WhatsApp instan, manajemen kasir & inventori alat terapi.">
+    <meta property="og:image" content="{{ asset('images/logo-icon.svg') }}">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="Smart Clinic Therapy Platform">
+
+    {{-- Twitter Card --}}
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="{{ url('/') }}">
+    <meta name="twitter:title" content="Smart Clinic Therapy — SaaS Manajemen Klinik Fisioterapi & Olahraga">
+    <meta name="twitter:description" content="Platform cloud multi-tenant untuk klinik fisioterapi, rehabilitasi cedera olahraga, reservasi WhatsApp, dan rekam medis digital.">
+    <meta name="twitter:image" content="{{ asset('images/logo-icon.svg') }}">
+
+    {{-- Structured Data: JSON-LD (Schema.org) --}}
+    <script type="application/ld+json">
+    {!! json_encode([
+      '@context' => 'https://schema.org',
+      '@graph' => [
+        [
+          '@type' => 'SoftwareApplication',
+          '@id' => url('/') . '#software',
+          'name' => 'Smart Clinic Therapy',
+          'applicationCategory' => 'HealthApplication, BusinessApplication',
+          'operatingSystem' => 'Web Browser, iOS, Android, macOS, Windows',
+          'offers' => [
+            '@type' => 'AggregateOffer',
+            'priceCurrency' => 'IDR',
+            'lowPrice' => '0',
+            'highPrice' => '1499000',
+            'offerCount' => '3',
+          ],
+          'description' => 'Platform cloud multi-tenant PaaS & SaaS untuk manajemen operasional klinik fisioterapi, rekam medis rehabilitasi cedera olahraga berjenjang, reservasi WhatsApp, dan sistem kasir terpadu.',
+          'url' => url('/'),
+          'author' => [
+            '@type' => 'Organization',
+            'name' => 'Smart Clinic Therapy',
+            'url' => url('/'),
+          ],
+        ],
+        [
+          '@type' => 'MedicalBusiness',
+          '@id' => url('/') . '#business',
+          'name' => 'Smart Clinic Therapy',
+          'description' => 'Sistem teknologi informasi dan manajemen klinik terapi olahraga dan fisioterapi modern di Indonesia.',
+          'url' => url('/'),
+          'logo' => asset('images/logo-icon.svg'),
+          'medicalSpecialty' => [
+            'Physiotherapy',
+            'SportsMedicine',
+          ],
+          'availableService' => [
+            [
+              '@type' => 'MedicalTherapy',
+              'name' => 'Terapi & Rehabilitasi Cedera Olahraga Berjenjang',
+            ],
+            [
+              '@type' => 'MedicalTherapy',
+              'name' => 'Fisioterapi Muskuloskeletal',
+            ],
+            [
+              '@type' => 'MedicalTherapy',
+              'name' => 'Manajemen Rekam Medis & Jadwal Terapi Digital',
+            ],
+          ],
+          'contactPoint' => [
+            '@type' => 'ContactPoint',
+            'telephone' => '+62-812-3456-7890',
+            'contactType' => 'Customer Support',
+            'areaServed' => 'ID',
+            'availableLanguage' => ['Indonesian', 'English'],
+          ],
+        ],
+        [
+          '@type' => 'FAQPage',
+          '@id' => url('/') . '#faq',
+          'mainEntity' => [
+            [
+              '@type' => 'Question',
+              'name' => 'Apakah data rekam medis pasien di klinik kami aman dan terisolasi?',
+              'acceptedAnswer' => [
+                '@type' => 'Answer',
+                'text' => 'Sangat aman. Platform kami menggunakan arsitektur Scoped Multi-Tenancy tingkat lanjut di mana setiap data pasien, tindakan terapi, dan transaksi kasir secara ketat terisolasi berdasarkan ID klinik masing-masing. Klinik lain tidak memiliki akses ke data klinik Anda.',
+              ],
+            ],
+            [
+              '@type' => 'Question',
+              'name' => 'Apakah sistem ini dapat dibuka menggunakan tablet atau iPad di ruang terapi?',
+              'acceptedAnswer' => [
+                '@type' => 'Answer',
+                'text' => 'Ya! Seluruh tampilan Smart Clinic Therapy didesain 100% responsif. Terapis dapat membawa tablet atau iPad saat menangani pasien untuk mencatat evaluasi dan langsung menyimpan data pemulihan secara real-time.',
+              ],
+            ],
+            [
+              '@type' => 'Question',
+              'name' => 'Bagaimana cara kerja pengingat WhatsApp ke pasien?',
+              'acceptedAnswer' => [
+                '@type' => 'Answer',
+                'text' => 'Di menu reservasi terapi terdapat tombol langsung berlogo WhatsApp. Saat diklik, sistem secara otomatis merangkai pesan personal (nama pasien, jadwal jam, nama terapis penanggung jawab) dan membuka aplikasi WhatsApp tanpa perlu menyimpan nomor pasien di kontak HP.',
+              ],
+            ],
+            [
+              '@type' => 'Question',
+              'name' => 'Apakah kami perlu membayar sebelum mencoba fitur-fiturnya?',
+              'acceptedAnswer' => [
+                '@type' => 'Answer',
+                'text' => 'Tidak. Anda dapat langsung mendaftarkan klinik dan menikmati masa uji coba gratis (Free Trial) selama 14 hari penuh dengan semua fitur aktif tanpa kewajiban memasukkan nomor kartu kredit.',
+              ],
+            ],
+          ],
+        ],
+      ],
+    ], JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) !!}
+    </script>
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">

@@ -26,6 +26,7 @@ use App\Http\Controllers\PharmacyController;
 Route::get('/', [App\Http\Controllers\PublicController::class, 'landing'])->name('public.landing');
 Route::get('/register-clinic', [App\Http\Controllers\PublicController::class, 'registerClinicForm'])->name('register.clinic');
 Route::post('/register-clinic', [App\Http\Controllers\PublicController::class, 'registerClinicSubmit'])->name('register.clinic.submit');
+Route::get('/sitemap.xml', [App\Http\Controllers\PublicController::class, 'sitemap'])->name('sitemap');
 
 Auth::routes();
 

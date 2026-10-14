@@ -1,2 +1,30 @@
+# Smart Clinic Therapy — Robots Exclusion Protocol
 User-agent: *
-Disallow:
+Allow: /
+Allow: /register-clinic
+Allow: /login
+Allow: /images/
+Allow: /icons/
+Allow: /build/
+
+# Private Administrative & Clinic Management Portals
+Disallow: /dashboard
+Disallow: /admin
+Disallow: /saas
+Disallow: /patients
+Disallow: /reservations
+Disallow: /therapy-sessions
+Disallow: /therapists
+Disallow: /therapy-types
+Disallow: /therapy-equipments
+Disallow: /cashier
+Disallow: /pharmacy
+Disallow: /medicines
+Disallow: /users
+Disallow: /roles
+Disallow: /api/
+Disallow: /password/
+Disallow: /subscription-expired
+
+# Sitemaps
+Sitemap: /sitemap.xml

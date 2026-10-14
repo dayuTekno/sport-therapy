@@ -90,4 +90,34 @@ class PublicController extends Controller
 
         return redirect()->route('dashboard')->with('success', "Selamat datang di Smart Clinic Therapy! Klinik {$clinic->name} berhasil didaftarkan dengan masa uji coba gratis 14 hari.");
     }
+
+    /**
+     * XML Sitemap dinamis untuk Google, Bing, dan mesin pencari lainnya.
+     */
+    public function sitemap()
+    {
+        $urls = [
+            [
+                'loc' => url('/'),
+                'lastmod' => now()->toDateString(),
+                'changefreq' => 'daily',
+                'priority' => '1.0',
+            ],
+            [
+                'loc' => route('register.clinic'),
+                'lastmod' => now()->toDateString(),
+                'changefreq' => 'weekly',
+                'priority' => '0.9',
+            ],
+            [
+                'loc' => route('login'),
+                'lastmod' => now()->toDateString(),
+                'changefreq' => 'monthly',
+                'priority' => '0.6',
+            ],
+        ];
+
+        return response()->view('public.sitemap', compact('urls'))
+            ->header('Content-Type', 'application/xml; charset=utf-8');
+    }
 }

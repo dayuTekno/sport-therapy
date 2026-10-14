@@ -7,6 +7,7 @@ use App\Models\MasterPatients;
 use App\Models\Reservation;
 use App\Models\Therapist;
 use App\Models\TherapySession;
+use App\Models\TherapyType;
 use App\Models\User;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\TestCase;
@@ -19,6 +20,7 @@ class TherapistScheduleConflictTest extends TestCase
     protected $therapist1;
     protected $therapist2;
     protected $patient;
+    protected $therapyType;
 
     protected function setUp(): void
     {
@@ -58,6 +60,15 @@ class TherapistScheduleConflictTest extends TestCase
             'phone_number' => '081234567890',
             'gender' => 'male',
             'age' => 25,
+            'clinic_id' => $clinicId,
+        ]);
+
+        $this->therapyType = TherapyType::where('clinic_id', $clinicId)->first() ?: TherapyType::create([
+            'type_code' => 'TT-TEST-1',
+            'name' => 'Fisioterapi Dasar',
+            'stage_order' => 1,
+            'duration_minutes' => 60,
+            'is_active' => true,
             'clinic_id' => $clinicId,
         ]);
     }
@@ -169,7 +180,7 @@ class TherapistScheduleConflictTest extends TestCase
         $sess1 = $this->post(route('therapy-sessions.store'), [
             'patient_id' => $this->patient->id,
             'therapist_id' => $this->therapist1->id,
-            'therapy_type_id' => 1,
+            'therapy_type_id' => $this->therapyType->id,
             'stage_number' => 1,
             'stage_name' => 'Terapi A',
             'scheduled_at' => $scheduledAt,
@@ -181,7 +192,7 @@ class TherapistScheduleConflictTest extends TestCase
         $sess2 = $this->post(route('therapy-sessions.store'), [
             'patient_id' => $this->patient->id,
             'therapist_id' => $this->therapist1->id,
-            'therapy_type_id' => 1,
+            'therapy_type_id' => $this->therapyType->id,
             'stage_number' => 2,
             'stage_name' => 'Terapi B',
             'scheduled_at' => $scheduledAt,

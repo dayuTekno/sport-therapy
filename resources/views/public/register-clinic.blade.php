@@ -3,7 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Daftarkan Klinik Mitra Baru - Smart Clinic Therapy</title>
+
+    {{-- Primary SEO Meta Tags --}}
+    <title>Daftarkan Klinik Mitra Baru — Smart Clinic Therapy</title>
+    <meta name="title" content="Daftarkan Klinik Mitra Baru — Smart Clinic Therapy">
+    <meta name="description" content="Daftarkan klinik fisioterapi atau pusat terapi rehabilitasi olahraga Anda ke platform cloud Smart Clinic Therapy. Dapatkan akses langsung dengan 14 hari masa uji coba gratis tanpa kartu kredit.">
+    <meta name="keywords" content="daftar klinik fisioterapi, registrasi klinik olahraga, aplikasi fisioterapi, rekam medis digital, Smart Clinic Therapy">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="{{ route('register.clinic') }}">
+    <meta name="theme-color" content="#2563eb">
+
+    {{-- Open Graph / Facebook / WhatsApp --}}
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{ route('register.clinic') }}">
+    <meta property="og:site_name" content="Smart Clinic Therapy">
+    <meta property="og:locale" content="id_ID">
+    <meta property="og:title" content="Daftarkan Klinik Mitra Baru — Smart Clinic Therapy">
+    <meta property="og:description" content="Mulai 14 hari uji coba gratis platform manajemen klinik fisioterapi modern tanpa kartu kredit.">
+    <meta property="og:image" content="{{ asset('images/logo-icon.svg') }}">
+
+    {{-- Twitter Card --}}
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Daftarkan Klinik Mitra Baru — Smart Clinic Therapy">
+    <meta name="twitter:description" content="Mulai 14 hari uji coba gratis platform manajemen klinik fisioterapi modern tanpa kartu kredit.">
+    <meta name="twitter:image" content="{{ asset('images/logo-icon.svg') }}">
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
