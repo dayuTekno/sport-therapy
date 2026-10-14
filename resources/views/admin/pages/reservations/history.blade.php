@@ -221,6 +221,14 @@
                     </td>
                     <td class="px-6 py-4 text-right whitespace-nowrap">
                         <div class="flex items-center justify-end gap-1.5">
+                            @if($res->status === 'completed' || $res->payment_status === 'paid')
+                                <a href="{{ route('reservations.sick-letter', $res->id) }}" target="_blank"
+                                   title="Cetak Surat Keterangan Sakit (PDF)"
+                                   class="px-2 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-lg transition text-xs font-semibold flex items-center gap-1 border border-rose-200">
+                                    <span>📄</span> Surat Sakit
+                                </a>
+                            @endif
+
                             @if($res->payment_status === 'paid')
                                 <a href="{{ route('cashier.receipt', $res->id) }}" target="_blank"
                                    title="Cetak Kwitansi Pembayaran"

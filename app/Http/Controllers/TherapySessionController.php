@@ -459,7 +459,7 @@ class TherapySessionController extends Controller
      */
     public function generateSickLetter($id, Request $request)
     {
-        $session = TherapySession::with(['patient', 'therapist', 'therapyType', 'clinic'])->findOrFail($id);
+        $session = TherapySession::with(['patient', 'therapist', 'therapyType', 'clinic', 'reservation'])->findOrFail($id);
         $patient = $session->patient;
 
         if (!$patient) {
@@ -484,7 +484,7 @@ class TherapySessionController extends Controller
         $controlTime = $request->input('control_time', '18.00 - 20.30 WIB');
 
         // 4. Diagnosa
-        $diagnosisInput = $request->input('diagnosis', $session->evaluation_notes ?: ($session->therapyType?->name ?? 'Cedera Fisik / Terapi Otot'));
+        $diagnosisInput = $request->input('diagnosis', $session->evaluation_notes ?: ($session->reservation?->chief_complaint ?: ($session->therapyType?->name ?? 'Cedera Fisik / Terapi Otot')));
 
         // 5. Nama & Jabatan Tertanda Pemeriksa
         $signerName = $request->input('signer_name', $clinic?->signer_name ?: ($session->therapist?->full_name ?: 'Iyon Pramulo, S.Or, M.Pd, AIFO'));

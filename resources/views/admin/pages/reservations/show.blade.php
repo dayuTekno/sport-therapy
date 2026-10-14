@@ -72,6 +72,13 @@
         @endif
 
         {{-- Tombol Kasir & Pembayaran Reservasi --}}
+        @if($reservation->status === 'completed' || $reservation->payment_status === 'paid')
+            <a href="{{ route('reservations.sick-letter', $reservation->id) }}" target="_blank"
+               class="px-3.5 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-xl shadow-xs transition flex items-center gap-1.5 cursor-pointer">
+                <span>📄</span> Cetak Surat Keterangan Sakit (PDF)
+            </a>
+        @endif
+
         @if($reservation->payment_status === 'paid')
             <a href="{{ route('cashier.receipt', $reservation->id) }}" target="_blank"
                class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-xl shadow-xs transition flex items-center gap-1.5 cursor-pointer">
@@ -410,10 +417,19 @@
                                 {{ $session->evaluation_notes ?: ($session->actions_taken ?: '-') }}
                             </td>
                             <td class="px-5 py-3.5 text-right whitespace-nowrap">
-                                <a href="{{ route('therapy-sessions.show', $session->id) }}" 
-                                   class="px-2.5 py-1 bg-blue-50 hover:bg-blue-100 text-blue-700 font-semibold rounded-lg text-xs transition">
-                                    Buka Sesi →
-                                </a>
+                                <div class="flex items-center justify-end gap-1.5">
+                                    @if($session->status == 'completed')
+                                        <a href="{{ route('therapy-sessions.sick-letter', $session->id) }}" target="_blank"
+                                           title="Cetak Surat Keterangan Sakit Sesi Ini"
+                                           class="px-2 py-1 bg-rose-50 hover:bg-rose-100 text-rose-700 font-semibold rounded-lg text-xs transition border border-rose-200 inline-flex items-center gap-1">
+                                            <span>📄</span> Surat Sakit
+                                        </a>
+                                    @endif
+                                    <a href="{{ route('therapy-sessions.show', $session->id) }}" 
+                                       class="px-2.5 py-1 bg-blue-50 hover:bg-blue-100 text-blue-700 font-semibold rounded-lg text-xs transition">
+                                        Buka Sesi →
+                                    </a>
+                                </div>
                             </td>
                         </tr>
                     @endforeach
@@ -427,17 +443,25 @@
                             Rp {{ number_format($reservation->total_price > 0 ? $reservation->total_price : $therapySessions->sum('total_price'), 0, ',', '.') }}
                         </td>
                         <td colspan="2" class="px-5 py-3.5 text-right whitespace-nowrap">
-                            @if($reservation->payment_status === 'paid')
-                                <a href="{{ route('cashier.receipt', $reservation->id) }}" target="_blank"
-                                   class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg text-xs shadow-xs transition inline-flex items-center gap-1">
-                                    <span>🖨️</span> Kwitansi Kasir
-                                </a>
-                            @else
-                                <a href="{{ route('cashier.process', $reservation->id) }}" 
-                                   class="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-lg text-xs shadow-xs transition inline-flex items-center gap-1">
-                                    <span>💳</span> Bayar di Kasir
-                                </a>
-                            @endif
+                            <div class="flex items-center justify-end gap-2">
+                                @if($reservation->status === 'completed' || $reservation->payment_status === 'paid')
+                                    <a href="{{ route('reservations.sick-letter', $reservation->id) }}" target="_blank"
+                                       class="px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-lg text-xs shadow-xs transition inline-flex items-center gap-1">
+                                        <span>📄</span> Surat Sakit (PDF)
+                                    </a>
+                                @endif
+                                @if($reservation->payment_status === 'paid')
+                                    <a href="{{ route('cashier.receipt', $reservation->id) }}" target="_blank"
+                                       class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg text-xs shadow-xs transition inline-flex items-center gap-1">
+                                        <span>🖨️</span> Kwitansi Kasir
+                                    </a>
+                                @else
+                                    <a href="{{ route('cashier.process', $reservation->id) }}" 
+                                       class="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-lg text-xs shadow-xs transition inline-flex items-center gap-1">
+                                        <span>💳</span> Bayar di Kasir
+                                    </a>
+                                @endif
+                            </div>
                         </td>
                     </tr>
                 </tfoot>

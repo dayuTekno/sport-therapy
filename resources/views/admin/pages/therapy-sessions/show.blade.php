@@ -446,12 +446,20 @@
                             </div>
                         </div>
                     </div>
-                    @if($session->reservation_id)
-                        <a href="{{ route('cashier.receipt', $session->reservation_id) }}" target="_blank" 
-                           class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold shadow-xs flex items-center gap-1.5 self-start sm:self-auto">
-                            <span>🖨️</span> Cetak Kwitansi Reservasi
-                        </a>
-                    @endif
+                    <div class="flex items-center gap-2 self-start sm:self-auto">
+                        @if($session->status == 'completed')
+                            <a href="{{ route('therapy-sessions.sick-letter', $session->id) }}" target="_blank" 
+                               class="px-3.5 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold shadow-xs flex items-center gap-1.5">
+                                <span>📄</span> Cetak Surat Sakit (PDF)
+                            </a>
+                        @endif
+                        @if($session->reservation_id)
+                            <a href="{{ route('cashier.receipt', $session->reservation_id) }}" target="_blank" 
+                               class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold shadow-xs flex items-center gap-1.5">
+                                <span>🖨️</span> Cetak Kwitansi Reservasi
+                            </a>
+                        @endif
+                    </div>
                 </div>
             @else
                 <div class="p-4 bg-amber-50 rounded-xl border border-amber-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -469,12 +477,20 @@
                             </div>
                         </div>
                     </div>
-                    @if($session->reservation_id)
-                        <a href="{{ route('cashier.process', $session->reservation_id) }}" 
-                           class="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold shadow-xs flex items-center gap-1.5 self-start sm:self-auto">
-                            <span>💳</span> Bayar di Kasir →
-                        </a>
-                    @endif
+                    <div class="flex items-center gap-2 self-start sm:self-auto">
+                        @if($session->status == 'completed')
+                            <a href="{{ route('therapy-sessions.sick-letter', $session->id) }}" target="_blank" 
+                               class="px-3.5 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold shadow-xs flex items-center gap-1.5">
+                                <span>📄</span> Cetak Surat Sakit (PDF)
+                            </a>
+                        @endif
+                        @if($session->reservation_id)
+                            <a href="{{ route('cashier.process', $session->reservation_id) }}" 
+                               class="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold shadow-xs flex items-center gap-1.5">
+                                <span>💳</span> Bayar di Kasir →
+                            </a>
+                        @endif
+                    </div>
                 </div>
             @endif
 

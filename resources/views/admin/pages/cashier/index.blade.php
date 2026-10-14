@@ -230,6 +230,11 @@
                     <td class="px-6 py-4 text-right whitespace-nowrap">
                         @if($tab === 'paid')
                             <div class="flex items-center justify-end gap-1.5">
+                                <a href="{{ route('reservations.sick-letter', $res->id) }}" target="_blank"
+                                   title="Cetak Surat Keterangan Sakit (PDF)"
+                                   class="px-2.5 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-lg text-xs font-bold border border-rose-200 transition flex items-center gap-1">
+                                    <span>📄</span> Surat Sakit
+                                </a>
                                 <a href="{{ route('cashier.receipt', $res->id) }}" target="_blank"
                                    class="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-lg text-xs font-semibold transition flex items-center gap-1">
                                     <span>🖨️</span> Kwitansi

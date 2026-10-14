@@ -12,6 +12,10 @@
         </a>
 
         <div class="flex items-center gap-2">
+            <a href="{{ route('reservations.sick-letter', $reservation->id) }}" target="_blank"
+               class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-xl shadow-md transition flex items-center gap-1.5 cursor-pointer">
+                <span>📄</span> Cetak Surat Keterangan Sakit (PDF)
+            </a>
             <button onclick="window.print()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl shadow-md transition flex items-center gap-1.5 cursor-pointer">
                 <span>🖨️</span> Cetak Kwitansi
             </button>

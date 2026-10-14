@@ -59,6 +59,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('reservations/{id}/confirm', [\App\Http\Controllers\ReservationController::class, 'confirm'])->name('reservations.confirm');
     Route::post('reservations/{id}/cancel', [\App\Http\Controllers\ReservationController::class, 'cancel'])->name('reservations.cancel');
     Route::post('reservations/{id}/complete', [\App\Http\Controllers\ReservationController::class, 'complete'])->name('reservations.complete');
+    Route::get('reservations/{id}/sick-letter', [\App\Http\Controllers\ReservationController::class, 'generateSickLetter'])->name('reservations.sick-letter');
     Route::post('reservations/{id}/advance', [\App\Http\Controllers\ReservationController::class, 'advanceStage'])->name('reservations.advance');
     Route::get('api/patients/lookup', [\App\Http\Controllers\ReservationController::class, 'lookupPatient'])->name('api.patients.lookup');
     Route::get('api/therapists/check-availability', [\App\Http\Controllers\ReservationController::class, 'checkTherapistAvailability'])->name('api.therapists.check-availability');

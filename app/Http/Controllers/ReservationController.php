@@ -469,5 +469,37 @@ class ReservationController extends Controller
 
         return redirect()->back()->with('success', "Reservasi {$reservation->reservation_code} berhasil diselesaikan dan dipindahkan ke Riwayat Terapi.");
     }
+
+    /**
+     * Cetak Surat Keterangan Sakit dari Reservasi
+     */
+    public function generateSickLetter($id, Request $request)
+    {
+        $reservation = Reservation::with(['patient', 'therapist', 'sessions', 'clinic'])->findOrFail($id);
+
+        // Cari sesi terapi yang telah selesai atau sesi terakhir
+        $session = $reservation->sessions()->where('status', 'completed')->latest()->first()
+            ?? $reservation->sessions()->latest()->first();
+
+        if (!$session) {
+            // Buat sesi terapi otomatis jika reservasi belum memiliki record sesi
+            $therapyType = \App\Models\TherapyType::first();
+            $session = \App\Models\TherapySession::create([
+                'reservation_id' => $reservation->id,
+                'patient_id' => $reservation->patient_id,
+                'therapist_id' => $reservation->therapist_id,
+                'therapy_type_id' => $therapyType?->id,
+                'stage_number' => $reservation->current_stage ?: 1,
+                'stage_name' => $therapyType?->name ?? 'Terapi Pemulihan & Rehabilitasi Cedera',
+                'scheduled_at' => $reservation->confirmed_schedule ?: ($reservation->preferred_datetime ?: $reservation->created_at),
+                'status' => 'completed',
+                'completed_at' => $reservation->completed_at ?: now(),
+                'evaluation_notes' => $reservation->chief_complaint ?: 'Terapi pemulihan cedera fisik.',
+                'clinic_id' => $reservation->clinic_id,
+            ]);
+        }
+
+        return app(\App\Http\Controllers\TherapySessionController::class)->generateSickLetter($session->id, $request);
+    }
 }
 
