@@ -12,6 +12,7 @@ class Clinic extends Model
 
     protected $casts = [
         'trial_ends_at' => 'datetime',
+        'subscription_ends_at' => 'datetime',
         'is_active' => 'boolean',
         'max_therapists' => 'integer',
         'max_patients' => 'integer',
@@ -62,17 +63,49 @@ class Clinic extends Model
         return $this->hasMany(TherapySession::class, 'clinic_id');
     }
 
+    public function isSubscriptionExpired(): bool
+    {
+        if ($this->status === 'expired' || $this->status === 'suspended') {
+            return true;
+        }
+
+        if ($this->subscription_ends_at && $this->subscription_ends_at->isPast()) {
+            return true;
+        }
+
+        if ($this->status === 'trial' && $this->trial_ends_at && $this->trial_ends_at->isPast()) {
+            return true;
+        }
+
+        return false;
+    }
+
+    public function daysRemaining(): ?int
+    {
+        $target = $this->subscription_ends_at ?? ($this->status === 'trial' ? $this->trial_ends_at : null);
+        if (!$target) {
+            return null;
+        }
+        return (int) now()->diffInDays($target, false);
+    }
+
+    public function getEndDateAttribute()
+    {
+        return $this->subscription_ends_at;
+    }
+
+    public function setEndDateAttribute($value)
+    {
+        $this->attributes['subscription_ends_at'] = $value;
+    }
+
     public function isOperational(): bool
     {
-        if (!$this->is_active || $this->status === 'suspended') {
+        if (!$this->is_active) {
             return false;
         }
 
-        if ($this->status === 'trial') {
-            return $this->trial_ends_at ? $this->trial_ends_at->isFuture() : true;
-        }
-
-        return $this->status === 'active';
+        return !$this->isSubscriptionExpired();
     }
 
     public static function generateClinicCode(): string

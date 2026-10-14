@@ -29,6 +29,8 @@ Route::post('/register-clinic', [App\Http\Controllers\PublicController::class, '
 
 Auth::routes();
 
+Route::get('/subscription-expired', [App\Http\Controllers\SubscriptionExpiredController::class, 'index'])->name('subscription.expired');
+
 Route::get('/dashboard', [App\Http\Controllers\HomeController::class, 'index'])->name('dashboard');
 Route::get('/admin/dashboard', [App\Http\Controllers\HomeController::class, 'index'])->name('admin.dashboard');
 Route::get('/admin', [App\Http\Controllers\HomeController::class, 'index'])->name('admin');

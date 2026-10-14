@@ -67,7 +67,7 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
                     <label class="block font-bold text-gray-700 uppercase tracking-wider mb-1.5">
                         Paket Langganan SaaS <span class="text-rose-500">*</span>
@@ -90,6 +90,22 @@
                         <option value="suspended" {{ $clinic->status === 'suspended' ? 'selected' : '' }}>Suspended</option>
                         <option value="expired" {{ $clinic->status === 'expired' ? 'selected' : '' }}>Expired</option>
                     </select>
+                </div>
+                <div>
+                    <label class="block font-bold text-gray-700 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+                        <span>End Date Subscribe</span>
+                        @if($clinic->subscription_ends_at)
+                            @if($clinic->subscription_ends_at->isPast())
+                                <span class="text-rose-600 font-bold text-[10px] bg-rose-50 px-1.5 py-0.5 rounded">Habis</span>
+                            @else
+                                <span class="text-emerald-600 font-bold text-[10px] bg-emerald-50 px-1.5 py-0.5 rounded">{{ now()->diffInDays($clinic->subscription_ends_at) }} hari lagi</span>
+                            @endif
+                        @endif
+                    </label>
+                    <input type="date" name="subscription_ends_at" 
+                           value="{{ old('subscription_ends_at', $clinic->subscription_ends_at?->format('Y-m-d')) }}"
+                           class="w-full px-3.5 py-2.5 text-xs border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 font-medium">
+                    <p class="text-[10px] text-gray-400 mt-1">Batas tanggal aktif langganan operasional klinik</p>
                 </div>
             </div>
 

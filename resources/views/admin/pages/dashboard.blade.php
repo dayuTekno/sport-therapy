@@ -8,7 +8,7 @@
 <div class="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
     <div>
         <h1 class="text-2xl md:text-3xl font-bold text-gray-800">Dashboard Utama</h1>
-        <p class="text-sm text-gray-500 mt-1">Sistem Manajemen Klinik Sport Physiotherapy & Rehabilitasi Cedera.</p>
+        <p class="text-sm text-gray-500 mt-1">Sistem Manajemen Rumah Terapi, untuk umum.</p>
     </div>
     <div class="flex items-center gap-3">
         <div class="px-4 py-2.5 bg-white rounded-2xl shadow-sm border border-gray-100 flex items-center gap-3">

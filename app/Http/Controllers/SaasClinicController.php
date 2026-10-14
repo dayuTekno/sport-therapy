@@ -48,6 +48,7 @@ class SaasClinicController extends Controller
             'phone_number' => 'required|string',
             'address' => 'nullable|string',
             'subscription_plan_id' => 'required|exists:subscription_plans,id',
+            'subscription_ends_at' => 'nullable|date',
             'status' => 'required|in:active,trial,suspended',
             'admin_name' => 'required|string|max:255',
             'admin_password' => 'required|string|min:8',
@@ -69,6 +70,7 @@ class SaasClinicController extends Controller
             'address' => $request->address,
             'status' => $request->status,
             'trial_ends_at' => $request->status === 'trial' ? now()->addDays(14) : null,
+            'subscription_ends_at' => $request->subscription_ends_at,
             'subscription_plan_id' => $plan->id,
             'max_therapists' => $plan->max_therapists,
             'max_patients' => $plan->max_patients,
@@ -104,10 +106,21 @@ class SaasClinicController extends Controller
             'phone_number' => 'required|string',
             'address' => 'nullable|string',
             'subscription_plan_id' => 'required|exists:subscription_plans,id',
+            'subscription_ends_at' => 'nullable|date',
             'status' => 'required|in:active,trial,suspended,expired',
             'max_therapists' => 'required|integer|min:1',
             'max_patients' => 'required|integer|min:1',
         ]);
+
+        $status = $request->status;
+        $subscriptionEndsAt = $request->subscription_ends_at;
+
+        // Sinkronisasi status jika subscription_ends_at diperpanjang atau sudah lewat
+        if ($subscriptionEndsAt && \Carbon\Carbon::parse($subscriptionEndsAt)->isPast() && $status === 'active') {
+            $status = 'expired';
+        } elseif ($subscriptionEndsAt && \Carbon\Carbon::parse($subscriptionEndsAt)->isFuture() && $status === 'expired') {
+            $status = 'active';
+        }
 
         $clinic->update([
             'name' => $request->name,
@@ -115,10 +128,11 @@ class SaasClinicController extends Controller
             'phone_number' => $request->phone_number,
             'address' => $request->address,
             'subscription_plan_id' => $request->subscription_plan_id,
-            'status' => $request->status,
+            'subscription_ends_at' => $subscriptionEndsAt,
+            'status' => $status,
             'max_therapists' => $request->max_therapists,
             'max_patients' => $request->max_patients,
-            'is_active' => $request->status !== 'suspended',
+            'is_active' => $status !== 'suspended',
             'notes' => $request->notes,
         ]);
 

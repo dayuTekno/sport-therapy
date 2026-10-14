@@ -105,9 +105,26 @@
 
                     <td class="px-6 py-4 text-center">
                         @if($c->status === 'active')
-                            <span class="px-2.5 py-1 text-xs font-bold rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
-                                ✓ Aktif
-                            </span>
+                            @if($c->subscription_ends_at && $c->subscription_ends_at->isPast())
+                                <span class="px-2.5 py-1 text-xs font-bold rounded-full bg-rose-50 text-rose-700 border border-rose-200">
+                                    ⚠️ Expired
+                                </span>
+                                <div class="text-[9px] text-rose-500 font-medium mt-0.5">Habis {{ $c->subscription_ends_at->format('d M Y') }}</div>
+                            @elseif($c->subscription_ends_at && now()->diffInDays($c->subscription_ends_at) <= 7)
+                                <span class="px-2.5 py-1 text-xs font-bold rounded-full bg-amber-50 text-amber-700 border border-amber-200">
+                                    ⏳ Sisa {{ now()->diffInDays($c->subscription_ends_at) }} Hari
+                                </span>
+                                <div class="text-[9px] text-gray-500 mt-0.5">s/d {{ $c->subscription_ends_at->format('d M Y') }}</div>
+                            @else
+                                <span class="px-2.5 py-1 text-xs font-bold rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                    ✓ Aktif
+                                </span>
+                                @if($c->subscription_ends_at)
+                                    <div class="text-[9px] text-gray-500 mt-0.5">s/d {{ $c->subscription_ends_at->format('d M Y') }}</div>
+                                @else
+                                    <div class="text-[9px] text-gray-400 mt-0.5">Tanpa Batas</div>
+                                @endif
+                            @endif
                         @elseif($c->status === 'trial')
                             <span class="px-2.5 py-1 text-xs font-bold rounded-full bg-amber-50 text-amber-700 border border-amber-200">
                                 ⏳ Trial
@@ -115,8 +132,15 @@
                             @if($c->trial_ends_at)
                                 <div class="text-[9px] text-gray-400 mt-0.5">s/d {{ $c->trial_ends_at->format('d M Y') }}</div>
                             @endif
-                        @else
+                        @elseif($c->status === 'expired')
                             <span class="px-2.5 py-1 text-xs font-bold rounded-full bg-rose-50 text-rose-700 border border-rose-200">
+                                ⚠️ Expired
+                            </span>
+                            @if($c->subscription_ends_at)
+                                <div class="text-[9px] text-rose-500 mt-0.5">s/d {{ $c->subscription_ends_at->format('d M Y') }}</div>
+                            @endif
+                        @else
+                            <span class="px-2.5 py-1 text-xs font-bold rounded-full bg-gray-100 text-gray-700 border border-gray-300">
                                 ✕ Suspended
                             </span>
                         @endif

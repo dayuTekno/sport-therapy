@@ -235,6 +235,20 @@
                     </div>
                 @endif
 
+                @if(auth()->user()->clinic?->isSubscriptionExpired() && !auth()->user()->isSaasAdmin())
+                    {{-- MENU TERKUNCI KARENA LANGGANAN HABIS --}}
+                    <div class="p-4 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 rounded-2xl text-center my-4" :class="sidebarToggle ? 'hidden' : ''">
+                        <div class="text-3xl mb-2">🔒</div>
+                        <h4 class="font-bold text-xs text-rose-800 dark:text-rose-300 uppercase tracking-wider mb-1">Menu Terkunci</h4>
+                        <p class="text-[10px] text-gray-500 dark:text-gray-400 mb-3 leading-relaxed">
+                            Masa aktif langganan telah habis. Seluruh menu operasional dinonaktifkan.
+                        </p>
+                        <a href="{{ route('subscription.expired') }}" class="inline-block px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-bold shadow-sm transition">
+                            Lihat Rincian
+                        </a>
+                    </div>
+                @else
+
                 <!-- GROUP: MENU LAYANAN -->
                 <h3 class="mb-4 text-xs uppercase text-gray-400 font-semibold tracking-wider">
                     <span :class="sidebarToggle ? 'lg:hidden' : ''">Menu Layanan</span>
@@ -517,6 +531,7 @@
                 </ul>
                 @endif
 
+            @endif
             @endif
         </nav>
     </div>
