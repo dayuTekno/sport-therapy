@@ -3,26 +3,36 @@
            overflow-y-hidden border-r border-gray-200 bg-white px-5
            dark:border-gray-800 dark:bg-black lg:static lg:translate-x-0 transition-transform duration-300 ease-in-out shadow-2xl lg:shadow-none">
     <!-- HEADER LOGO -->
+    @php
+        $activeClinic = session()->has('active_clinic_id')
+            ? \App\Models\Clinic::find(session('active_clinic_id'))
+            : (auth()->user()?->clinic ?: \App\Models\Clinic::first());
+
+        $clinicName = ($activeClinic && !empty(trim($activeClinic->name ?? '')))
+            ? $activeClinic->name
+            : 'Sistem Klinik';
+
+        $clinicLogo = $activeClinic?->logo_path;
+        $defaultLogo = asset('admin/images/logo/hospital.png');
+        $logoSrc = ($clinicLogo && \Illuminate\Support\Facades\Storage::disk('public')->exists($clinicLogo))
+            ? asset('storage/' . $clinicLogo)
+            : ($clinicLogo ? asset('storage/' . $clinicLogo) : $defaultLogo);
+    @endphp
     <div :class="sidebarToggle ? 'justify-between lg:justify-center' : 'justify-between'" class="flex items-center gap-2 pt-6 pb-5 border-b border-gray-100 dark:border-gray-800 lg:border-none">
         <a href="{{ auth()->user()->isSaasAdmin() && !session()->has('active_clinic_id') ? route('saas.dashboard') : route('dashboard') }}" class="flex items-center gap-3">
             {{-- LOGO --}}
-            @php
-                $clinicLogo = auth()->user()->clinic?->logo_path;
-                $defaultLogo = asset('admin/images/logo/hospital.png');
-                $logoSrc = $clinicLogo ? asset('storage/' . $clinicLogo) : $defaultLogo;
-            @endphp
-            <img class="w-[40px] h-[40px] object-contain rounded-lg" 
+            <img class="w-[40px] h-[40px] object-contain rounded-lg shrink-0" 
                 src="{{ $logoSrc }}" 
                 onerror="this.src='{{ asset('admin/images/logo/hospital.png') }}'"
-                alt="Logo" />
+                alt="{{ $clinicName }}" />
 
             {{-- TEXT --}}
-            <div class="flex flex-col" :class="sidebarToggle ? 'hidden' : ''">
-                <span class="text-sm font-black tracking-tight text-gray-900 dark:text-white whitespace-nowrap">
+            <div class="flex flex-col min-w-0" :class="sidebarToggle ? 'hidden' : ''">
+                <span class="text-sm font-black tracking-tight text-gray-900 dark:text-white whitespace-nowrap truncate max-w-[170px]" title="{{ $clinicName }}">
                     @if(auth()->user()->isSaasAdmin() && !session()->has('active_clinic_id'))
-                        SportTherapy <span class="text-blue-600 text-xs font-bold uppercase tracking-wider">SaaS</span>
+                        {{ Str::limit($clinicName, 18) }} <span class="text-blue-600 text-xs font-bold uppercase tracking-wider">SaaS</span>
                     @else
-                        {{ Str::limit(auth()->user()->clinic?->name ?? 'Sport Therapy', 18) }}
+                        {{ Str::limit($clinicName, 18) }}
                     @endif
                 </span>
                 <span class="text-[10px] text-gray-400 font-medium">
@@ -46,16 +56,13 @@
 
         {{-- ICON SAAT SIDEBAR COLLAPSE --}}
         <img class="logo-icon w-[32px] h-[32px] object-contain" :class="sidebarToggle ? 'lg:block' : 'hidden'"
-            src="{{ asset('admin/images/logo/logo-icon.svg') }}" 
+            src="{{ $logoSrc }}" 
             onerror="this.src='{{ asset('admin/images/logo/hospital.png') }}'"
-            alt="Logo Icon" />
+            alt="{{ $clinicName }}" />
     </div>
 
     {{-- IMPERSONATION BANNER DI SIDEBAR JIKA SEDANG AKTIF --}}
     @if(session()->has('active_clinic_id'))
-        @php
-            $activeClinic = \App\Models\Clinic::find(session('active_clinic_id'));
-        @endphp
         <div class="mb-4 p-3 bg-amber-500/10 border border-amber-500/30 rounded-xl text-amber-800 dark:text-amber-400 text-xs" :class="sidebarToggle ? 'hidden' : ''">
             <div class="font-bold flex items-center justify-between gap-1 mb-1">
                 <span class="flex items-center gap-1">👁️ Mode Tinjau</span>
@@ -235,7 +242,7 @@
                     </div>
                 @endif
 
-                @if(auth()->user()->clinic?->isSubscriptionExpired() && !auth()->user()->isSaasAdmin())
+                @if(($activeClinic?->isSubscriptionExpired() ?? (auth()->user()->clinic?->isSubscriptionExpired() ?? false)) && !auth()->user()->isSaasAdmin())
                     {{-- MENU TERKUNCI KARENA LANGGANAN HABIS --}}
                     <div class="p-4 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 rounded-2xl text-center my-4" :class="sidebarToggle ? 'hidden' : ''">
                         <div class="text-3xl mb-2">🔒</div>

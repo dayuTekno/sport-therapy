@@ -20,14 +20,24 @@
             <!-- Logo (Mobile) -->
             <a href="{{ route('dashboard') }}" class="lg:hidden flex items-center gap-2">
                 @php
-                    $mobileLogo = auth()->user()->clinic?->logo_path ? asset('storage/' . auth()->user()->clinic->logo_path) : asset('admin/images/logo/hospital.png');
+                    $headerClinic = session()->has('active_clinic_id')
+                        ? \App\Models\Clinic::find(session('active_clinic_id'))
+                        : (auth()->user()?->clinic ?: \App\Models\Clinic::first());
+                    $headerClinicName = ($headerClinic && !empty(trim($headerClinic->name ?? '')))
+                        ? $headerClinic->name
+                        : 'Sistem Klinik';
+                    $headerClinicLogo = $headerClinic?->logo_path;
+                    $headerDefaultLogo = asset('admin/images/logo/hospital.png');
+                    $mobileLogo = ($headerClinicLogo && \Illuminate\Support\Facades\Storage::disk('public')->exists($headerClinicLogo))
+                        ? asset('storage/' . $headerClinicLogo)
+                        : ($headerClinicLogo ? asset('storage/' . $headerClinicLogo) : $headerDefaultLogo);
                 @endphp
                 <img class="h-7 w-7 object-contain rounded-md" 
                     src="{{ $mobileLogo }}" 
                     onerror="this.src='{{ asset('admin/images/logo/hospital.png') }}'" 
-                    alt="Logo">
-                <span class="text-xs font-black tracking-tight text-gray-800 dark:text-white truncate max-w-[130px] sm:max-w-xs">
-                    {{ Str::limit(auth()->user()->clinic?->name ?? 'Sport Therapy', 16) }}
+                    alt="{{ $headerClinicName }}">
+                <span class="text-xs font-black tracking-tight text-gray-800 dark:text-white truncate max-w-[130px] sm:max-w-xs" title="{{ $headerClinicName }}">
+                    {{ Str::limit($headerClinicName, 18) }}
                 </span>
             </a>
         </div>
