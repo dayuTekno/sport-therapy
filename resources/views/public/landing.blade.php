@@ -18,6 +18,13 @@
     <link rel="canonical" href="{{ url('/') }}">
     <meta name="theme-color" content="#2563eb">
 
+    {{-- Favicon & Touch Icons --}}
+    <link rel="icon" type="image/svg+xml" href="{{ asset('images/logo-icon.svg') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon-32x32.png') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('favicon-16x16.png') }}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('apple-touch-icon.png') }}">
+    <link rel="manifest" href="{{ asset('site.webmanifest') }}">
+
     {{-- Open Graph / Facebook / WhatsApp / Telegram --}}
     <meta property="og:type" content="website">
     <meta property="og:url" content="{{ url('/') }}">
@@ -25,17 +32,17 @@
     <meta property="og:locale" content="id_ID">
     <meta property="og:title" content="Smart Clinic Therapy — Platform SaaS Manajemen Klinik Fisioterapi & Olahraga Modern">
     <meta property="og:description" content="Transformasi digital klinik fisioterapi dan cedera olahraga: rekam medis berjenjang SOAP, booking WhatsApp instan, manajemen kasir & inventori alat terapi.">
-    <meta property="og:image" content="{{ asset('images/logo-icon.svg') }}">
-    <meta property="og:image:width" content="1200">
-    <meta property="og:image:height" content="630">
+    <meta property="og:image" content="{{ asset('android-chrome-512x512.png') }}">
+    <meta property="og:image:width" content="512">
+    <meta property="og:image:height" content="512">
     <meta property="og:image:alt" content="Smart Clinic Therapy Platform">
 
     {{-- Twitter Card --}}
-    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:card" content="summary">
     <meta name="twitter:url" content="{{ url('/') }}">
     <meta name="twitter:title" content="Smart Clinic Therapy — SaaS Manajemen Klinik Fisioterapi & Olahraga">
     <meta name="twitter:description" content="Platform cloud multi-tenant untuk klinik fisioterapi, rehabilitasi cedera olahraga, reservasi WhatsApp, dan rekam medis digital.">
-    <meta name="twitter:image" content="{{ asset('images/logo-icon.svg') }}">
+    <meta name="twitter:image" content="{{ asset('android-chrome-512x512.png') }}">
 
     {{-- Structured Data: JSON-LD (Schema.org) --}}
     <script type="application/ld+json">
@@ -157,11 +164,7 @@
             
             {{-- Brand Logo --}}
             <a href="{{ url('/') }}" class="flex items-center gap-3 group">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-700 via-blue-600 to-indigo-600 flex items-center justify-center text-white shadow-md shadow-blue-500/25 group-hover:scale-105 transition-transform duration-200">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"/>
-                    </svg>
-                </div>
+                <img src="{{ asset('images/logo-icon.svg') }}" alt="Smart Clinic Therapy Logo" class="w-10 h-10 rounded-xl shadow-md shadow-blue-500/25 group-hover:scale-105 transition-transform duration-200 object-contain">
                 <div>
                     <span class="text-xl font-extrabold tracking-tight text-slate-900 flex items-center leading-tight">
                         Smart Clinic <span class="text-blue-600">Therapy</span>
@@ -977,9 +980,7 @@
                 {{-- Col 1: Identity & Contact info --}}
                 <div class="md:col-span-2 space-y-4">
                     <div class="flex items-center gap-3">
-                        <div class="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center text-white font-bold text-base">
-                            ⚡
-                        </div>
+                        <img src="{{ asset('images/logo-icon.svg') }}" alt="Logo" class="w-9 h-9 rounded-xl object-contain shadow-sm">
                         <span class="text-lg font-black tracking-tight text-white">Smart Clinic <span class="text-blue-500">Therapy</span></span>
                     </div>
                     <p class="text-slate-400 max-w-sm leading-relaxed">

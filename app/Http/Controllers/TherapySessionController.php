@@ -490,10 +490,11 @@ class TherapySessionController extends Controller
         $signerName = $request->input('signer_name', $clinic?->signer_name ?: ($session->therapist?->full_name ?: 'Iyon Pramulo, S.Or, M.Pd, AIFO'));
         $signerTitle = $request->input('signer_title', $clinic?->signer_title ?: 'Sport Therapis Pemeriksa');
 
-        // 6. Konversi Gambar ke Base64 untuk kompatibilitas DomPDF
         $logoBase64 = null;
         if ($clinic?->logo_path && file_exists(storage_path('app/public/' . $clinic->logo_path))) {
             $logoBase64 = 'data:image/' . pathinfo($clinic->logo_path, PATHINFO_EXTENSION) . ';base64,' . base64_encode(file_get_contents(storage_path('app/public/' . $clinic->logo_path)));
+        } elseif (file_exists(public_path('icons/hospital.png'))) {
+            $logoBase64 = 'data:image/png;base64,' . base64_encode(file_get_contents(public_path('icons/hospital.png')));
         }
 
         $stampBase64 = null;

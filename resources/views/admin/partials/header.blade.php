@@ -27,14 +27,14 @@
                         ? $headerClinic->name
                         : 'Sistem Klinik';
                     $headerClinicLogo = $headerClinic?->logo_path;
-                    $headerDefaultLogo = asset('admin/images/logo/hospital.png');
+                    $headerDefaultLogo = asset('images/logo-icon.svg');
                     $mobileLogo = ($headerClinicLogo && \Illuminate\Support\Facades\Storage::disk('public')->exists($headerClinicLogo))
                         ? asset('storage/' . $headerClinicLogo)
                         : ($headerClinicLogo ? asset('storage/' . $headerClinicLogo) : $headerDefaultLogo);
                 @endphp
-                <img class="h-7 w-7 object-contain rounded-md" 
+                <img class="h-7 w-7 object-contain rounded-lg" 
                     src="{{ $mobileLogo }}" 
-                    onerror="this.src='{{ asset('admin/images/logo/hospital.png') }}'" 
+                    onerror="this.src='{{ asset('images/logo-icon.svg') }}'" 
                     alt="{{ $headerClinicName }}">
                 <span class="text-xs font-black tracking-tight text-gray-800 dark:text-white truncate max-w-[130px] sm:max-w-xs" title="{{ $headerClinicName }}">
                     {{ Str::limit($headerClinicName, 18) }}

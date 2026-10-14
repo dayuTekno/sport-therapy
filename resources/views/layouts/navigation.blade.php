@@ -5,8 +5,9 @@
             <div class="flex">
                 <!-- Logo -->
                 <div class="shrink-0 flex items-center">
-                    <a href="{{ route('dashboard') }}">
-                        <x-application-logo class="block h-9 w-auto fill-current text-gray-800 dark:text-gray-200" />
+                    <a href="{{ route('dashboard') }}" class="flex items-center gap-2.5">
+                        <x-application-logo class="block h-9 w-9 rounded-xl shadow-xs" />
+                        <span class="text-sm font-extrabold text-gray-900 dark:text-white">Smart Clinic <span class="text-blue-600">Therapy</span></span>
                     </a>
                 </div>
 

@@ -16,6 +16,13 @@
     <link rel="canonical" href="{{ route('register.clinic') }}">
     <meta name="theme-color" content="#2563eb">
 
+    {{-- Favicon & Touch Icons --}}
+    <link rel="icon" type="image/svg+xml" href="{{ asset('images/logo-icon.svg') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon-32x32.png') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('favicon-16x16.png') }}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('apple-touch-icon.png') }}">
+    <link rel="manifest" href="{{ asset('site.webmanifest') }}">
+
     {{-- Open Graph / Facebook / WhatsApp --}}
     <meta property="og:type" content="website">
     <meta property="og:url" content="{{ route('register.clinic') }}">
@@ -23,13 +30,13 @@
     <meta property="og:locale" content="id_ID">
     <meta property="og:title" content="Daftarkan Klinik Mitra Baru — Smart Clinic Therapy">
     <meta property="og:description" content="Mulai {{ $trialDays }} hari uji coba gratis platform manajemen klinik fisioterapi modern tanpa kartu kredit.">
-    <meta property="og:image" content="{{ asset('images/logo-icon.svg') }}">
+    <meta property="og:image" content="{{ asset('android-chrome-512x512.png') }}">
 
     {{-- Twitter Card --}}
     <meta name="twitter:card" content="summary">
     <meta name="twitter:title" content="Daftarkan Klinik Mitra Baru — Smart Clinic Therapy">
     <meta name="twitter:description" content="Mulai {{ $trialDays }} hari uji coba gratis platform manajemen klinik fisioterapi modern tanpa kartu kredit.">
-    <meta name="twitter:image" content="{{ asset('images/logo-icon.svg') }}">
+    <meta name="twitter:image" content="{{ asset('android-chrome-512x512.png') }}">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -44,9 +51,7 @@
     <div class="max-w-xl w-full bg-white rounded-3xl shadow-xl border border-gray-100 p-8 sm:p-10">
         {{-- Header Form --}}
         <div class="text-center mb-8">
-            <div class="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-blue-600 text-white font-black text-2xl shadow-md shadow-blue-500/25 mb-3">
-                ⚡
-            </div>
+            <img src="{{ asset('images/logo-icon.svg') }}" alt="Logo" class="inline-block w-14 h-14 rounded-2xl shadow-md shadow-blue-500/25 mb-3 object-contain">
             <h1 class="text-2xl font-black text-gray-900 tracking-tight">Daftarkan Klinik Terapi Anda</h1>
             <p class="text-xs text-gray-500 mt-1">Dapatkan akses langsung ke platform PaaS Smart Clinic Therapy dengan <strong>{{ $trialDays }} hari masa uji coba gratis</strong> tanpa kartu kredit.</p>
         </div>

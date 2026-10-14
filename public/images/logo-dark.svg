@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 48" width="260" height="48" fill="none">
+  <defs>
+    <linearGradient id="logoDarkBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00E5FF"/>
+      <stop offset="28%" stop-color="#0284C7"/>
+      <stop offset="70%" stop-color="#1D4ED8"/>
+      <stop offset="100%" stop-color="#1E3A8A"/>
+    </linearGradient>
+    <radialGradient id="logoDarkGlow" cx="22%" cy="18%" r="65%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.32"/>
+      <stop offset="60%" stop-color="#FFFFFF" stop-opacity="0.04"/>
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="logoDarkWave1" x1="20%" y1="90%" x2="80%" y2="10%">
+      <stop offset="0%" stop-color="#00F5FF"/>
+      <stop offset="50%" stop-color="#38BDF8"/>
+      <stop offset="100%" stop-color="#67E8F9"/>
+    </linearGradient>
+    <linearGradient id="logoDarkWave2" x1="10%" y1="80%" x2="90%" y2="20%">
+      <stop offset="0%" stop-color="#06B6D4"/>
+      <stop offset="100%" stop-color="#E0F2FE"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Left Icon Emblem -->
+  <g transform="translate(4, 2) scale(0.0859)">
+    <rect x="16" y="16" width="480" height="480" rx="114" fill="url(#logoDarkBg)"/>
+    <rect x="16" y="16" width="480" height="480" rx="114" fill="url(#logoDarkGlow)"/>
+    <rect x="18" y="18" width="476" height="476" rx="112" fill="none" stroke="#FFFFFF" stroke-opacity="0.25" stroke-width="3"/>
+    
+    <path d="M 216 112 C 216 103.16 223.16 96 232 96 L 280 96 C 288.84 96 296 103.16 296 112 L 296 216 L 400 216 C 408.84 216 416 223.16 416 232 L 416 280 C 416 288.84 408.84 296 400 296 L 296 296 L 296 400 C 296 408.84 288.84 416 280 416 L 232 416 C 223.16 416 216 408.84 216 400 L 216 296 L 112 296 C 103.16 296 96 288.84 96 280 L 96 232 C 96 223.16 103.16 216 112 216 L 216 216 Z"
+          fill="none" stroke="#FFFFFF" stroke-width="30" stroke-linejoin="round" stroke-linecap="round"/>
+    
+    <path d="M 180 440 C 160 370, 185 295, 240 250 C 290 210, 335 155, 305 60 C 335 125, 315 195, 265 240 C 215 285, 185 360, 205 435 Z" fill="url(#logoDarkWave1)"/>
+    <path d="M 195 385 C 190 320, 220 265, 270 220 C 320 175, 345 130, 330 90 C 350 140, 335 185, 285 230 C 235 275, 210 330, 215 380 Z" fill="url(#logoDarkWave2)" opacity="0.9"/>
+  </g>
+
+  <!-- Typography: Dark Mode Text -->
+  <text x="56" y="24" font-family="'Plus Jakarta Sans', system-ui, -apple-system, sans-serif" font-size="16" font-weight="800" fill="#FFFFFF" letter-spacing="-0.02em">
+    Smart Clinic <tspan fill="#38BDF8">Therapy</tspan>
+  </text>
+  <text x="56" y="38" font-family="'Plus Jakarta Sans', system-ui, -apple-system, sans-serif" font-size="9" font-weight="700" fill="#94A3B8" letter-spacing="0.08em">
+    SPORT &amp; PHYSIO SAAS
+  </text>
+</svg>
