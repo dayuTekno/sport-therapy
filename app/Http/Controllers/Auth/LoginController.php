@@ -26,7 +26,7 @@ class LoginController extends Controller
      *
      * @var string
      */
-    protected $redirectTo = '/home';
+    protected $redirectTo = '/admin/dashboard';
 
     /**
      * Maximum login attempts allowed before throttling.
@@ -58,14 +58,18 @@ class LoginController extends Controller
     {
         $user = Auth::user();
 
-        if ($user->hasRole('admin')) {
+        if ($user && ($user->isSaasAdmin() || $user->hasRole('saas_admin'))) {
+            return '/admin/saas/dashboard';
+        }
+
+        if ($user && ($user->hasRole('admin') || $user->hasRole('operator') || $user->isClinicAdmin() || $user->isClinicOperator())) {
             return '/admin/dashboard';
         }
 
-        if ($user->hasRole('user')) {
+        if ($user && $user->hasRole('user')) {
             return '/dashboard';
         }
 
-        return '/home';
+        return '/admin/dashboard';
     }
 }

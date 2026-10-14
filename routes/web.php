@@ -35,6 +35,12 @@ Route::get('/subscription-expired', [App\Http\Controllers\SubscriptionExpiredCon
 Route::get('/dashboard', [App\Http\Controllers\HomeController::class, 'index'])->name('dashboard');
 Route::get('/admin/dashboard', [App\Http\Controllers\HomeController::class, 'index'])->name('admin.dashboard');
 Route::get('/admin', [App\Http\Controllers\HomeController::class, 'index'])->name('admin');
+Route::get('/home', function () {
+    if (auth()->check() && auth()->user()->isSaasAdmin()) {
+        return redirect()->route('saas.dashboard');
+    }
+    return redirect()->route('admin.dashboard');
+})->name('home');
 
 Route::get('antrian', [AntrianController::class, 'index'])->name('antrian');
 Route::post('antrian/generate', [AntrianController::class, 'generate'])->name('antrian.generate');
