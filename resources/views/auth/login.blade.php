@@ -11,7 +11,10 @@
 
                 {{-- Mobile Brand Header --}}
                 <div class="mb-6 lg:hidden flex items-center gap-3">
-                    <img class="w-10 h-10 rounded-xl object-contain shadow-md shadow-blue-500/20" src="{{ asset('images/logo-icon.svg') }}" alt="Logo">
+                    <img class="w-10 h-10 rounded-xl object-contain shadow-md shadow-blue-500/20" 
+                        src="{{ asset('images/logo-icon.svg') }}" 
+                        onerror="this.onerror=null; this.src='{{ asset('admin/images/logo/logo-icon.svg') }}';" 
+                        alt="Logo">
                     <div>
                         <h2 class="text-base font-black tracking-tight text-gray-900 dark:text-white">Smart Clinic <span class="text-blue-600">Therapy</span></h2>
                         <p class="text-[10px] text-gray-500 dark:text-gray-400 font-medium">Sistem Rumah Terapi</p>
@@ -118,9 +121,10 @@
         </div>
 
         <!-- RIGHT: FULL IMAGE (DESKTOP ONLY) -->
-        <div class="relative hidden lg:block w-1/2 h-full min-h-[100dvh]">
+        <div class="relative hidden lg:block w-1/2 h-full min-h-[100dvh] bg-slate-900 overflow-hidden">
             <!-- Background Image -->
-            <img src="{{ asset('storage/images/klinik.jpg') }}" alt="Klinik"
+            <img src="{{ asset('images/klinik.jpg') }}" alt="Klinik"
+                onerror="this.onerror=null; this.src='{{ asset('storage/images/klinik.jpg') }}';"
                 class="absolute inset-0 w-full h-full object-cover">
 
             <!-- Overlay Gradient -->
@@ -128,7 +132,10 @@
 
             <!-- Content -->
             <div class="relative z-10 flex flex-col items-center justify-center h-full text-center px-8">
-                <img src="{{ asset('images/logo-icon.svg') }}" alt="Smart Clinic Therapy Logo" class="w-20 h-20 rounded-3xl shadow-2xl border border-white/20 mb-6 object-contain">
+                <img src="{{ asset('images/logo-icon.svg') }}" 
+                    onerror="this.onerror=null; this.src='{{ asset('admin/images/logo/logo-icon.svg') }}';" 
+                    alt="Smart Clinic Therapy Logo" 
+                    class="w-20 h-20 rounded-3xl shadow-2xl border border-white/20 mb-6 object-contain">
                 <h2 class="text-3xl lg:text-4xl font-extrabold text-white mb-3 tracking-tight">
                     Smart Clinic Therapy SaaS Platform
                 </h2>
