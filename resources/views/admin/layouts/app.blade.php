@@ -45,7 +45,7 @@ alertType = 'error';
     {{-- Overlay for mobile sidebar --}}
     @include('admin.partials.overlay')
 
-    <div class="flex h-screen overflow-hidden">
+    <div class="flex h-screen h-[100dvh] overflow-hidden">
         {{-- Sidebar --}}
         @include('admin.partials.sidebar')
 

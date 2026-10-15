@@ -38,7 +38,7 @@
     <meta property="og:image:alt" content="Smart Clinic Therapy Platform">
 
     {{-- Twitter Card --}}
-    <meta name="twitter:card" content="summary">
+    <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:url" content="{{ url('/') }}">
     <meta name="twitter:title" content="Smart Clinic Therapy — SaaS Manajemen Klinik Terapi & Olahraga">
     <meta name="twitter:description" content="Platform cloud multi-tenant untuk klinik terapi, rehabilitasi cedera olahraga, reservasi WhatsApp, dan rekam medis digital.">

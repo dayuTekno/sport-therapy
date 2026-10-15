@@ -1,6 +1,6 @@
 <aside x-data="{ selected: null }" :class="sidebarToggle ? 'translate-x-0 lg:w-[90px]' : '-translate-x-full'"
-    class="sidebar fixed left-0 top-0 z-50 flex h-screen w-[290px] max-w-[85vw] flex-col
-           overflow-y-hidden border-r border-gray-200 bg-white px-5
+    class="sidebar fixed left-0 top-0 z-50 flex h-screen h-[100dvh] max-h-screen w-[280px] sm:w-[290px] max-w-[82vw] flex-col
+           overflow-hidden border-r border-gray-200 bg-white px-4 sm:px-5
            dark:border-gray-800 dark:bg-black lg:static lg:translate-x-0 transition-transform duration-300 ease-in-out shadow-2xl lg:shadow-none">
     <!-- HEADER LOGO -->
     @php
@@ -16,7 +16,7 @@
         $defaultLogo = asset('images/logo-icon.svg');
         $logoSrc = ($clinicLogo && \Illuminate\Support\Facades\Storage::disk('public')->exists($clinicLogo))
             ? asset('storage/' . $clinicLogo)
-            : ($clinicLogo ? asset('storage/' . $clinicLogo) : $defaultLogo);
+            : $defaultLogo;
 
         // Branding untuk SaaS Admin (dari CMS)
         $saasBranding = \App\Models\LandingPageSetting::getSection('branding');
@@ -34,24 +34,28 @@
         $headerTagline = $isSaasMode ? $saasPlatformTagline : 'Sistem Rumah Terapi';
         $headerLogoSrc = $isSaasMode ? $saasLogoSrc         : $logoSrc;
     @endphp
-    <div :class="sidebarToggle ? 'justify-between lg:justify-center' : 'justify-between'" class="flex items-center gap-2 pt-6 pb-5 border-b border-gray-100 dark:border-gray-800 lg:border-none">
-        <a href="{{ $isSaasMode ? route('saas.dashboard') : route('dashboard') }}" class="flex items-center gap-3">
+    <div :class="sidebarToggle ? 'justify-between lg:justify-center' : 'justify-between'" 
+         class="flex items-center gap-2 pt-4 pb-3 sm:pt-5 sm:pb-4 border-b border-gray-100 dark:border-gray-800 lg:border-none shrink-0">
+        <a href="{{ $isSaasMode ? route('saas.dashboard') : route('dashboard') }}" 
+           class="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1 lg:flex-initial">
             {{-- LOGO --}}
-            <img class="w-[40px] h-[40px] object-contain rounded-xl shrink-0 shadow-xs" 
+            <img class="w-8 h-8 sm:w-9 sm:h-9 object-contain rounded-xl shrink-0 shadow-2xs" 
                 src="{{ $headerLogoSrc }}" 
+                width="36" height="36"
+                style="width: 36px; height: 36px; max-width: 36px; max-height: 36px;"
                 onerror="this.src='{{ asset('images/logo-icon.svg') }}'"
                 alt="{{ $headerName }}" />
 
-            {{-- TEXT --}}
-            <div class="flex flex-col min-w-0" :class="sidebarToggle ? 'hidden' : ''">
-                <span class="text-sm font-black tracking-tight text-gray-900 dark:text-white whitespace-nowrap truncate max-w-[170px]" title="{{ $headerName }}">
+            {{-- TEXT: Selalu tampil di drawer mobile, disembunyikan hanya saat desktop collapse --}}
+            <div class="flex flex-col min-w-0" :class="sidebarToggle ? 'lg:hidden' : ''">
+                <span class="text-xs sm:text-sm font-black tracking-tight text-gray-900 dark:text-white whitespace-nowrap truncate max-w-[160px] sm:max-w-[170px]" title="{{ $headerName }}">
                     @if($isSaasMode)
-                        {{ Str::limit($headerName, 18) }} <span class="text-blue-600 text-xs font-bold uppercase tracking-wider">SaaS</span>
+                        {{ Str::limit($headerName, 18) }} <span class="text-blue-600 text-[10px] font-bold uppercase tracking-wider">SaaS</span>
                     @else
                         {{ Str::limit($headerName, 18) }}
                     @endif
                 </span>
-                <span class="text-[10px] text-gray-400 font-medium">
+                <span class="text-[10px] text-gray-400 font-medium truncate">
                     {{ $headerTagline }}
                 </span>
             </div>
@@ -59,23 +63,17 @@
 
         {{-- CLOSE BUTTON ON MOBILE --}}
         <button type="button" @click="sidebarToggle = false" 
-                class="lg:hidden p-2 text-gray-500 hover:text-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition"
+                class="lg:hidden p-1.5 text-gray-400 hover:text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition shrink-0"
                 aria-label="Tutup Menu">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
             </svg>
         </button>
-
-        {{-- ICON SAAT SIDEBAR COLLAPSE --}}
-        <img class="logo-icon w-[32px] h-[32px] object-contain rounded-lg" :class="sidebarToggle ? 'lg:block' : 'hidden'"
-            src="{{ $headerLogoSrc }}" 
-            onerror="this.src='{{ asset('images/logo-icon.svg') }}'"
-            alt="{{ $headerName }}" />
     </div>
 
     {{-- IMPERSONATION BANNER DI SIDEBAR JIKA SEDANG AKTIF --}}
     @if(session()->has('active_clinic_id'))
-        <div class="mb-4 p-3 bg-amber-500/10 border border-amber-500/30 rounded-xl text-amber-800 dark:text-amber-400 text-xs" :class="sidebarToggle ? 'hidden' : ''">
+        <div class="mb-3 p-3 bg-amber-500/10 border border-amber-500/30 rounded-xl text-amber-800 dark:text-amber-400 text-xs shrink-0" :class="sidebarToggle ? 'lg:hidden' : ''">
             <div class="font-bold flex items-center justify-between gap-1 mb-1">
                 <span class="flex items-center gap-1">👁️ Mode Tinjau</span>
                 <span class="text-[9px] uppercase font-extrabold px-1.5 py-0.5 rounded bg-amber-200 text-amber-900">Aktif</span>
@@ -97,8 +95,8 @@
     @endif
 
     <!-- MENU CONTAINER -->
-    <div class="flex flex-col overflow-y-auto no-scrollbar">
-        <nav>
+    <div class="flex-1 min-h-0 overflow-y-auto overscroll-contain no-scrollbar py-3">
+        <nav class="pb-24 sm:pb-12">
 
             {{-- ========================================================================= --}}
             {{-- KONDISI 1: ADMINISTRATOR SAAS (TIDAK SEDANG IMPERSONATE KLINIK)          --}}
@@ -256,7 +254,7 @@
 
                 @if(($activeClinic?->isSubscriptionExpired() ?? (auth()->user()->clinic?->isSubscriptionExpired() ?? false)) && !auth()->user()->isSaasAdmin())
                     {{-- MENU TERKUNCI KARENA LANGGANAN HABIS --}}
-                    <div class="p-4 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 rounded-2xl text-center my-4" :class="sidebarToggle ? 'hidden' : ''">
+                    <div class="p-4 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 rounded-2xl text-center my-4" :class="sidebarToggle ? 'lg:hidden' : ''">
                         <div class="text-3xl mb-2">🔒</div>
                         <h4 class="font-bold text-xs text-rose-800 dark:text-rose-300 uppercase tracking-wider mb-1">Menu Terkunci</h4>
                         <p class="text-[10px] text-gray-500 dark:text-gray-400 mb-3 leading-relaxed">

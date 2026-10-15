@@ -18,26 +18,44 @@
             </button>
 
             <!-- Logo (Mobile) -->
-            <a href="{{ route('dashboard') }}" class="lg:hidden flex items-center gap-2">
-                @php
-                    $headerClinic = session()->has('active_clinic_id')
-                        ? \App\Models\Clinic::find(session('active_clinic_id'))
-                        : (auth()->user()?->clinic ?: \App\Models\Clinic::first());
-                    $headerClinicName = ($headerClinic && !empty(trim($headerClinic->name ?? '')))
-                        ? $headerClinic->name
-                        : 'Sistem Klinik';
-                    $headerClinicLogo = $headerClinic?->logo_path;
-                    $headerDefaultLogo = asset('images/logo-icon.svg');
-                    $mobileLogo = ($headerClinicLogo && \Illuminate\Support\Facades\Storage::disk('public')->exists($headerClinicLogo))
-                        ? asset('storage/' . $headerClinicLogo)
-                        : ($headerClinicLogo ? asset('storage/' . $headerClinicLogo) : $headerDefaultLogo);
-                @endphp
-                <img class="h-7 w-7 object-contain rounded-lg" 
-                    src="{{ $mobileLogo }}" 
+            @php
+                $headerClinic = session()->has('active_clinic_id')
+                    ? \App\Models\Clinic::find(session('active_clinic_id'))
+                    : (auth()->user()?->clinic ?: \App\Models\Clinic::first());
+                $headerClinicName = ($headerClinic && !empty(trim($headerClinic->name ?? '')))
+                    ? $headerClinic->name
+                    : 'Sistem Klinik';
+                $headerClinicLogo = $headerClinic?->logo_path;
+                $headerDefaultLogo = asset('images/logo-icon.svg');
+                $mobileLogo = ($headerClinicLogo && \Illuminate\Support\Facades\Storage::disk('public')->exists($headerClinicLogo))
+                    ? asset('storage/' . $headerClinicLogo)
+                    : $headerDefaultLogo;
+
+                $headerSaasBranding = \App\Models\LandingPageSetting::getSection('branding');
+                $headerSaasJson = $headerSaasBranding?->content_json ?? [];
+                $headerSaasName = !empty($headerSaasJson['platform_name']) ? $headerSaasJson['platform_name'] : 'Smart Clinic Therapy';
+                $headerSaasLogoPath = $headerSaasJson['logo_path'] ?? null;
+                $headerSaasLogoSrc = ($headerSaasLogoPath && \Illuminate\Support\Facades\Storage::disk('public')->exists($headerSaasLogoPath))
+                    ? asset('storage/' . $headerSaasLogoPath)
+                    : $headerDefaultLogo;
+
+                $isSaasHeader = auth()->user()->isSaasAdmin() && !session()->has('active_clinic_id');
+                $mobileDisplayName = $isSaasHeader ? $headerSaasName : $headerClinicName;
+                $mobileDisplayLogo = $isSaasHeader ? $headerSaasLogoSrc : $mobileLogo;
+                $mobileDashboardRoute = $isSaasHeader ? route('saas.dashboard') : route('dashboard');
+            @endphp
+            <a href="{{ $mobileDashboardRoute }}" class="lg:hidden flex items-center gap-2 min-w-0">
+                <img class="w-7 h-7 shrink-0 object-contain rounded-lg shadow-2xs" 
+                    src="{{ $mobileDisplayLogo }}" 
+                    width="28" height="28"
+                    style="width: 28px; height: 28px; max-width: 28px; max-height: 28px;"
                     onerror="this.src='{{ asset('images/logo-icon.svg') }}'" 
-                    alt="{{ $headerClinicName }}">
-                <span class="text-xs font-black tracking-tight text-gray-800 dark:text-white truncate max-w-[130px] sm:max-w-xs" title="{{ $headerClinicName }}">
-                    {{ Str::limit($headerClinicName, 18) }}
+                    alt="{{ $mobileDisplayName }}">
+                <span class="text-xs font-black tracking-tight text-gray-800 dark:text-white truncate max-w-[130px] sm:max-w-xs" title="{{ $mobileDisplayName }}">
+                    {{ Str::limit($mobileDisplayName, 18) }}
+                    @if($isSaasHeader)
+                        <span class="text-blue-600 text-[10px] font-bold uppercase tracking-wider">SaaS</span>
+                    @endif
                 </span>
             </a>
         </div>

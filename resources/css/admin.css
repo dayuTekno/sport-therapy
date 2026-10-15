@@ -188,7 +188,7 @@ layer(base);
 }
 
 @utility menu-item {
-  @apply text-theme-sm relative flex items-center gap-3 rounded-lg px-3 py-2 font-medium;
+  @apply text-theme-sm relative flex items-center gap-3 rounded-lg px-3 py-2.5 sm:py-2 font-medium;
 }
 
 @utility menu-item-active {
@@ -287,35 +287,37 @@ layer(base);
   }
 }
 
-.sidebar:hover {
-  width: 290px;
-}
-.sidebar:hover .logo {
-  display: block;
-}
-.sidebar:hover .logo-icon {
-  display: none;
-}
-.sidebar:hover .sidebar-header {
-  justify-content: space-between;
-}
-.sidebar:hover .menu-group-title {
-  display: block;
-}
-.sidebar:hover .menu-group-icon {
-  display: none;
-}
+@media (min-width: 1024px) {
+  .sidebar:hover {
+    width: 290px;
+  }
+  .sidebar:hover .logo {
+    display: block;
+  }
+  .sidebar:hover .logo-icon {
+    display: none;
+  }
+  .sidebar:hover .sidebar-header {
+    justify-content: space-between;
+  }
+  .sidebar:hover .menu-group-title {
+    display: block;
+  }
+  .sidebar:hover .menu-group-icon {
+    display: none;
+  }
 
-.sidebar:hover .menu-item-text {
-  display: inline;
-}
+  .sidebar:hover .menu-item-text {
+    display: inline;
+  }
 
-.sidebar:hover .menu-item-arrow {
-  display: block;
-}
+  .sidebar:hover .menu-item-arrow {
+    display: block;
+  }
 
-.sidebar:hover .menu-dropdown {
-  display: flex;
+  .sidebar:hover .menu-dropdown {
+    display: flex;
+  }
 }
 
 .tableCheckbox:checked ~ span span {
