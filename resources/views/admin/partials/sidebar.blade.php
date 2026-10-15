@@ -17,30 +17,42 @@
         $logoSrc = ($clinicLogo && \Illuminate\Support\Facades\Storage::disk('public')->exists($clinicLogo))
             ? asset('storage/' . $clinicLogo)
             : ($clinicLogo ? asset('storage/' . $clinicLogo) : $defaultLogo);
+
+        // Branding untuk SaaS Admin (dari CMS)
+        $saasBranding = \App\Models\LandingPageSetting::getSection('branding');
+        $saasBrandingJson = $saasBranding?->content_json ?? [];
+        $saasPlatformName    = !empty($saasBrandingJson['platform_name'])    ? $saasBrandingJson['platform_name']    : 'Smart Clinic Therapy';
+        $saasPlatformTagline = !empty($saasBrandingJson['platform_tagline']) ? $saasBrandingJson['platform_tagline'] : 'Platform Control Center';
+        $saasLogoPath = $saasBrandingJson['logo_path'] ?? null;
+        $saasLogoSrc  = ($saasLogoPath && \Illuminate\Support\Facades\Storage::disk('public')->exists($saasLogoPath))
+            ? asset('storage/' . $saasLogoPath)
+            : $defaultLogo;
+
+        // Tentukan data header yang tampil berdasarkan mode
+        $isSaasMode = auth()->user()->isSaasAdmin() && !session()->has('active_clinic_id');
+        $headerName    = $isSaasMode ? $saasPlatformName    : $clinicName;
+        $headerTagline = $isSaasMode ? $saasPlatformTagline : 'Sistem Rumah Terapi';
+        $headerLogoSrc = $isSaasMode ? $saasLogoSrc         : $logoSrc;
     @endphp
     <div :class="sidebarToggle ? 'justify-between lg:justify-center' : 'justify-between'" class="flex items-center gap-2 pt-6 pb-5 border-b border-gray-100 dark:border-gray-800 lg:border-none">
-        <a href="{{ auth()->user()->isSaasAdmin() && !session()->has('active_clinic_id') ? route('saas.dashboard') : route('dashboard') }}" class="flex items-center gap-3">
+        <a href="{{ $isSaasMode ? route('saas.dashboard') : route('dashboard') }}" class="flex items-center gap-3">
             {{-- LOGO --}}
             <img class="w-[40px] h-[40px] object-contain rounded-xl shrink-0 shadow-xs" 
-                src="{{ $logoSrc }}" 
+                src="{{ $headerLogoSrc }}" 
                 onerror="this.src='{{ asset('images/logo-icon.svg') }}'"
-                alt="{{ $clinicName }}" />
+                alt="{{ $headerName }}" />
 
             {{-- TEXT --}}
             <div class="flex flex-col min-w-0" :class="sidebarToggle ? 'hidden' : ''">
-                <span class="text-sm font-black tracking-tight text-gray-900 dark:text-white whitespace-nowrap truncate max-w-[170px]" title="{{ $clinicName }}">
-                    @if(auth()->user()->isSaasAdmin() && !session()->has('active_clinic_id'))
-                        {{ Str::limit($clinicName, 18) }} <span class="text-blue-600 text-xs font-bold uppercase tracking-wider">SaaS</span>
+                <span class="text-sm font-black tracking-tight text-gray-900 dark:text-white whitespace-nowrap truncate max-w-[170px]" title="{{ $headerName }}">
+                    @if($isSaasMode)
+                        {{ Str::limit($headerName, 18) }} <span class="text-blue-600 text-xs font-bold uppercase tracking-wider">SaaS</span>
                     @else
-                        {{ Str::limit($clinicName, 18) }}
+                        {{ Str::limit($headerName, 18) }}
                     @endif
                 </span>
                 <span class="text-[10px] text-gray-400 font-medium">
-                    @if(auth()->user()->isSaasAdmin() && !session()->has('active_clinic_id'))
-                        Platform Control Center
-                    @else
-                        Sistem Rumah Terapi
-                    @endif
+                    {{ $headerTagline }}
                 </span>
             </div>
         </a>
@@ -56,9 +68,9 @@
 
         {{-- ICON SAAT SIDEBAR COLLAPSE --}}
         <img class="logo-icon w-[32px] h-[32px] object-contain rounded-lg" :class="sidebarToggle ? 'lg:block' : 'hidden'"
-            src="{{ $logoSrc }}" 
+            src="{{ $headerLogoSrc }}" 
             onerror="this.src='{{ asset('images/logo-icon.svg') }}'"
-            alt="{{ $clinicName }}" />
+            alt="{{ $headerName }}" />
     </div>
 
     {{-- IMPERSONATION BANNER DI SIDEBAR JIKA SEDANG AKTIF --}}

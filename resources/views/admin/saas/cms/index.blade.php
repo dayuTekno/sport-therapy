@@ -27,22 +27,27 @@
 <div class="space-y-8" x-data="{ activeTab: 'hero' }">
 
     {{-- TAB NAVIGATION --}}
-    <div class="border-b border-gray-200">
-        <nav class="flex space-x-6 text-sm font-bold">
+    <div class="border-b border-gray-200 overflow-x-auto">
+        <nav class="flex space-x-1 sm:space-x-6 text-sm font-bold min-w-max">
             <button @click="activeTab = 'hero'" 
                     :class="activeTab === 'hero' ? 'border-blue-600 text-blue-600 border-b-2' : 'text-gray-500 hover:text-gray-700'"
-                    class="py-3 px-1 transition flex items-center gap-2">
+                    class="py-3 px-1 transition flex items-center gap-2 whitespace-nowrap">
                 <span>⚡</span> Hero Banner Utama
             </button>
             <button @click="activeTab = 'features'" 
                     :class="activeTab === 'features' ? 'border-blue-600 text-blue-600 border-b-2' : 'text-gray-500 hover:text-gray-700'"
-                    class="py-3 px-1 transition flex items-center gap-2">
+                    class="py-3 px-1 transition flex items-center gap-2 whitespace-nowrap">
                 <span>🩺</span> Fitur Unggulan (6 Kartu)
             </button>
             <button @click="activeTab = 'contact'" 
                     :class="activeTab === 'contact' ? 'border-blue-600 text-blue-600 border-b-2' : 'text-gray-500 hover:text-gray-700'"
-                    class="py-3 px-1 transition flex items-center gap-2">
+                    class="py-3 px-1 transition flex items-center gap-2 whitespace-nowrap">
                 <span>📱</span> Kontak & Footer Publik
+            </button>
+            <button @click="activeTab = 'branding'" 
+                    :class="activeTab === 'branding' ? 'border-orange-500 text-orange-600 border-b-2' : 'text-gray-500 hover:text-gray-700'"
+                    class="py-3 px-1 transition flex items-center gap-2 whitespace-nowrap">
+                <span>🏷️</span> Branding Header Sidebar
             </button>
         </nav>
     </div>
@@ -246,6 +251,117 @@
         </form>
     </div>
 
+    {{-- 4. BRANDING SIDEBAR HEADER SETTINGS --}}
+    <div x-show="activeTab === 'branding'" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8" style="display: none;">
+        <div class="mb-6 pb-4 border-b border-gray-100 flex items-center justify-between">
+            <div>
+                <h3 class="text-base font-bold text-gray-900">Pengaturan Branding Header Sidebar</h3>
+                <p class="text-xs text-gray-500">Nama platform, tagline, dan logo yang muncul di pojok kiri atas sidebar dashboard admin ketika login sebagai SaaS Administrator.</p>
+            </div>
+            <span class="text-[10px] font-bold uppercase bg-orange-50 text-orange-700 px-2 py-0.5 rounded-full border border-orange-100">
+                Section #4
+            </span>
+        </div>
+
+        <form action="{{ route('saas.cms.branding') }}" method="POST" enctype="multipart/form-data" class="space-y-5 text-xs">
+            @csrf
+
+            {{-- Preview current branding --}}
+            @php
+                $brandJson = $branding->content_json ?? [];
+                $brandLogoPath = $brandJson['logo_path'] ?? null;
+                $brandLogoSrc = $brandLogoPath && \Illuminate\Support\Facades\Storage::disk('public')->exists($brandLogoPath)
+                    ? asset('storage/' . $brandLogoPath)
+                    : asset('images/logo-icon.svg');
+            @endphp
+
+            {{-- Live Preview --}}
+            <div class="p-4 bg-gray-900 rounded-2xl border border-gray-700 flex items-center gap-3 max-w-xs">
+                <img id="brandingPreviewLogo" src="{{ $brandLogoSrc }}" alt="Logo Preview"
+                     class="w-10 h-10 object-contain rounded-xl bg-white p-0.5 shadow shrink-0">
+                <div class="min-w-0">
+                    <p id="brandingPreviewName" class="text-sm font-black text-white truncate max-w-[150px]">
+                        {{ $brandJson['platform_name'] ?? 'Sport Therapist' }}
+                    </p>
+                    <p id="brandingPreviewTagline" class="text-[10px] text-gray-400">
+                        {{ $brandJson['platform_tagline'] ?? 'Platform Control Center' }}
+                    </p>
+                </div>
+            </div>
+            <p class="text-[10px] text-gray-400 italic -mt-2">↑ Live preview sidebar header (tampilan setelah disimpan)</p>
+
+            {{-- Nama Platform --}}
+            <div>
+                <label class="block font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+                    Nama Platform (Header Sidebar) <span class="text-rose-500">*</span>
+                </label>
+                <input type="text" name="platform_name" id="brandingNameInput"
+                       value="{{ old('platform_name', $brandJson['platform_name'] ?? 'Sport Therapist') }}" required
+                       placeholder="Contoh: Smart Clinic Therapy"
+                       class="w-full px-3.5 py-2.5 text-xs border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-400 font-bold text-gray-900 text-sm"
+                       oninput="document.getElementById('brandingPreviewName').textContent = this.value || 'Nama Platform'">
+                <p class="text-[10px] text-gray-400 mt-1">Nama ini akan muncul di header sidebar ketika logged in sebagai SaaS Admin.</p>
+            </div>
+
+            {{-- Tagline --}}
+            <div>
+                <label class="block font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+                    Tagline / Subjudul Sidebar
+                </label>
+                <input type="text" name="platform_tagline" id="brandingTaglineInput"
+                       value="{{ old('platform_tagline', $brandJson['platform_tagline'] ?? 'Platform Control Center') }}"
+                       placeholder="Contoh: Platform Control Center"
+                       class="w-full px-3.5 py-2.5 text-xs border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-400 text-gray-600"
+                       oninput="document.getElementById('brandingPreviewTagline').textContent = this.value || 'Tagline'">
+            </div>
+
+            {{-- Upload Logo --}}
+            <div>
+                <label class="block font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+                    Logo / Icon Sidebar
+                </label>
+                <div class="flex items-start gap-4">
+                    <div class="shrink-0">
+                        <img id="brandingLogoThumb" src="{{ $brandLogoSrc }}"
+                             class="w-16 h-16 object-contain border border-gray-200 rounded-xl bg-gray-50 p-1 shadow-sm">
+                    </div>
+                    <div class="flex-1 space-y-2">
+                        <input type="file" name="logo" id="brandingLogoInput" accept="image/png,image/jpeg,image/jpg,image/svg+xml,image/webp"
+                               class="w-full text-xs border border-dashed border-gray-300 rounded-xl px-3 py-2 bg-gray-50 hover:bg-orange-50 transition file:mr-3 file:text-xs file:font-bold file:bg-orange-100 file:text-orange-700 file:border-0 file:rounded-lg file:px-3 file:py-1"
+                               onchange="previewBrandingLogo(this)">
+                        <p class="text-[10px] text-gray-400">Format: PNG, JPG, SVG, WebP • Maks. 2 MB • Rekomendasi: 256×256px atau 1:1</p>
+
+                        @if($brandLogoPath)
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="checkbox" name="remove_logo" value="1" class="rounded text-rose-500">
+                                <span class="text-[10px] text-rose-600 font-bold">Hapus logo saat ini & gunakan logo default</span>
+                            </label>
+                        @endif
+                    </div>
+                </div>
+            </div>
+
+            <div class="pt-4 flex justify-end">
+                <button type="submit" class="px-6 py-2.5 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-xl shadow-md transition flex items-center gap-2">
+                    <span>💾</span> Simpan Branding Sidebar
+                </button>
+            </div>
+        </form>
+    </div>
+
 </div>
+
+<script>
+function previewBrandingLogo(input) {
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('brandingLogoThumb').src = e.target.result;
+            document.getElementById('brandingPreviewLogo').src = e.target.result;
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+</script>
 
 @endsection

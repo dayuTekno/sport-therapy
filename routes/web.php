@@ -258,5 +258,6 @@ Route::middleware(['auth'])->group(function () {
         Route::post('landing-page/hero', [\App\Http\Controllers\SaasCmsController::class, 'updateHero'])->name('cms.hero');
         Route::post('landing-page/features', [\App\Http\Controllers\SaasCmsController::class, 'updateFeatures'])->name('cms.features');
         Route::post('landing-page/contact', [\App\Http\Controllers\SaasCmsController::class, 'updateContact'])->name('cms.contact');
+        Route::post('landing-page/branding', [\App\Http\Controllers\SaasCmsController::class, 'updateBranding'])->name('cms.branding');
     });
 });
