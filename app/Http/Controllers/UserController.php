@@ -20,26 +20,37 @@ class UserController extends Controller
 
     public function index(Request $request)
     {
-        $query = User::with('roles')->orderBy('created_at', 'desc');
+        $isSaasAdmin = auth()->user()->isSaasAdmin();
 
-        // Jika diakses dari dashboard klinik (atau staf/admin klinik sedang login)
-        // JANGAN tampilkan user SaaS Admin karena merupakan akses tertinggi platform
-        if (auth()->user()->clinic_id || session()->has('active_clinic_id')) {
-            $clinicId = session('active_clinic_id') ?: auth()->user()->clinic_id;
-            $query->where('clinic_id', $clinicId)
-                  ->whereDoesntHave('roles', function ($q) {
-                      $q->where('name', 'saas_admin');
-                  });
-        } elseif (auth()->user()->isSaasAdmin()) {
-            // Jika SaaS Admin sedang berada di luar mode impersonasi (di panel SaaS)
-            if ($request->filled('clinic_id')) {
-                $query->where('clinic_id', $request->clinic_id);
-            }
+        if ($isSaasAdmin && !session()->has('active_clinic_id')) {
+            // SaaS Admin Panel: tampilkan semua user dikelompokkan platform vs klinik
+            $platformUsers = User::with('roles')
+                ->whereNull('clinic_id')
+                ->orderBy('name')
+                ->get();
+
+            $clinicUsers = User::with(['roles', 'clinic'])
+                ->whereNotNull('clinic_id')
+                ->orderBy('clinic_id')
+                ->orderBy('name')
+                ->get()
+                ->groupBy(fn($u) => $u->clinic?->name ?? 'Klinik #' . $u->clinic_id);
+
+            return view('admin.pages.users.index', compact('platformUsers', 'clinicUsers', 'isSaasAdmin'));
         }
 
-        $users = $query->paginate(15);
+        // Dashboard klinik: tampilkan hanya user klinik yang sedang aktif
+        $clinicId = session('active_clinic_id') ?: auth()->user()->clinic_id;
+        $users = User::with('roles')
+            ->where('clinic_id', $clinicId)
+            ->whereDoesntHave('roles', fn($q) => $q->where('name', 'saas_admin'))
+            ->orderBy('name')
+            ->get();
 
-        return view('admin.pages.users.index', compact('users'));
+        $platformUsers = collect();
+        $clinicUsers   = $users->groupBy(fn($u) => 'Klinik Saya');
+
+        return view('admin.pages.users.index', compact('platformUsers', 'clinicUsers', 'isSaasAdmin'));
     }
 
     public function create()
@@ -60,19 +71,19 @@ class UserController extends Controller
         $request->merge(['roles' => $roles]);
 
         $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|max:255|unique:users,email',
+            'name'     => 'required|string|max:255',
+            'email'    => 'required|email|max:255|unique:users,email',
             'password' => 'required|min:6',
-            'roles' => 'nullable|array',
-            'roles.*' => 'in:admin,operator',
+            'roles'    => 'nullable|array',
+            'roles.*'  => 'in:admin,operator',
         ]);
 
         $clinicId = auth()->user()->clinic_id ?: session('active_clinic_id');
 
         $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => bcrypt($request->password),
+            'name'      => $request->name,
+            'email'     => $request->email,
+            'password'  => bcrypt($request->password),
             'clinic_id' => $clinicId,
         ]);
 
@@ -88,48 +99,61 @@ class UserController extends Controller
 
     public function edit(User $user)
     {
-        // Tolak akses jika mencoba mengedit akun Administrator SaaS
-        if ($user->isSaasAdmin() || $user->clinic_id === null) {
-            abort(403, 'Akses ditolak. Administrator SaaS memiliki hak akses tertinggi dan tidak dapat diubah dari dashboard klinik.');
+        $authUser       = auth()->user();
+        $isPlatformUser = is_null($user->clinic_id);
+
+        // Hanya SaaS Admin yang boleh edit user platform
+        if ($isPlatformUser && !$authUser->isSaasAdmin()) {
+            abort(403, 'Akses ditolak. Hanya Administrator Platform yang dapat mengelola user platform.');
         }
 
-        // Pastikan admin klinik hanya dapat mengedit user di kliniknya sendiri
-        if (!auth()->user()->isSaasAdmin()) {
-            $authClinicId = auth()->user()->clinic_id;
-            if ((int) $user->clinic_id !== (int) $authClinicId) {
+        // Admin klinik hanya dapat mengedit user di kliniknya sendiri
+        if (!$authUser->isSaasAdmin() && !$isPlatformUser) {
+            if ((int) $user->clinic_id !== (int) $authUser->clinic_id) {
                 abort(403, 'Akses ditolak. Anda tidak memiliki izin untuk mengelola pengguna klinik ini.');
             }
         }
 
-        // Hanya sediakan role admin dan operator
-        $roles = Role::whereIn('name', ['admin', 'operator'])->get();
-        $userRoles = $user->roles->pluck('name')->intersect(['admin', 'operator'])->values()->toArray();
-        if (empty($userRoles)) {
-            $userRoles = ['operator'];
+        if ($isPlatformUser) {
+            // Role untuk user platform: saas_admin atau operator
+            $availableRoles = Role::whereIn('name', ['saas_admin', 'operator'])->get();
+            $userRoles      = $user->roles->pluck('name')->intersect(['saas_admin', 'operator'])->values()->toArray();
+        } else {
+            // Role untuk user klinik: admin atau operator
+            $availableRoles = Role::whereIn('name', ['admin', 'operator'])->get();
+            $userRoles      = $user->roles->pluck('name')->intersect(['admin', 'operator'])->values()->toArray();
+            if (empty($userRoles)) {
+                $userRoles = ['operator'];
+            }
         }
 
-        return view('admin.pages.users.edit', compact('user', 'roles', 'userRoles'));
+        return view('admin.pages.users.edit', compact('user', 'availableRoles', 'userRoles', 'isPlatformUser'));
     }
 
     public function update(Request $request, User $user)
     {
-        // Tolak akses jika mencoba mengubah akun Administrator SaaS
-        if ($user->isSaasAdmin() || $user->clinic_id === null) {
-            abort(403, 'Akses ditolak. Administrator SaaS memiliki hak akses tertinggi dan tidak dapat diubah dari dashboard klinik.');
+        $authUser       = auth()->user();
+        $isPlatformUser = is_null($user->clinic_id);
+
+        // Hanya SaaS Admin yang boleh update user platform
+        if ($isPlatformUser && !$authUser->isSaasAdmin()) {
+            abort(403, 'Akses ditolak. Hanya Administrator Platform yang dapat mengelola user platform.');
         }
 
-        if (!auth()->user()->isSaasAdmin()) {
-            $authClinicId = auth()->user()->clinic_id;
-            if ((int) $user->clinic_id !== (int) $authClinicId) {
+        if (!$authUser->isSaasAdmin() && !$isPlatformUser) {
+            if ((int) $user->clinic_id !== (int) $authUser->clinic_id) {
                 abort(403, 'Akses ditolak. Anda tidak memiliki izin untuk mengelola pengguna klinik ini.');
             }
         }
 
-        // Fallback roles jika kosong atau tidak dicentang: pertahankan role yang ada atau default operator
+        // Tentukan allowed roles berdasarkan tipe user
+        $allowedRoleValues = $isPlatformUser ? ['saas_admin', 'operator'] : ['admin', 'operator'];
+
+        // Fallback roles jika kosong atau tidak dicentang
         $roles = $request->roles;
         if (empty($roles)) {
-            $existingRoles = $user->roles->pluck('name')->intersect(['admin', 'operator'])->toArray();
-            $roles = !empty($existingRoles) ? $existingRoles : ['operator'];
+            $existingRoles = $user->roles->pluck('name')->intersect($allowedRoleValues)->toArray();
+            $roles         = !empty($existingRoles) ? $existingRoles : ['operator'];
         }
         if (is_string($roles)) {
             $roles = [$roles];
@@ -137,26 +161,25 @@ class UserController extends Controller
         $request->merge(['roles' => $roles]);
 
         $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => ['required', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
+            'name'     => 'required|string|max:255',
+            'email'    => ['required', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
             'password' => 'nullable|min:6',
-            'roles' => 'nullable|array',
-            'roles.*' => 'in:admin,operator',
+            'roles'    => 'nullable|array',
+            'roles.*'  => Rule::in($allowedRoleValues),
         ]);
 
         $updateData = [
-            'name' => $request->name,
+            'name'  => $request->name,
             'email' => $request->email,
         ];
 
-        // Hanya ubah password jika user mengisinya
         if ($request->filled('password')) {
             $updateData['password'] = bcrypt($request->password);
         }
 
         $user->update($updateData);
 
-        $allowedRoles = array_intersect($roles, ['admin', 'operator']);
+        $allowedRoles = array_intersect($roles, $allowedRoleValues);
         if (empty($allowedRoles)) {
             $allowedRoles = ['operator'];
         }
@@ -168,7 +191,7 @@ class UserController extends Controller
     public function destroy(User $user)
     {
         // Larang menghapus Administrator SaaS
-        if ($user->isSaasAdmin() || $user->clinic_id === null) {
+        if ($user->isSaasAdmin()) {
             abort(403, 'Akses ditolak. Administrator SaaS tidak dapat dihapus.');
         }
 
