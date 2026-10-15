@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Script to generate high-impact presentation deck in PPTX format:
-Smart Clinic Therapy - Platform SaaS Manajemen Klinik Fisioterapi & Cedera Olahraga Modern
+Smart Clinic Therapy - Platform SaaS Manajemen Klinik Terapi & Cedera Olahraga Modern
 """
 
 import sys
@@ -95,7 +95,7 @@ def create_deck(filename="Smart_Clinic_Therapy_Presentation.pptx"):
     tf1.word_wrap = True
 
     p = tf1.paragraphs[0]
-    p.text = "PLATFORM DIGITALISASI KLINIK FISIOTERAPI & REHABILITASI"
+    p.text = "PLATFORM DIGITALISASI KLINIK TERAPI & REHABILITASI"
     p.font.size = Pt(12)
     p.font.bold = True
     p.font.color.rgb = RGBColor(96, 165, 250)
@@ -218,7 +218,7 @@ def create_deck(filename="Smart_Clinic_Therapy_Presentation.pptx"):
         ("Akses & Kolaborasi", "Satu file dibuka bergantian; rentan file lock & bentrok versi", "Multi-user realtime (Admisi, Terapis, Kasir) dengan hak akses ketat (RBAC)"),
         ("Penjadwalan & Slot Jam", "Manual; risiko tinggi jadwal terapis bertabrakan", "Otomatis mengunci kuota & jam terapis, no double-booking"),
         ("Notifikasi Pasien", "Harus simpan nomor WhatsApp manual di ponsel staf", "1-Klik kirim konfirmasi jadwal & tiket WhatsApp langsung dari sistem"),
-        ("Protokol Fisioterapi", "Catatan acak; tidak terstruktur; sulit dievaluasi", "Alur berjenjang terstandarisasi (Tahap A Akut s/d D Return to Sport)"),
+        ("Protokol Terapi", "Catatan acak; tidak terstruktur; sulit dievaluasi", "Alur berjenjang terstandarisasi (Tahap A Akut s/d D Return to Sport)"),
         ("Billing & Kasir", "Rumus kalkulasi manual; rentan salah hitung tarif", "Tagihan otomatis per reservasi, cetak struk resmi kasir instan"),
         ("Keamanan & Backup Data", "File tersimpan lokal di 1 PC; risiko hilang sangat tinggi", "Penyimpanan Cloud terenkripsi, backup otomatis, multi-tenant aman")
     ]
@@ -326,16 +326,16 @@ def create_deck(filename="Smart_Clinic_Therapy_Presentation.pptx"):
 
     menus_part1 = [
         ("1. Dashboard Klinik", 
-         "Pusat kendali visual harian pimpinan klinik.\n• Ringkasan pasien hari ini, sesi aktif, dan antrean kasir\n• Statistik utilisasi fisioterapis & kapasitas ruangan\n• Grafik tren pemulihan pasien dan omzet berjalan",
+         "Pusat kendali visual harian pimpinan klinik.\n• Ringkasan pasien hari ini, sesi aktif, dan antrean kasir\n• Statistik utilisasi terapis & kapasitas ruangan\n• Grafik tren pemulihan pasien dan omzet berjalan",
          COLOR_BLUE_MAIN),
         ("2. Buat Reservasi & Antrian", 
          "Pendaftaran pasien baru maupun pasien lama (auto-search by HP).\n• Pemilihan terapis penanggung jawab & slot waktu akurat\n• Penentuan nomor antrean klinik dan cetak tiket admisi\n• Tombol 1-klik kirim jadwal langsung ke WhatsApp pasien",
          COLOR_TEAL_MAIN),
         ("3. Manajemen Reservasi Terapi", 
-         "Monitoring jadwal harian dan status kedatangan pasien.\n• Status: Menunggu Konfirmasi, Dikonfirmasi, Selesai, Dibatalkan\n• Filter berdasarkan tanggal kunjungan dan nama fisioterapis\n• Fitur pembatalan dengan pencatatan alasan resmi",
+         "Monitoring jadwal harian dan status kedatangan pasien.\n• Status: Menunggu Konfirmasi, Dikonfirmasi, Selesai, Dibatalkan\n• Filter berdasarkan tanggal kunjungan dan nama terapis\n• Fitur pembatalan dengan pencatatan alasan resmi",
          COLOR_AMBER_MAIN),
         ("4. Sesi Terapi Pasien (Clinical Engine)", 
-         "Lembar kerja digital fisioterapis saat menangani pasien.\n• Protokol 4 Jenjang (Tahap A Akut s/d Tahap D Return to Sport)\n• Mendukung >1 sesi terapi dalam 1 hari untuk atlet intensif\n• Evaluasi klinis per sesi & tombol 'Advance Stage' (Naik Tahap)",
+         "Lembar kerja digital terapis saat menangani pasien.\n• Protokol 4 Jenjang (Tahap A Akut s/d Tahap D Return to Sport)\n• Mendukung >1 sesi terapi dalam 1 hari untuk atlet intensif\n• Evaluasi klinis per sesi & tombol 'Advance Stage' (Naik Tahap)",
          RGBColor(124, 58, 237))
     ]
 
@@ -386,7 +386,7 @@ def create_deck(filename="Smart_Clinic_Therapy_Presentation.pptx"):
          "Pusat billing pembayaran kasir otomatis.\n• 1 Tagihan kasir merangkum seluruh sesi terapi per reservasi\n• Rincian tarif sesi terapi + obat / alat bantu tambahan\n• Status bayar (Lunas / Belum) & cetak struk kuitansi resmi",
          COLOR_GREEN_MAIN),
         ("6. Stok Peralatan Terapi", 
-         "Monitoring inventaris peralatan dan modalitas fisioterapi.\n• Kinesio taping, TENS pad, resist band, dry needle, ice pack\n• Pencatatan keluar-masuk barang per gudang klinik\n• Peringatan dini (alert) ketika stok mencapai batas minimum",
+         "Monitoring inventaris peralatan dan modalitas terapi.\n• Kinesio taping, TENS pad, resist band, dry needle, ice pack\n• Pencatatan keluar-masuk barang per gudang klinik\n• Peringatan dini (alert) ketika stok mencapai batas minimum",
          COLOR_TEAL_MAIN),
         ("7. Master Data Terintegrasi", 
          "Pusat basis data terstruktur klinik.\n• Master Pasien: Biodata lengkap, pekerjaan, kontak darurat\n• Master Terapis: Spesialisasi, kontak, dan status aktif\n• Master Jenjang Terapi: Katalog Tahap A-D, durasi & tarif",
@@ -427,7 +427,7 @@ def create_deck(filename="Smart_Clinic_Therapy_Presentation.pptx"):
     s7 = prs.slides.add_slide(blank_layout)
     set_slide_background(s7, COLOR_BG_LIGHT)
     add_header(s7, "Alur Kerja Standar (SOP)", "Alur Proses Pelayanan Klinik dari Awal Hingga Sembuh",
-               "Bagaimana sistem menghubungkan admisi pendaftaran, tindakan fisioterapis, kasir, dan arsip rekam medis secara mulus.")
+               "Bagaimana sistem menghubungkan admisi pendaftaran, tindakan terapis, kasir, dan arsip rekam medis secara mulus.")
 
     steps = [
         ("01", "Pendaftaran & Booking", 
@@ -493,7 +493,7 @@ def create_deck(filename="Smart_Clinic_Therapy_Presentation.pptx"):
     s8 = prs.slides.add_slide(blank_layout)
     set_slide_background(s8, COLOR_BG_LIGHT)
     add_header(s8, "Keunggulan Klinis Khusus", "Protokol Terapi Berjenjang: Dirancang Khusus Cedera Fisik & Olahraga",
-               "Berbeda dari software rumah sakit biasa yang kaku, sistem ini memiliki alur tahapan pemulihan terukur sesuai kaidah fisioterapi.")
+               "Berbeda dari software rumah sakit biasa yang kaku, sistem ini memiliki alur tahapan pemulihan terukur sesuai kaidah terapi.")
 
     stages = [
         ("Tahap A (Akut & Anti-Nyeri)", 
