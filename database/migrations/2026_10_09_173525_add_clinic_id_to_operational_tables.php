@@ -42,7 +42,7 @@ return new class extends Migration
                 'billing_cycle' => 'monthly',
                 'max_therapists' => 3,
                 'max_patients' => 250,
-                'description' => 'Cocok untuk fisioterapi mandiri atau klinik rintisan.',
+                'description' => 'Cocok untuk terapi mandiri atau klinik rintisan.',
                 'features_json' => json_encode([
                     'Booking Online & Jadwal Terapi',
                     'Sesi Terapi Standar',

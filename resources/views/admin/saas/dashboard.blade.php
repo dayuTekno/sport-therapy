@@ -66,7 +66,7 @@
         </div>
         <div>
             <span class="text-[10px] text-gray-400 font-bold uppercase tracking-wider block">Terapis di Seluruh Klinik</span>
-            <span class="text-xl font-black text-indigo-700">{{ $totalTherapists }} Fisioterapis</span>
+            <span class="text-xl font-black text-indigo-700">{{ $totalTherapists }} Terapis</span>
             <span class="text-[10px] text-gray-500 font-medium block mt-0.5">Praktisi profesional</span>
         </div>
     </div>

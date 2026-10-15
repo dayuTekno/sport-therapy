@@ -140,7 +140,7 @@
                     Smart Clinic Therapy SaaS Platform
                 </h2>
                 <p class="text-sm text-white/90 max-w-md leading-relaxed">
-                    Transformasi Digital Terintegrasi: Rekam Medis Fisioterapi Berjenjang, Otomasi Antrian & WhatsApp, Kasir, dan Manajemen Peralatan.
+                    Transformasi Digital Terintegrasi: Rekam Medis Terapi Berjenjang, Otomasi Antrian & WhatsApp, Kasir, dan Manajemen Peralatan.
                 </p>
             </div>
         </div>

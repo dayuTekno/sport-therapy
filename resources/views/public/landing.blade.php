@@ -8,10 +8,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     {{-- Primary SEO Meta Tags --}}
-    <title>Smart Clinic Therapy — Platform SaaS Manajemen Klinik Fisioterapi & Olahraga Modern</title>
-    <meta name="title" content="Smart Clinic Therapy — Platform SaaS Manajemen Klinik Fisioterapi & Olahraga Modern">
-    <meta name="description" content="Platform cloud PaaS & SaaS multi-tenant untuk manajemen klinik fisioterapi, rehabilitasi cedera olahraga berjenjang, otomasi booking WhatsApp, kasir dan rekam medis digital (EHR).">
-    <meta name="keywords" content="fisioterapi, klinik olahraga, software klinik, aplikasi fisioterapi, manajemen klinik, rekam medis digital, rehabilitasi cedera, sport clinic, Smart Clinic Therapy, SaaS klinik, jadwal terapis, SOAP fisioterapi">
+    <title>Smart Clinic Therapy — Platform SaaS Manajemen Klinik Terapi & Olahraga Modern</title>
+    <meta name="title" content="Smart Clinic Therapy — Platform SaaS Manajemen Klinik Terapi & Olahraga Modern">
+    <meta name="description" content="Platform cloud PaaS & SaaS multi-tenant untuk manajemen klinik terapi, rehabilitasi cedera olahraga berjenjang, otomasi booking WhatsApp, kasir dan rekam medis digital (EHR).">
+    <meta name="keywords" content="terapi, klinik olahraga, software klinik, aplikasi terapi, manajemen klinik, rekam medis digital, rehabilitasi cedera, sport clinic, Smart Clinic Therapy, SaaS klinik, jadwal terapis, SOAP terapi">
     <meta name="author" content="Smart Clinic Therapy">
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
     <meta name="googlebot" content="index, follow">
@@ -30,8 +30,8 @@
     <meta property="og:url" content="{{ url('/') }}">
     <meta property="og:site_name" content="Smart Clinic Therapy">
     <meta property="og:locale" content="id_ID">
-    <meta property="og:title" content="Smart Clinic Therapy — Platform SaaS Manajemen Klinik Fisioterapi & Olahraga Modern">
-    <meta property="og:description" content="Transformasi digital klinik fisioterapi dan cedera olahraga: rekam medis berjenjang SOAP, booking WhatsApp instan, manajemen kasir & inventori alat terapi.">
+    <meta property="og:title" content="Smart Clinic Therapy — Platform SaaS Manajemen Klinik Terapi & Olahraga Modern">
+    <meta property="og:description" content="Transformasi digital klinik terapi dan cedera olahraga: rekam medis berjenjang SOAP, booking WhatsApp instan, manajemen kasir & inventori alat terapi.">
     <meta property="og:image" content="{{ asset('android-chrome-512x512.png') }}">
     <meta property="og:image:width" content="512">
     <meta property="og:image:height" content="512">
@@ -40,8 +40,8 @@
     {{-- Twitter Card --}}
     <meta name="twitter:card" content="summary">
     <meta name="twitter:url" content="{{ url('/') }}">
-    <meta name="twitter:title" content="Smart Clinic Therapy — SaaS Manajemen Klinik Fisioterapi & Olahraga">
-    <meta name="twitter:description" content="Platform cloud multi-tenant untuk klinik fisioterapi, rehabilitasi cedera olahraga, reservasi WhatsApp, dan rekam medis digital.">
+    <meta name="twitter:title" content="Smart Clinic Therapy — SaaS Manajemen Klinik Terapi & Olahraga">
+    <meta name="twitter:description" content="Platform cloud multi-tenant untuk klinik terapi, rehabilitasi cedera olahraga, reservasi WhatsApp, dan rekam medis digital.">
     <meta name="twitter:image" content="{{ asset('android-chrome-512x512.png') }}">
 
     {{-- Structured Data: JSON-LD (Schema.org) --}}
@@ -62,7 +62,7 @@
             'highPrice' => '1499000',
             'offerCount' => '3',
           ],
-          'description' => 'Platform cloud multi-tenant PaaS & SaaS untuk manajemen operasional klinik fisioterapi, rekam medis rehabilitasi cedera olahraga berjenjang, reservasi WhatsApp, dan sistem kasir terpadu.',
+          'description' => 'Platform cloud multi-tenant PaaS & SaaS untuk manajemen operasional klinik terapi, rekam medis rehabilitasi cedera olahraga berjenjang, reservasi WhatsApp, dan sistem kasir terpadu.',
           'url' => url('/'),
           'author' => [
             '@type' => 'Organization',
@@ -74,7 +74,7 @@
           '@type' => 'MedicalBusiness',
           '@id' => url('/') . '#business',
           'name' => 'Smart Clinic Therapy',
-          'description' => 'Sistem teknologi informasi dan manajemen klinik terapi olahraga dan fisioterapi modern di Indonesia.',
+          'description' => 'Sistem teknologi informasi dan manajemen klinik terapi olahraga dan terapi modern di Indonesia.',
           'url' => url('/'),
           'logo' => asset('images/logo-icon.svg'),
           'medicalSpecialty' => [
@@ -88,7 +88,7 @@
             ],
             [
               '@type' => 'MedicalTherapy',
-              'name' => 'Fisioterapi Muskuloskeletal',
+              'name' => 'Terapi Muskuloskeletal',
             ],
             [
               '@type' => 'MedicalTherapy',
@@ -257,12 +257,12 @@
                             <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
                             <span class="relative inline-flex rounded-full h-2 w-2 bg-blue-600"></span>
                         </span>
-                        <span>{{ $hero->content_json['badge_text'] ?? 'Platform Operasional Fisioterapi & Smart Clinic Therapy No. 1' }}</span>
+                        <span>{{ $hero->content_json['badge_text'] ?? 'Platform Operasional Terapi & Smart Clinic Therapy No. 1' }}</span>
                     </div>
 
                     {{-- Main Headline --}}
                     <h1 class="text-3xl sm:text-4xl lg:text-5xl font-black text-slate-900 tracking-tight leading-[1.12]">
-                        {{ $hero->title ?? 'Platform Manajemen Klinik Fisioterapi & Cedera Olahraga Modern' }}
+                        {{ $hero->title ?? 'Platform Manajemen Klinik Terapi & Cedera Olahraga Modern' }}
                     </h1>
 
                     {{-- Subtitle --}}
@@ -311,7 +311,7 @@
                         </div>
                         <div class="text-xs text-slate-500 text-left">
                             <div class="text-amber-500 font-bold tracking-tight">★★★★★ <span class="text-slate-800 font-bold">4.9 / 5.0</span></div>
-                            <span class="text-[11px]">Dipercaya pemilik klinik fisioterapi & kedokteran olahraga</span>
+                            <span class="text-[11px]">Dipercaya pemilik klinik terapi & kedokteran olahraga</span>
                         </div>
                     </div>
 
@@ -473,10 +473,10 @@
             
             <div class="text-center max-w-3xl mx-auto mb-16">
                 <span class="text-xs font-bold text-blue-600 uppercase tracking-widest bg-blue-100/70 border border-blue-200 px-3.5 py-1 rounded-full">
-                    Dirancang Khusus Fisioterapi
+                    Dirancang Khusus Terapi
                 </span>
                 <h2 class="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-900 tracking-tight mt-4">
-                    {{ $features->title ?? 'Fitur Unggulan Dirancang Khusus untuk Fisioterapi & Smart Clinic Therapy' }}
+                    {{ $features->title ?? 'Fitur Unggulan Dirancang Khusus untuk Terapi & Smart Clinic Therapy' }}
                 </h2>
                 <p class="text-sm sm:text-base text-slate-600 mt-3 leading-relaxed">
                     {{ $features->subtitle ?? 'Bukan sekadar sistem rumah sakit umum yang kaku. Setiap fitur dioptimalkan untuk alur pemulihan fisik atlet, penanganan cedera ligamen, dan kepuasan pasien aktif.' }}
@@ -549,7 +549,7 @@
                     </div>
                     <h4 class="font-bold text-base text-slate-900">Tindakan Berjenjang</h4>
                     <p class="text-xs text-slate-600 mt-2 leading-relaxed">
-                        Terapis menjalankan sesi fisioterapi dan mengisi evaluasi tahapan klinis (Tahap A Akut s/d Tahap D Return to Sport).
+                        Terapis menjalankan sesi terapi dan mengisi evaluasi tahapan klinis (Tahap A Akut s/d Tahap D Return to Sport).
                     </p>
                 </div>
 
@@ -955,7 +955,7 @@
                 Siap Membawa Pengalaman Terapi Klinik Anda ke Level Berikutnya?
             </h2>
             <p class="text-sm sm:text-base text-blue-100 max-w-2xl mx-auto leading-relaxed">
-                Bergabunglah dengan klinik fisioterapi modern di Indonesia. Mulai uji coba gratis {{ $trialDays }} hari Anda sekarang dan rasakan kemudahannya.
+                Bergabunglah dengan klinik terapi modern di Indonesia. Mulai uji coba gratis {{ $trialDays }} hari Anda sekarang dan rasakan kemudahannya.
             </p>
             <div class="pt-4 flex flex-col sm:flex-row items-center justify-center gap-4">
                 <a href="{{ route('register.clinic') }}" 
@@ -984,7 +984,7 @@
                         <span class="text-lg font-black tracking-tight text-white">Smart Clinic <span class="text-blue-500">Therapy</span></span>
                     </div>
                     <p class="text-slate-400 max-w-sm leading-relaxed">
-                        Platform PaaS / SaaS operasional klinik fisioterapi, rehabilitasi cedera fisik atlet, dan manajemen kasir terpadu nomor satu di Indonesia.
+                        Platform PaaS / SaaS operasional klinik terapi, rehabilitasi cedera fisik atlet, dan manajemen kasir terpadu nomor satu di Indonesia.
                     </p>
                     <div class="text-slate-400 space-y-1.5 pt-2">
                         <div class="flex items-center gap-2">

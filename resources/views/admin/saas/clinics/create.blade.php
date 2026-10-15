@@ -45,7 +45,7 @@
                         Email Resmi Klinik <span class="text-rose-500">*</span>
                     </label>
                     <input type="email" name="email" value="{{ old('email') }}" required
-                           placeholder="admin@surabayafisio.com"
+                           placeholder="admin@surabayaterapi.com"
                            class="w-full px-3.5 py-2.5 text-xs border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500">
                 </div>
                 <div>

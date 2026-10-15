@@ -126,7 +126,7 @@
                 </div>
                 <div class="flex justify-between">
                     <span class="text-gray-500 text-xs">Spesialisasi</span>
-                    <span class="text-gray-800 font-medium text-xs">{{ $session->therapist?->specialization ?: 'Fisioterapis Olahraga' }}</span>
+                    <span class="text-gray-800 font-medium text-xs">{{ $session->therapist?->specialization ?: 'Terapis Olahraga' }}</span>
                 </div>
                 @if($session->therapist?->phone_number)
                 <div class="flex justify-between">
@@ -187,7 +187,7 @@
         <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
             <div class="p-5 bg-gradient-to-r from-blue-50/50 to-indigo-50/50 border-b border-gray-100 flex items-center justify-between">
                 <div>
-                    <h3 class="font-black text-gray-900 text-base">Evaluasi Klinis & Tindakan Fisioterapi</h3>
+                    <h3 class="font-black text-gray-900 text-base">Evaluasi Klinis & Tindakan Terapi</h3>
                     <p class="text-xs text-gray-500 mt-0.5">{{ $session->stage_name ?: ($session->therapyType?->name ?? 'Tahapan Terapi') }}</p>
                 </div>
                 <span class="px-3 py-1 rounded-xl bg-blue-600 text-white font-bold text-xs shadow-sm">
@@ -210,7 +210,7 @@
                 </div>
                 @endif
 
-                {{-- Tindakan Fisioterapi yang Dilakukan --}}
+                {{-- Tindakan Terapi yang Dilakukan --}}
                 <div class="space-y-2">
                     <h4 class="text-xs font-bold text-gray-500 uppercase tracking-wider flex items-center gap-2">
                         <span class="w-2 h-2 bg-blue-500 rounded-full"></span>
@@ -220,7 +220,7 @@
                         @if(!empty($session->actions_taken))
                             <p class="whitespace-pre-line">{{ $session->actions_taken }}</p>
                         @else
-                            <p class="text-gray-400 italic">Tindakan disesuaikan dengan protokol baku {{ $session->stage_name ?: ($session->therapyType?->name ?? 'Fisioterapi') }}.</p>
+                            <p class="text-gray-400 italic">Tindakan disesuaikan dengan protokol baku {{ $session->stage_name ?: ($session->therapyType?->name ?? 'Terapi') }}.</p>
                         @endif
                     </div>
                 </div>

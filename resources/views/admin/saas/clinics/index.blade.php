@@ -14,7 +14,7 @@
         <h1 class="text-xl font-bold text-gray-800 flex items-center gap-2">
             <span>🏥</span> Manajemen Mitra Klinik (Tenant Directory)
         </h1>
-        <p class="text-xs text-gray-500 mt-1">Daftar seluruh klinik fisioterapi dan sport center yang terdaftar di platform SaaS.</p>
+        <p class="text-xs text-gray-500 mt-1">Daftar seluruh klinik terapi dan sport center yang terdaftar di platform SaaS.</p>
     </div>
 
     <a href="{{ route('saas.clinics.create') }}" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl shadow-md shadow-blue-500/20 transition flex items-center gap-1.5">

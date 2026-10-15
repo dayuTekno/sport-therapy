@@ -65,7 +65,7 @@ class TherapistScheduleConflictTest extends TestCase
 
         $this->therapyType = TherapyType::where('clinic_id', $clinicId)->first() ?: TherapyType::create([
             'type_code' => 'TT-TEST-1',
-            'name' => 'Fisioterapi Dasar',
+            'name' => 'Terapi Dasar',
             'stage_order' => 1,
             'duration_minutes' => 60,
             'is_active' => true,

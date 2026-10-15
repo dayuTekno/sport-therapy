@@ -51,7 +51,7 @@ return new class extends Migration
             'duration_in_months' => 6,
             'max_therapists' => 5,
             'max_patients' => 500,
-            'description' => 'Paket minimum subscribe awal paling fleksibel untuk klinik fisioterapi & terapi cedera olahraga rintisan maupun berkembang.',
+            'description' => 'Paket minimum subscribe awal paling fleksibel untuk klinik terapi & terapi cedera olahraga rintisan maupun berkembang.',
             'features_json' => json_encode([
                 'Booking Online & Reservasi Pasien Mandiri',
                 'Evaluasi & Terapi Berjenjang (Fase Akut, Subakut, Pemulihan, Fungsional)',

@@ -12,7 +12,7 @@
 <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
     <div>
         <h1 class="text-xl font-bold text-gray-800">Master Data Terapis</h1>
-        <p class="text-xs text-gray-500 mt-1">Daftar tenaga fisioterapi dan sport therapist klinik</p>
+        <p class="text-xs text-gray-500 mt-1">Daftar tenaga terapi dan sport therapist klinik</p>
     </div>
 
     <div class="flex items-center gap-3">

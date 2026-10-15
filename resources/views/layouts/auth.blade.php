@@ -6,7 +6,7 @@
   <meta http-equiv="X-UA-Compatible" content="ie=edge" />
   <meta name="csrf-token" content="{{ csrf_token() }}">
   <meta name="theme-color" content="#2563eb">
-  <meta name="description" content="Masuk ke portal Smart Clinic Therapy untuk manajemen klinik fisioterapi dan rekam medis digital.">
+  <meta name="description" content="Masuk ke portal Smart Clinic Therapy untuk manajemen klinik terapi dan rekam medis digital.">
   <meta name="robots" content="noindex, follow">
   <link rel="canonical" href="{{ url()->current() }}">
   <meta name="mobile-web-app-capable" content="yes">

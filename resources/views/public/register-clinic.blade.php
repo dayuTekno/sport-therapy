@@ -10,8 +10,8 @@
     {{-- Primary SEO Meta Tags --}}
     <title>Daftarkan Klinik Mitra Baru — Smart Clinic Therapy</title>
     <meta name="title" content="Daftarkan Klinik Mitra Baru — Smart Clinic Therapy">
-    <meta name="description" content="Daftarkan klinik fisioterapi atau pusat terapi rehabilitasi olahraga Anda ke platform cloud Smart Clinic Therapy. Dapatkan akses langsung dengan {{ $trialDays }} hari masa uji coba gratis tanpa kartu kredit.">
-    <meta name="keywords" content="daftar klinik fisioterapi, registrasi klinik olahraga, aplikasi fisioterapi, rekam medis digital, Smart Clinic Therapy">
+    <meta name="description" content="Daftarkan klinik terapi atau pusat terapi rehabilitasi olahraga Anda ke platform cloud Smart Clinic Therapy. Dapatkan akses langsung dengan {{ $trialDays }} hari masa uji coba gratis tanpa kartu kredit.">
+    <meta name="keywords" content="daftar klinik terapi, registrasi klinik olahraga, aplikasi terapi, rekam medis digital, Smart Clinic Therapy">
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="{{ route('register.clinic') }}">
     <meta name="theme-color" content="#2563eb">
@@ -29,13 +29,13 @@
     <meta property="og:site_name" content="Smart Clinic Therapy">
     <meta property="og:locale" content="id_ID">
     <meta property="og:title" content="Daftarkan Klinik Mitra Baru — Smart Clinic Therapy">
-    <meta property="og:description" content="Mulai {{ $trialDays }} hari uji coba gratis platform manajemen klinik fisioterapi modern tanpa kartu kredit.">
+    <meta property="og:description" content="Mulai {{ $trialDays }} hari uji coba gratis platform manajemen klinik terapi modern tanpa kartu kredit.">
     <meta property="og:image" content="{{ asset('android-chrome-512x512.png') }}">
 
     {{-- Twitter Card --}}
     <meta name="twitter:card" content="summary">
     <meta name="twitter:title" content="Daftarkan Klinik Mitra Baru — Smart Clinic Therapy">
-    <meta name="twitter:description" content="Mulai {{ $trialDays }} hari uji coba gratis platform manajemen klinik fisioterapi modern tanpa kartu kredit.">
+    <meta name="twitter:description" content="Mulai {{ $trialDays }} hari uji coba gratis platform manajemen klinik terapi modern tanpa kartu kredit.">
     <meta name="twitter:image" content="{{ asset('android-chrome-512x512.png') }}">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">

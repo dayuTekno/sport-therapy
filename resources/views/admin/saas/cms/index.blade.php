@@ -67,7 +67,7 @@
                     Badge Header Kecil
                 </label>
                 <input type="text" name="badge_text" value="{{ old('badge_text', $hero->content_json['badge_text'] ?? '') }}"
-                       placeholder="Contoh: ⚡ Platform Fisioterapi & Smart Clinic Therapy No. 1 di Indonesia"
+                       placeholder="Contoh: ⚡ Platform Terapi & Smart Clinic Therapy No. 1 di Indonesia"
                        class="w-full px-3.5 py-2.5 text-xs border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 font-bold text-blue-800 bg-blue-50/30">
             </div>
 

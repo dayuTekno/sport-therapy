@@ -16,7 +16,7 @@
             <span>📋</span> Laporan & Rekap Rekam Terapi
         </h1>
         <p class="text-sm text-gray-500 mt-1">
-            Rekapitulasi riwayat penanganan fisioterapi berjenjang, perkembangan klinis pasien, dan penugasan terapis.
+            Rekapitulasi riwayat penanganan terapi berjenjang, perkembangan klinis pasien, dan penugasan terapis.
         </p>
     </div>
 </div>
@@ -187,7 +187,7 @@
                                 <span>{{ $s->therapist?->full_name ?? 'Belum Ditentukan' }}</span>
                             </div>
                             <div class="text-xs text-gray-500">
-                                {{ $s->therapist?->specialization ?: 'Fisioterapis Olahraga' }}
+                                {{ $s->therapist?->specialization ?: 'Terapis Olahraga' }}
                             </div>
                         </td>
 

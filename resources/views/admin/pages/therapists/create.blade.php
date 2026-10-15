@@ -31,7 +31,7 @@
 
         <div>
             <label class="block text-xs font-semibold uppercase text-gray-600 mb-1">Keahlian / Spesialisasi</label>
-            <input type="text" name="specialization" value="{{ old('specialization') }}" placeholder="Contoh: Fisioterapi Olahraga, Manual Therapy, Cedera Lutut"
+            <input type="text" name="specialization" value="{{ old('specialization') }}" placeholder="Contoh: Terapi Olahraga, Manual Therapy, Cedera Lutut"
                    class="w-full text-sm border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500">
         </div>
 

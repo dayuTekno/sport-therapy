@@ -74,7 +74,7 @@ class ClinicDemoDataSeeder extends Seeder
         // 3. MASTER POLIKLINIK
         // ----------------------------------------------------------------------
         $polyData = [
-            ['polyclinic_code' => 'POL-SPORTS', 'name' => 'Poli Fisioterapi & Cedera Olahraga'],
+            ['polyclinic_code' => 'POL-SPORTS', 'name' => 'Poli Terapi & Cedera Olahraga'],
             ['polyclinic_code' => 'POL-REHAB', 'name' => 'Poli Rehabilitasi Medik & Fisik'],
             ['polyclinic_code' => 'POL-ORTHO', 'name' => 'Poli Konsultasi Ortopedi'],
         ];
@@ -123,7 +123,7 @@ class ClinicDemoDataSeeder extends Seeder
         // 5. MASTER TINDAKAN / PROSEDUR KLINIK
         // ----------------------------------------------------------------------
         $proceduresData = [
-            ['procedure_code' => 'PRC-01', 'name' => 'Terapi Manual & Mobilisasi Sendi', 'price' => 150000, 'desc' => 'Manipulasi jaringan lunak dan sendi oleh fisioterapis'],
+            ['procedure_code' => 'PRC-01', 'name' => 'Terapi Manual & Mobilisasi Sendi', 'price' => 150000, 'desc' => 'Manipulasi jaringan lunak dan sendi oleh terapis'],
             ['procedure_code' => 'PRC-02', 'name' => 'Elektroterapi TENS & NMES', 'price' => 120000, 'desc' => 'Stimulasi listrik pereda nyeri dan aktivasi saraf otot'],
             ['procedure_code' => 'PRC-03', 'name' => 'Ultrasound Diathermy (USD)', 'price' => 135000, 'desc' => 'Gelombang suara penghangat jaringan dalam untuk relaksasi'],
             ['procedure_code' => 'PRC-04', 'name' => 'Latihan Penguatan Fungsional & Keseimbangan', 'price' => 180000, 'desc' => 'Exercise therapy pengembalian stabilitas pasca cedera'],
