@@ -86,6 +86,7 @@ class Clinic extends Model
         if (!$target) {
             return null;
         }
+        // diffInDays(target, false): positif = target di masa depan, negatif = sudah lewat
         return (int) now()->diffInDays($target, false);
     }
 

@@ -163,22 +163,36 @@
                             <div class="font-mono text-[11px] text-gray-400 mt-0.5">📱 {{ $c->phone_number ?? '-' }}</div>
                         </td>
                         <td class="p-4 text-center">
-                            @if($c->status === 'active')
-                                <span class="px-2.5 py-1 text-xs font-bold rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
-                                    ✓ Aktif
-                                </span>
-                            @elseif($c->status === 'trial')
-                                @php
-                                    $remaining = $c->trial_ends_at ? max(0, (int) now()->diffInDays($c->trial_ends_at, false)) : null;
-                                @endphp
-                                <span class="px-2.5 py-1 text-xs font-bold rounded-full bg-amber-50 text-amber-700 border border-amber-200">
-                                    ⏳ Trial {{ $remaining !== null ? "({$remaining}h sisa)" : 'Masa Uji Coba' }}
-                                </span>
-                            @else
-                                <span class="px-2.5 py-1 text-xs font-bold rounded-full bg-rose-50 text-rose-700 border border-rose-200">
-                                    ✕ Suspended
-                                </span>
-                            @endif
+                        @php
+                            // Tentukan tanggal end yang relevan
+                            $endDate = $c->subscription_ends_at ?? ($c->status === 'trial' ? $c->trial_ends_at : null);
+                            $remaining = $endDate ? (int) now()->diffInDays($endDate, false) : null;
+                        @endphp
+                        @if($c->status === 'active')
+                            <span class="px-2.5 py-1 text-xs font-bold rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                ✓ Aktif
+                                @if($remaining !== null && $remaining > 0)
+                                    <span class="text-emerald-500 font-normal">({{ $remaining }} hari sisa)</span>
+                                @elseif($remaining !== null && $remaining <= 0)
+                                    <span class="text-rose-500 font-normal">(Habis)</span>
+                                @endif
+                            </span>
+                        @elseif($c->status === 'trial')
+                            <span class="px-2.5 py-1 text-xs font-bold rounded-full bg-amber-50 text-amber-700 border border-amber-200">
+                                ⏳ Trial
+                                @if($remaining !== null && $remaining > 0)
+                                    <span class="font-normal">({{ $remaining }} hari sisa)</span>
+                                @elseif($remaining !== null && $remaining <= 0)
+                                    <span class="text-rose-500 font-normal">(Habis)</span>
+                                @else
+                                    <span class="font-normal">Masa Uji Coba</span>
+                                @endif
+                            </span>
+                        @else
+                            <span class="px-2.5 py-1 text-xs font-bold rounded-full bg-rose-50 text-rose-700 border border-rose-200">
+                                ✕ {{ ucfirst($c->status) }}
+                            </span>
+                        @endif
                         </td>
                         <td class="p-4 text-center text-gray-500">
                             {{ $c->created_at->format('d M Y') }}

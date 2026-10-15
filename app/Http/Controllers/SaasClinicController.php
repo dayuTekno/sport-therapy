@@ -115,11 +115,19 @@ class SaasClinicController extends Controller
         $status = $request->status;
         $subscriptionEndsAt = $request->subscription_ends_at;
 
-        // Sinkronisasi status jika subscription_ends_at diperpanjang atau sudah lewat
-        if ($subscriptionEndsAt && \Carbon\Carbon::parse($subscriptionEndsAt)->isPast() && $status === 'active') {
-            $status = 'expired';
-        } elseif ($subscriptionEndsAt && \Carbon\Carbon::parse($subscriptionEndsAt)->isFuture() && $status === 'expired') {
-            $status = 'active';
+        // Sinkronisasi status otomatis berdasarkan subscription_ends_at
+        if ($subscriptionEndsAt) {
+            $endDate = \Carbon\Carbon::parse($subscriptionEndsAt);
+
+            if ($endDate->isFuture()) {
+                // End date masih valid (masa depan) → otomatis aktifkan jika status bukan suspended
+                if (in_array($status, ['trial', 'expired'])) {
+                    $status = 'active';
+                }
+            } elseif ($endDate->isPast() && $status === 'active') {
+                // End date sudah lewat tapi status masih active → tandai expired
+                $status = 'expired';
+            }
         }
 
         $clinic->update([
