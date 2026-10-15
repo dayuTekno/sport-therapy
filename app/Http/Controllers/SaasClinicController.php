@@ -115,17 +115,16 @@ class SaasClinicController extends Controller
         $status = $request->status;
         $subscriptionEndsAt = $request->subscription_ends_at;
 
-        // Sinkronisasi status otomatis berdasarkan subscription_ends_at
-        if ($subscriptionEndsAt) {
+        // Auto-correct hanya untuk mismatch 'expired' ↔ 'active' vs tanggal.
+        // Pilihan 'trial' dan 'suspended' dari admin SELALU direspect tanpa override.
+        if ($subscriptionEndsAt && in_array($status, ['active', 'expired'])) {
             $endDate = \Carbon\Carbon::parse($subscriptionEndsAt);
 
-            if ($endDate->isFuture()) {
-                // End date masih valid (masa depan) → otomatis aktifkan jika status bukan suspended
-                if (in_array($status, ['trial', 'expired'])) {
-                    $status = 'active';
-                }
+            if ($endDate->isFuture() && $status === 'expired') {
+                // Admin set expired tapi tanggal belum lewat → koreksi ke active
+                $status = 'active';
             } elseif ($endDate->isPast() && $status === 'active') {
-                // End date sudah lewat tapi status masih active → tandai expired
+                // Admin set active tapi tanggal sudah lewat → koreksi ke expired
                 $status = 'expired';
             }
         }
