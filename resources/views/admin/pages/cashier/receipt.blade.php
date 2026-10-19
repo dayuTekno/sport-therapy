@@ -124,7 +124,7 @@
         {{-- Total & Ringkasan Pembayaran --}}
         <div class="border-t border-gray-200 pt-4 pb-6 flex flex-col sm:flex-row justify-between gap-6">
             <div class="text-xs text-gray-500 space-y-1">
-                <div><strong>Pembayaran:</strong> <span class="font-bold text-gray-800">Kasir Offline (Tunai)</span></div>
+                <div><strong>Metode Pembayaran:</strong> <span class="font-bold text-gray-900">{{ $reservation->payment_method ?: 'Cash (Tunai)' }}</span> <span class="text-gray-400 text-[11px] font-normal">(Kasir Offline)</span></div>
                 @if($reservation->cashier_notes)
                     <div><strong>Catatan Kasir:</strong> {{ $reservation->cashier_notes }}</div>
                 @endif
@@ -139,8 +139,14 @@
                     <span>Rp {{ number_format($reservation->total_price, 0, ',', '.') }}</span>
                 </div>
                 @if($reservation->discount > 0)
+                    @php
+                        $base = (float)$reservation->total_price;
+                        $disc = (float)$reservation->discount;
+                        $pct = $base > 0 ? round(($disc / $base) * 100) : 0;
+                        $isCleanPct = $base > 0 && abs(($base * $pct / 100) - $disc) < 1;
+                    @endphp
                     <div class="flex justify-between text-rose-600">
-                        <span>Diskon:</span>
+                        <span>Diskon / Potongan {{ $isCleanPct ? "({$pct}%)" : '' }}:</span>
                         <span>- Rp {{ number_format($reservation->discount, 0, ',', '.') }}</span>
                     </div>
                 @endif

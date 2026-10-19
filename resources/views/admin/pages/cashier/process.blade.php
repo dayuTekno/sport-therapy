@@ -27,16 +27,50 @@
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6" 
      x-data="{
         baseTotal: {{ $total }},
-        discount: 0,
+        discountType: 'rupiah',
+        discountValue: '',
         paidInput: {{ $total }},
+        paymentMethod: 'Cash',
+        paymentMethodOther: '',
+        get discountAmount() {
+            let val = parseFloat(this.discountValue) || 0;
+            if (val <= 0) return 0;
+            if (this.discountType === 'percent') {
+                let pct = Math.min(100, Math.max(0, val));
+                return Math.round((this.baseTotal * pct) / 100);
+            }
+            return Math.min(this.baseTotal, Math.max(0, val));
+        },
         get grandTotal() {
-            return Math.max(0, this.baseTotal - (parseFloat(this.discount) || 0));
+            return Math.max(0, this.baseTotal - this.discountAmount);
         },
         get changeAmount() {
             return Math.max(0, (parseFloat(this.paidInput) || 0) - this.grandTotal);
         },
         formatRupiah(num) {
             return new Intl.NumberFormat('id-ID').format(num);
+        },
+        onPaymentMethodChange() {
+            if (this.paymentMethod !== 'Cash') {
+                this.paidInput = this.grandTotal;
+            }
+        },
+        onDiscountChange() {
+            this.$nextTick(() => {
+                if (this.paymentMethod !== 'Cash') {
+                    this.paidInput = this.grandTotal;
+                }
+            });
+        },
+        setDiscountType(type) {
+            this.discountType = type;
+            this.discountValue = '';
+            this.onDiscountChange();
+        },
+        setPercentPreset(pct) {
+            this.discountType = 'percent';
+            this.discountValue = pct;
+            this.onDiscountChange();
         }
      }">
 
@@ -190,68 +224,170 @@
                     </table>
                 </div>
 
-                {{-- Formulir Pembayaran Interaktif --}}
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
-                    {{-- Diskon / Potongan --}}
+                {{-- Section Diskon & Total Tagihan --}}
+                <div class="bg-gray-50/80 border border-gray-200/80 rounded-2xl p-4 space-y-4">
+                    {{-- Input Diskon / Potongan Harga --}}
                     <div>
-                        <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
-                            Diskon / Potongan Harga (Rp)
-                        </label>
-                        <div class="relative">
-                            <span class="absolute left-3 top-2.5 text-xs text-gray-400 font-bold">Rp</span>
-                            <input type="number" name="discount" x-model="discount" min="0" :max="baseTotal"
-                                   class="w-full pl-9 pr-3 py-2 text-xs border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 font-bold text-gray-800"
-                                   placeholder="0">
+                        <div class="flex items-center justify-between mb-2">
+                            <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider">
+                                Diskon / Potongan Promo
+                            </label>
+
+                            {{-- Pilihan Jenis Diskon: Rupiah (Rp) vs Persentase (%) --}}
+                            <div class="inline-flex p-0.5 bg-gray-200/80 rounded-lg text-xs font-semibold">
+                                <button type="button" @click="setDiscountType('rupiah')"
+                                        :class="discountType === 'rupiah' ? 'bg-white text-blue-700 shadow-xs' : 'text-gray-600 hover:text-gray-900'"
+                                        class="px-2.5 py-1 rounded-md transition text-[11px] cursor-pointer font-bold">
+                                    Rp (Nominal)
+                                </button>
+                                <button type="button" @click="setDiscountType('percent')"
+                                        :class="discountType === 'percent' ? 'bg-white text-blue-700 shadow-xs' : 'text-gray-600 hover:text-gray-900'"
+                                        class="px-2.5 py-1 rounded-md transition text-[11px] cursor-pointer font-bold">
+                                    % (Persen)
+                                </button>
+                            </div>
                         </div>
-                        <span class="text-[10px] text-gray-400 mt-1 block">Kosongkan jika tidak ada diskon promo klinik.</span>
+
+                        {{-- Input Nilai Diskon --}}
+                        <div class="relative">
+                            {{-- Prefix Rp jika rupiah --}}
+                            <span x-show="discountType === 'rupiah'" class="absolute left-3.5 top-2.5 text-xs text-gray-400 font-bold">Rp</span>
+
+                            <input type="number"
+                                   x-model="discountValue"
+                                   @input="onDiscountChange()"
+                                   :min="0"
+                                   :max="discountType === 'percent' ? 100 : baseTotal"
+                                   :placeholder="discountType === 'percent' ? 'Masukkan persentase (misal: 10)' : '0'"
+                                   :class="discountType === 'rupiah' ? 'pl-10 pr-4' : 'pl-4 pr-10'"
+                                   class="w-full py-2.5 text-xs border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 font-bold text-gray-800 bg-white shadow-2xs">
+
+                            {{-- Suffix % jika percent --}}
+                            <span x-show="discountType === 'percent'" class="absolute right-3.5 top-2.5 text-xs text-blue-600 font-bold">%</span>
+                        </div>
+
+                        {{-- Hidden inputs nilai diskon untuk request form submission --}}
+                        <input type="hidden" name="discount" :value="discountAmount">
+                        <input type="hidden" name="discount_type" :value="discountType">
+                        <input type="hidden" name="discount_value" :value="discountValue">
+
+                        {{-- Keterangan / Feedback Nilai Diskon & Tombol Preset Cepat --}}
+                        <div class="flex flex-wrap items-center justify-between gap-2 mt-2">
+                            {{-- Preset Tombol Cepat Persentase --}}
+                            <div x-show="discountType === 'percent'" class="flex items-center gap-1.5">
+                                <span class="text-[10px] text-gray-400 font-semibold">Cepat:</span>
+                                <template x-for="pct in [5, 10, 15, 20, 50]">
+                                    <button type="button" @click="setPercentPreset(pct)"
+                                            class="px-2 py-0.5 bg-white hover:bg-blue-50 text-blue-700 hover:border-blue-300 border border-gray-200 rounded text-[10px] font-bold transition cursor-pointer"
+                                            x-text="pct + '%'"></button>
+                                </template>
+                            </div>
+
+                            {{-- Preset Tombol Cepat Rupiah --}}
+                            <div x-show="discountType === 'rupiah'" class="flex items-center gap-1.5">
+                                <span class="text-[10px] text-gray-400 font-semibold">Cepat:</span>
+                                <button type="button" @click="discountValue = 10000; onDiscountChange()" class="px-2 py-0.5 bg-white hover:bg-blue-50 text-blue-700 border border-gray-200 rounded text-[10px] font-bold transition cursor-pointer">10rb</button>
+                                <button type="button" @click="discountValue = 25000; onDiscountChange()" class="px-2 py-0.5 bg-white hover:bg-blue-50 text-blue-700 border border-gray-200 rounded text-[10px] font-bold transition cursor-pointer">25rb</button>
+                                <button type="button" @click="discountValue = 50000; onDiscountChange()" class="px-2 py-0.5 bg-white hover:bg-blue-50 text-blue-700 border border-gray-200 rounded text-[10px] font-bold transition cursor-pointer">50rb</button>
+                                <button type="button" @click="discountValue = 100000; onDiscountChange()" class="px-2 py-0.5 bg-white hover:bg-blue-50 text-blue-700 border border-gray-200 rounded text-[10px] font-bold transition cursor-pointer">100rb</button>
+                            </div>
+
+                            {{-- Preview Potongan Rupiah saat Diskon Persen / Nominal --}}
+                            <div x-show="discountAmount > 0" class="text-[11px] font-bold text-rose-600 ml-auto">
+                                Potongan: -Rp <span x-text="formatRupiah(discountAmount)"></span>
+                                <span x-show="discountType === 'percent'" class="text-gray-400 font-normal" x-text="'(' + discountValue + '%)'"></span>
+                            </div>
+                        </div>
                     </div>
 
-                    {{-- Total Akhir yang Harus Dibayar --}}
-                    <div>
-                        <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
-                            Total Tagihan Akhir
-                        </label>
-                        <div class="p-2.5 bg-blue-50/70 border border-blue-200 rounded-xl flex items-center justify-between">
-                            <span class="text-xs font-bold text-blue-900">Total Bersih:</span>
-                            <span class="text-lg font-black text-blue-700 font-mono" x-text="'Rp ' + formatRupiah(grandTotal)"></span>
+                    {{-- Total Tagihan Akhir (Setelah Diskon) --}}
+                    <div class="pt-3 border-t border-gray-200/80">
+                        <div class="flex items-center justify-between text-xs text-gray-500 mb-1.5">
+                            <span>Subtotal Sesi:</span>
+                            <span class="font-bold text-gray-800" x-text="'Rp ' + formatRupiah(baseTotal)"></span>
+                        </div>
+                        <div x-show="discountAmount > 0" class="flex items-center justify-between text-xs text-rose-600 mb-1.5">
+                            <span x-text="'Diskon ' + (discountType === 'percent' ? '(' + discountValue + '%)' : '') + ':'"></span>
+                            <span class="font-bold font-mono" x-text="'- Rp ' + formatRupiah(discountAmount)"></span>
+                        </div>
+                        <div class="p-3 bg-blue-50/80 border border-blue-200 rounded-xl flex items-center justify-between">
+                            <div>
+                                <span class="text-xs font-bold text-blue-900 block">Total Tagihan Akhir</span>
+                                <span class="text-[10px] text-blue-600">Nominal bersih yang wajib dibayar pasien</span>
+                            </div>
+                            <span class="text-xl font-black text-blue-700 font-mono" x-text="'Rp ' + formatRupiah(grandTotal)"></span>
                         </div>
                     </div>
                 </div>
 
-                {{-- Status Pembayaran Offline Kasir --}}
-                <div class="p-3.5 bg-blue-50/70 border border-blue-200/80 rounded-xl flex items-center justify-between">
-                    <div class="flex items-center gap-2.5">
-                        <span class="text-xl">🏢</span>
-                        <div>
-                            <span class="text-xs font-bold text-blue-900 block">Pembayaran Tunai di Kasir (Offline)</span>
-                            <span class="text-[11px] text-blue-700">Pasien membayar langsung di loket kasir klinik</span>
+                {{-- Status & Pilihan Metode Pembayaran Kasir --}}
+                <div class="p-4 bg-blue-50/70 border border-blue-200/80 rounded-2xl space-y-3">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2.5">
+                            <span class="text-2xl">🏢</span>
+                            <div>
+                                <span class="text-xs font-bold text-blue-900 block">Pembayaran Tunai / Loket Kasir (Offline)</span>
+                                <span class="text-[11px] text-blue-700">Pasien membayar langsung di loket kasir klinik</span>
+                            </div>
                         </div>
+                        <span class="px-2.5 py-1 bg-blue-600 text-white font-bold rounded-lg text-[10px] uppercase tracking-wide shrink-0">
+                            Kasir Klinik
+                        </span>
                     </div>
-                    <input type="hidden" name="payment_method" value="Kasir Offline">
-                    <span class="px-2.5 py-1 bg-blue-600 text-white font-bold rounded-lg text-[10px] uppercase tracking-wide">
-                        Kasir Klinik
-                    </span>
+
+                    {{-- Select Option Metode Pembayaran --}}
+                    <div class="pt-3 border-t border-blue-200/70">
+                        <label for="payment_method" class="block text-xs font-bold text-blue-950 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+                            <span>Metode / Kanal Pembayaran <span class="text-rose-500">*</span></span>
+                            <span class="text-[10px] font-normal text-blue-700 normal-case">Pilih opsi pembayaran pasien</span>
+                        </label>
+                        <div class="relative">
+                            <select name="payment_method" id="payment_method" x-model="paymentMethod" @change="onPaymentMethodChange()" required
+                                    class="w-full px-3.5 py-2.5 text-xs font-bold border border-blue-300 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white text-gray-800 shadow-2xs">
+                                <option value="Cash">💵 Cash / Tunai</option>
+                                <option value="QRIS">📱 QRIS (Barcode / E-Wallet)</option>
+                                <option value="Transfer Bank">🏦 Transfer Bank</option>
+                                <option value="Debit">💳 Kartu Debit / EDC</option>
+                                <option value="Lainnya">✨ Lainnya (Asuransi / Voucher / dll)</option>
+                            </select>
+                        </div>
+                        <p class="text-[10px] text-blue-600 mt-1">
+                            * Keterangan metode pembayaran ini tersimpan untuk memudahkan pelaporan & rekapitulasi keuangan kasir.
+                        </p>
+                    </div>
+
+                    {{-- Form Keterangan Tambahan Jika Memilih Lainnya --}}
+                    <div x-show="paymentMethod === 'Lainnya'" style="display: none;" class="pt-1">
+                        <label class="block text-xs font-semibold text-gray-700 mb-1">
+                            Keterangan Metode Pembayaran Lainnya <span class="text-rose-500">*</span>
+                        </label>
+                        <input type="text" name="payment_method_detail" x-model="paymentMethodOther"
+                               :required="paymentMethod === 'Lainnya'"
+                               placeholder="Contoh: Asuransi Mandiri Inhealth, Klaim BPJS Ketenagakerjaan, Voucher..."
+                               class="w-full px-3 py-2 text-xs border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 bg-white font-medium text-gray-800">
+                    </div>
                 </div>
 
                 {{-- Input Uang Diterima & Kembalian --}}
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
-                            Nominal Diterima Kasir <span class="text-rose-500">*</span>
+                        <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+                            <span>Nominal Diterima Kasir <span class="text-rose-500">*</span></span>
+                            <span class="text-[10px] font-normal text-emerald-600 normal-case" x-show="paymentMethod !== 'Cash'">✓ Otomatis Pas (Non-Tunai)</span>
                         </label>
                         <div class="relative">
                             <span class="absolute left-3 top-2.5 text-xs text-gray-400 font-bold">Rp</span>
                             <input type="number" name="paid_amount" x-model="paidInput" min="0" required
                                    class="w-full pl-9 pr-3 py-2 text-xs border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 font-bold text-gray-900 text-sm">
                         </div>
-                        <div class="flex gap-1.5 mt-1.5">
-                            <button type="button" @click="paidInput = grandTotal" class="px-2 py-0.5 bg-gray-100 hover:bg-gray-200 text-[10px] font-semibold text-gray-600 rounded">
+                        <div class="flex gap-1.5 mt-1.5" x-show="paymentMethod === 'Cash'">
+                            <button type="button" @click="paidInput = grandTotal" class="px-2 py-0.5 bg-gray-100 hover:bg-gray-200 text-[10px] font-semibold text-gray-600 rounded cursor-pointer">
                                 Uang Pas
                             </button>
-                            <button type="button" @click="paidInput = Math.ceil(grandTotal / 50000) * 50000" class="px-2 py-0.5 bg-gray-100 hover:bg-gray-200 text-[10px] font-semibold text-gray-600 rounded">
+                            <button type="button" @click="paidInput = Math.ceil(grandTotal / 50000) * 50000" class="px-2 py-0.5 bg-gray-100 hover:bg-gray-200 text-[10px] font-semibold text-gray-600 rounded cursor-pointer">
                                 Bulat 50rb
                             </button>
-                            <button type="button" @click="paidInput = Math.ceil(grandTotal / 100000) * 100000" class="px-2 py-0.5 bg-gray-100 hover:bg-gray-200 text-[10px] font-semibold text-gray-600 rounded">
+                            <button type="button" @click="paidInput = Math.ceil(grandTotal / 100000) * 100000" class="px-2 py-0.5 bg-gray-100 hover:bg-gray-200 text-[10px] font-semibold text-gray-600 rounded cursor-pointer">
                                 Bulat 100rb
                             </button>
                         </div>

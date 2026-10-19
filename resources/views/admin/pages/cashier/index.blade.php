@@ -36,18 +36,33 @@
         </div>
     </div>
 
-    <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4">
-        <div class="w-11 h-11 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-lg shrink-0">
-            ✓
-        </div>
-        <div>
-            <span class="text-[11px] text-gray-400 font-semibold uppercase tracking-wider block">Penerimaan Hari Ini (Lunas)</span>
-            <div class="flex items-baseline gap-2">
-                <span class="text-xl font-black text-emerald-700">Rp {{ number_format($todayPaidTotal, 0, ',', '.') }}</span>
-                <span class="text-xs font-bold text-gray-600">({{ $todayPaidCount }} Transaksi)</span>
+    <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex flex-col justify-between">
+        <div class="flex items-center gap-4">
+            <div class="w-11 h-11 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-lg shrink-0">
+                ✓
             </div>
-            <span class="text-[11px] text-emerald-600 font-medium block">Kasir klinik / QRIS / Transfer / Debit</span>
+            <div class="flex-1">
+                <span class="text-[11px] text-gray-400 font-semibold uppercase tracking-wider block">Penerimaan Hari Ini (Lunas)</span>
+                <div class="flex items-baseline gap-2">
+                    <span class="text-xl font-black text-emerald-700">Rp {{ number_format($todayPaidTotal, 0, ',', '.') }}</span>
+                    <span class="text-xs font-bold text-gray-600">({{ $todayPaidCount }} Transaksi)</span>
+                </div>
+                <span class="text-[11px] text-emerald-600 font-medium block">Kasir klinik / QRIS / Transfer / Debit</span>
+            </div>
         </div>
+
+        @if(isset($paymentMethodsRecap) && $paymentMethodsRecap->isNotEmpty())
+            <div class="mt-3 pt-2.5 border-t border-gray-100 flex flex-wrap gap-1.5 items-center">
+                <span class="text-[10px] text-gray-400 font-semibold uppercase">Rekap Metode:</span>
+                @foreach($paymentMethodsRecap as $recap)
+                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-semibold bg-gray-50 border border-gray-200 text-gray-700">
+                        <span>{{ $recap->method }}:</span>
+                        <strong class="text-emerald-700 font-mono">Rp {{ number_format($recap->total, 0, ',', '.') }}</strong>
+                        <span class="text-gray-400">({{ $recap->count }})</span>
+                    </span>
+                @endforeach
+            </div>
+        @endif
     </div>
 </div>
 
@@ -79,8 +94,8 @@
         <div class="flex flex-wrap gap-3 items-center w-full lg:w-auto">
             <div class="relative">
                 <input type="text" name="search" value="{{ request('search') }}" 
-                       placeholder="Cari pasien, kode reservasi, invoice..."
-                       class="px-3 py-2 pl-9 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 w-72">
+                       placeholder="Cari pasien, kode, invoice, metode..."
+                       class="px-3 py-2 pl-9 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 w-64">
                 <svg class="w-4 h-4 text-gray-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                 </svg>
@@ -92,10 +107,22 @@
                        class="px-2.5 py-1.5 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
             </div>
 
+            <div class="flex items-center gap-1.5 text-xs text-gray-500">
+                <span>Metode:</span>
+                <select name="payment_method" class="px-2.5 py-1.5 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white text-gray-800">
+                    <option value="">Semua Metode</option>
+                    <option value="Cash" {{ request('payment_method') === 'Cash' ? 'selected' : '' }}>💵 Cash (Tunai)</option>
+                    <option value="QRIS" {{ request('payment_method') === 'QRIS' ? 'selected' : '' }}>📱 QRIS</option>
+                    <option value="Transfer Bank" {{ request('payment_method') === 'Transfer Bank' ? 'selected' : '' }}>🏦 Transfer Bank</option>
+                    <option value="Debit" {{ request('payment_method') === 'Debit' ? 'selected' : '' }}>💳 Kartu Debit</option>
+                    <option value="Lainnya" {{ request('payment_method') === 'Lainnya' ? 'selected' : '' }}>✨ Lainnya</option>
+                </select>
+            </div>
+
             <button type="submit" class="px-4 py-2 bg-gray-800 text-white text-xs font-semibold rounded-lg hover:bg-gray-700 transition">
                 Filter
             </button>
-            @if(request('search') || request('date'))
+            @if(request('search') || request('date') || request('payment_method'))
                 <a href="{{ route('cashier.index', ['tab' => $tab]) }}" class="text-xs text-gray-500 hover:text-gray-700 underline font-medium">Reset</a>
             @endif
         </div>
@@ -121,7 +148,7 @@
                 <th class="px-6 py-3.5 text-left font-semibold text-gray-600 uppercase tracking-wider text-xs">Detail Tagihan Sesi Terapi</th>
                 <th class="px-6 py-3.5 text-left font-semibold text-gray-600 uppercase tracking-wider text-xs">Terapis</th>
                 <th class="px-6 py-3.5 text-right font-semibold text-gray-600 uppercase tracking-wider text-xs">Total Tagihan</th>
-                <th class="px-6 py-3.5 text-center font-semibold text-gray-600 uppercase tracking-wider text-xs">Status</th>
+                <th class="px-6 py-3.5 text-center font-semibold text-gray-600 uppercase tracking-wider text-xs">{{ $tab === 'paid' ? 'Status & Metode' : 'Status' }}</th>
                 <th class="px-6 py-3.5 text-right font-semibold text-gray-600 uppercase tracking-wider text-xs">Aksi</th>
             </tr>
         </thead>
@@ -213,12 +240,39 @@
                         @endif
                     </td>
 
-                    {{-- Kolom 6: Status Pembayaran Kasir --}}
+                    {{-- Kolom 6: Status Pembayaran Kasir & Metode --}}
                     <td class="px-6 py-4 text-center whitespace-nowrap">
                         @if($tab === 'paid')
-                            <span class="px-2.5 py-1 text-xs font-bold rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
-                                ✓ Lunas (Kasir)
-                            </span>
+                            <div class="flex flex-col items-center gap-1.5">
+                                <span class="px-2.5 py-0.5 text-xs font-bold rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                    ✓ Lunas
+                                </span>
+                                @php
+                                    $method = $res->payment_method ?: 'Cash';
+                                    $methodUpper = strtoupper($method);
+                                @endphp
+                                @if(str_contains($methodUpper, 'QRIS'))
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-bold rounded-md bg-purple-50 text-purple-700 border border-purple-200">
+                                        <span>📱</span> QRIS
+                                    </span>
+                                @elseif(str_contains($methodUpper, 'TRANSFER'))
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-bold rounded-md bg-blue-50 text-blue-700 border border-blue-200">
+                                        <span>🏦</span> Transfer
+                                    </span>
+                                @elseif(str_contains($methodUpper, 'DEBIT'))
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-bold rounded-md bg-cyan-50 text-cyan-700 border border-cyan-200">
+                                        <span>💳</span> Debit
+                                    </span>
+                                @elseif(str_contains($methodUpper, 'CASH') || str_contains($methodUpper, 'TUNAI'))
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-bold rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                        <span>💵</span> Cash
+                                    </span>
+                                @else
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-bold rounded-md bg-amber-50 text-amber-700 border border-amber-200" title="{{ $method }}">
+                                        <span>✨</span> {{ \Illuminate\Support\Str::limit($method, 14) }}
+                                    </span>
+                                @endif
+                            </div>
                         @else
                             <span class="px-2.5 py-1 text-xs font-bold rounded-full bg-amber-50 text-amber-700 border border-amber-200">
                                 Menunggu Kasir

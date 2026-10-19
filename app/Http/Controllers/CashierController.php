@@ -31,6 +31,7 @@ class CashierController extends Controller
             $query->where(function($q) use ($search) {
                 $q->where('invoice_code', 'ilike', "%{$search}%")
                   ->orWhere('reservation_code', 'ilike', "%{$search}%")
+                  ->orWhere('payment_method', 'ilike', "%{$search}%")
                   ->orWhereHas('patient', function($pq) use ($search) {
                       $pq->where('full_name', 'ilike', "%{$search}%")
                          ->orWhere('phone_number', 'ilike', "%{$search}%");
@@ -43,6 +44,18 @@ class CashierController extends Controller
                 $query->whereDate('paid_at', $request->date);
             } else {
                 $query->whereDate('created_at', $request->date);
+            }
+        }
+
+        if ($request->filled('payment_method')) {
+            $method = $request->payment_method;
+            if ($method === 'Lainnya') {
+                $query->where(function($q) {
+                    $q->where('payment_method', 'ilike', 'Lainnya%')
+                      ->orWhereNotIn('payment_method', ['Cash', 'QRIS', 'Transfer Bank', 'Debit', 'cash', 'qris', 'Kasir Offline']);
+                });
+            } else {
+                $query->where('payment_method', 'ilike', "%{$method}%");
             }
         }
 
@@ -66,13 +79,26 @@ class CashierController extends Controller
         $todayPaidCount = Reservation::whereDate('paid_at', $today)->where('payment_status', 'paid')->count();
         $todayPaidTotal = Reservation::whereDate('paid_at', $today)->where('payment_status', 'paid')->sum('paid_amount');
 
+        // Rekapitulasi Pembayaran per Metode (QRIS, Transfer Bank, Cash, Debit, dll)
+        $paymentMethodsRecap = Reservation::where('payment_status', 'paid')
+            ->when($request->filled('date'), function($q) use ($request) {
+                $q->whereDate('paid_at', $request->date);
+            }, function($q) use ($today) {
+                $q->whereDate('paid_at', $today);
+            })
+            ->selectRaw("COALESCE(NULLIF(payment_method, ''), 'Cash') as method, count(*) as count, sum(paid_amount) as total")
+            ->groupByRaw("COALESCE(NULLIF(payment_method, ''), 'Cash')")
+            ->orderBy('count', 'desc')
+            ->get();
+
         return view('admin.pages.cashier.index', compact(
             'reservations',
             'tab',
             'unpaidCount',
             'unpaidTotal',
             'todayPaidCount',
-            'todayPaidTotal'
+            'todayPaidTotal',
+            'paymentMethodsRecap'
         ));
     }
 
@@ -96,8 +122,11 @@ class CashierController extends Controller
 
         $request->validate([
             'discount' => 'nullable|numeric|min:0',
+            'discount_type' => 'nullable|string|in:rupiah,percent',
+            'discount_value' => 'nullable|numeric|min:0',
             'paid_amount' => 'required|numeric|min:0',
             'payment_method' => 'nullable|string',
+            'payment_method_detail' => 'nullable|string|max:100',
             'cashier_notes' => 'nullable|string',
         ]);
 
@@ -106,18 +135,30 @@ class CashierController extends Controller
             $basePrice = (float) $reservation->total_price;
         }
 
-        $discount = floatval($request->discount ?? 0);
+        $discountType = $request->input('discount_type', 'rupiah');
+        $discountValue = floatval($request->input('discount_value', 0));
+        if ($discountType === 'percent' && $discountValue > 0) {
+            $discount = round(($basePrice * min(100, max(0, $discountValue))) / 100, 2);
+        } else {
+            $discount = min($basePrice, max(0, floatval($request->input('discount', $discountValue))));
+        }
+
         $finalTotal = max(0, $basePrice - $discount);
         $paidAmount = floatval($request->paid_amount);
 
         $invoiceCode = $reservation->invoice_code ?: Reservation::generateInvoiceCode();
+
+        $paymentMethod = $request->payment_method ?: 'Cash';
+        if ($paymentMethod === 'Lainnya' && $request->filled('payment_method_detail')) {
+            $paymentMethod = 'Lainnya: ' . trim($request->payment_method_detail);
+        }
 
         $reservation->update([
             'payment_status' => 'paid',
             'total_price' => $basePrice,
             'discount' => $discount,
             'paid_amount' => $paidAmount,
-            'payment_method' => $request->payment_method ?: 'Kasir Offline',
+            'payment_method' => $paymentMethod,
             'invoice_code' => $invoiceCode,
             'paid_at' => now(),
             'cashier_user_id' => auth()->id(),
@@ -127,13 +168,14 @@ class CashierController extends Controller
         // Tandai seluruh sesi terapi di reservasi ini sebagai lunas
         $reservation->sessions()->update([
             'payment_status' => 'paid',
+            'payment_method' => $paymentMethod,
             'invoice_code' => $invoiceCode,
             'paid_at' => now(),
             'cashier_user_id' => auth()->id(),
         ]);
 
         return redirect()->route('cashier.receipt', $reservation->id)
-            ->with('success', "Pembayaran untuk reservasi {$reservation->reservation_code} ({$reservation->patient?->full_name}) berhasil diselesaikan (Invoice: {$invoiceCode})!");
+            ->with('success', "Pembayaran ({$paymentMethod}) untuk reservasi {$reservation->reservation_code} ({$reservation->patient?->full_name}) berhasil diselesaikan (Invoice: {$invoiceCode})!");
     }
 
     public function receipt($id)
