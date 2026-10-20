@@ -27,11 +27,16 @@
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6" 
      x-data="{
         baseTotal: {{ $total }},
+        otherFee: '{{ $reservation->other_fee > 0 ? (float)$reservation->other_fee : '' }}',
         discountType: 'rupiah',
         discountValue: '',
-        paidInput: {{ $total }},
+        paidInput: {{ $total + (float)($reservation->other_fee ?? 0) }},
         paymentMethod: 'Cash',
         paymentMethodOther: '',
+        get otherFeeAmount() {
+            let val = parseFloat(this.otherFee) || 0;
+            return Math.max(0, val);
+        },
         get discountAmount() {
             let val = parseFloat(this.discountValue) || 0;
             if (val <= 0) return 0;
@@ -39,10 +44,10 @@
                 let pct = Math.min(100, Math.max(0, val));
                 return Math.round((this.baseTotal * pct) / 100);
             }
-            return Math.min(this.baseTotal, Math.max(0, val));
+            return Math.min(this.baseTotal + this.otherFeeAmount, Math.max(0, val));
         },
         get grandTotal() {
-            return Math.max(0, this.baseTotal - this.discountAmount);
+            return Math.max(0, (this.baseTotal + this.otherFeeAmount) - this.discountAmount);
         },
         get changeAmount() {
             return Math.max(0, (parseFloat(this.paidInput) || 0) - this.grandTotal);
@@ -55,22 +60,32 @@
                 this.paidInput = this.grandTotal;
             }
         },
-        onDiscountChange() {
+        onRecalculate() {
             this.$nextTick(() => {
                 if (this.paymentMethod !== 'Cash') {
                     this.paidInput = this.grandTotal;
                 }
             });
         },
+        onDiscountChange() {
+            this.onRecalculate();
+        },
+        onOtherFeeChange() {
+            this.onRecalculate();
+        },
         setDiscountType(type) {
             this.discountType = type;
             this.discountValue = '';
-            this.onDiscountChange();
+            this.onRecalculate();
         },
         setPercentPreset(pct) {
             this.discountType = 'percent';
             this.discountValue = pct;
-            this.onDiscountChange();
+            this.onRecalculate();
+        },
+        setOtherFeePreset(val) {
+            this.otherFee = val > 0 ? val : '';
+            this.onRecalculate();
         }
      }">
 
@@ -226,6 +241,66 @@
 
                 {{-- Section Diskon & Total Tagihan --}}
                 <div class="bg-gray-50/80 border border-gray-200/80 rounded-2xl p-4 space-y-4">
+                    {{-- Input Biaya Lain-lain (Di Luar Penanganan) --}}
+                    <div class="pb-4 border-b border-gray-200/80">
+                        <div class="flex items-center justify-between mb-1.5">
+                            <label class="block text-xs font-bold text-gray-800 uppercase tracking-wider flex items-center gap-1.5">
+                                <span>🏷️</span> Biaya Lain-lain (Di Luar Penanganan)
+                            </label>
+                            <span class="text-[10px] font-semibold text-gray-500 bg-gray-200/70 px-2 py-0.5 rounded-md">
+                                Opsional
+                            </span>
+                        </div>
+                        <p class="text-[11px] text-gray-500 mb-2.5">
+                            Biaya tambahan di luar tindakan penanganan terapi (contoh: Kinesio tape, sewa alat khusus, obat/salep luar, perban, administrasi, dll.)
+                        </p>
+
+                        {{-- Input Nominal Rupiah Biaya Lain-lain & Keterangan --}}
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-[11px] font-semibold text-gray-600 mb-1">
+                                    Nominal Rupiah (Rp)
+                                </label>
+                                <div class="relative">
+                                    <span class="absolute left-3.5 top-2.5 text-xs text-gray-400 font-bold">Rp</span>
+                                    <input type="number"
+                                           name="other_fee"
+                                           x-model="otherFee"
+                                           @input="onOtherFeeChange()"
+                                           min="0"
+                                           placeholder="0"
+                                           class="w-full pl-10 pr-4 py-2.5 text-xs border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 font-bold text-gray-800 bg-white shadow-2xs">
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-[11px] font-semibold text-gray-600 mb-1">
+                                    Keterangan / Rincian Biaya Lain (Opsional)
+                                </label>
+                                <input type="text"
+                                       name="other_fee_description"
+                                       value="{{ old('other_fee_description', $reservation->other_fee_description) }}"
+                                       placeholder="Misal: Kinesio Tape 2 roll, Kasa & Plester..."
+                                       class="w-full px-3 py-2.5 text-xs border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 font-medium text-gray-800 bg-white shadow-2xs">
+                            </div>
+                        </div>
+
+                        {{-- Tombol Cepat Nominal Biaya Lain-lain --}}
+                        <div class="flex flex-wrap items-center gap-1.5 mt-2">
+                            <span class="text-[10px] text-gray-400 font-semibold">Cepat:</span>
+                            <button type="button" @click="setOtherFeePreset(0)" class="px-2 py-0.5 bg-white hover:bg-gray-100 text-gray-600 border border-gray-200 rounded text-[10px] font-bold transition cursor-pointer">Reset (0)</button>
+                            <button type="button" @click="setOtherFeePreset(15000)" class="px-2 py-0.5 bg-white hover:bg-emerald-50 text-emerald-700 hover:border-emerald-300 border border-gray-200 rounded text-[10px] font-bold transition cursor-pointer">+15rb</button>
+                            <button type="button" @click="setOtherFeePreset(25000)" class="px-2 py-0.5 bg-white hover:bg-emerald-50 text-emerald-700 hover:border-emerald-300 border border-gray-200 rounded text-[10px] font-bold transition cursor-pointer">+25rb</button>
+                            <button type="button" @click="setOtherFeePreset(50000)" class="px-2 py-0.5 bg-white hover:bg-emerald-50 text-emerald-700 hover:border-emerald-300 border border-gray-200 rounded text-[10px] font-bold transition cursor-pointer">+50rb</button>
+                            <button type="button" @click="setOtherFeePreset(75000)" class="px-2 py-0.5 bg-white hover:bg-emerald-50 text-emerald-700 hover:border-emerald-300 border border-gray-200 rounded text-[10px] font-bold transition cursor-pointer">+75rb</button>
+                            <button type="button" @click="setOtherFeePreset(100000)" class="px-2 py-0.5 bg-white hover:bg-emerald-50 text-emerald-700 hover:border-emerald-300 border border-gray-200 rounded text-[10px] font-bold transition cursor-pointer">+100rb</button>
+
+                            <div x-show="otherFeeAmount > 0" class="text-[11px] font-bold text-emerald-700 ml-auto">
+                                Tambahan: +Rp <span x-text="formatRupiah(otherFeeAmount)"></span>
+                            </div>
+                        </div>
+                    </div>
+
                     {{-- Input Diskon / Potongan Harga --}}
                     <div>
                         <div class="flex items-center justify-between mb-2">
@@ -257,7 +332,7 @@
                                    x-model="discountValue"
                                    @input="onDiscountChange()"
                                    :min="0"
-                                   :max="discountType === 'percent' ? 100 : baseTotal"
+                                   :max="discountType === 'percent' ? 100 : (baseTotal + otherFeeAmount)"
                                    :placeholder="discountType === 'percent' ? 'Masukkan persentase (misal: 10)' : '0'"
                                    :class="discountType === 'rupiah' ? 'pl-10 pr-4' : 'pl-4 pr-10'"
                                    class="w-full py-2.5 text-xs border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 font-bold text-gray-800 bg-white shadow-2xs">
@@ -300,17 +375,21 @@
                         </div>
                     </div>
 
-                    {{-- Total Tagihan Akhir (Setelah Diskon) --}}
-                    <div class="pt-3 border-t border-gray-200/80">
-                        <div class="flex items-center justify-between text-xs text-gray-500 mb-1.5">
-                            <span>Subtotal Sesi:</span>
+                    {{-- Total Tagihan Akhir (Setelah Biaya Lain-lain & Diskon) --}}
+                    <div class="pt-3 border-t border-gray-200/80 space-y-1.5">
+                        <div class="flex items-center justify-between text-xs text-gray-500">
+                            <span>Subtotal Sesi Penanganan:</span>
                             <span class="font-bold text-gray-800" x-text="'Rp ' + formatRupiah(baseTotal)"></span>
                         </div>
-                        <div x-show="discountAmount > 0" class="flex items-center justify-between text-xs text-rose-600 mb-1.5">
+                        <div x-show="otherFeeAmount > 0" class="flex items-center justify-between text-xs text-emerald-700">
+                            <span>Biaya Lain-lain:</span>
+                            <span class="font-bold font-mono" x-text="'+ Rp ' + formatRupiah(otherFeeAmount)"></span>
+                        </div>
+                        <div x-show="discountAmount > 0" class="flex items-center justify-between text-xs text-rose-600">
                             <span x-text="'Diskon ' + (discountType === 'percent' ? '(' + discountValue + '%)' : '') + ':'"></span>
                             <span class="font-bold font-mono" x-text="'- Rp ' + formatRupiah(discountAmount)"></span>
                         </div>
-                        <div class="p-3 bg-blue-50/80 border border-blue-200 rounded-xl flex items-center justify-between">
+                        <div class="p-3 bg-blue-50/80 border border-blue-200 rounded-xl flex items-center justify-between mt-2">
                             <div>
                                 <span class="text-xs font-bold text-blue-900 block">Total Tagihan Akhir</span>
                                 <span class="text-[10px] text-blue-600">Nominal bersih yang wajib dibayar pasien</span>

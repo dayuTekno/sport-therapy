@@ -117,6 +117,28 @@
                             </td>
                         </tr>
                     @endforelse
+
+                    @if($reservation->other_fee > 0)
+                        <tr class="bg-amber-50/40">
+                            <td class="py-3 font-semibold text-gray-400">#</td>
+                            <td class="py-3">
+                                <div class="font-bold text-gray-900 text-xs flex items-center gap-1.5">
+                                    <span>Biaya Tambahan / Lain-lain</span>
+                                    <span class="text-[9px] bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded font-bold uppercase tracking-wider">Luar Penanganan</span>
+                                </div>
+                                <div class="text-[11px] text-gray-500 mt-0.5">
+                                    {{ $reservation->other_fee_description ?: 'Biaya di luar penanganan terapi pasien' }}
+                                </div>
+                            </td>
+                            <td class="py-3 text-center text-gray-400">-</td>
+                            <td class="py-3 text-right text-gray-800">
+                                Rp {{ number_format($reservation->other_fee, 0, ',', '.') }}
+                            </td>
+                            <td class="py-3 text-right font-bold text-gray-900">
+                                Rp {{ number_format($reservation->other_fee, 0, ',', '.') }}
+                            </td>
+                        </tr>
+                    @endif
                 </tbody>
             </table>
         </div>
@@ -135,9 +157,15 @@
 
             <div class="w-full sm:w-64 space-y-2 text-xs">
                 <div class="flex justify-between text-gray-600">
-                    <span>Subtotal Tagihan:</span>
+                    <span>Subtotal Penanganan:</span>
                     <span>Rp {{ number_format($reservation->total_price, 0, ',', '.') }}</span>
                 </div>
+                @if($reservation->other_fee > 0)
+                    <div class="flex justify-between text-emerald-700 font-medium">
+                        <span>Biaya Lain-lain:</span>
+                        <span>+ Rp {{ number_format($reservation->other_fee, 0, ',', '.') }}</span>
+                    </div>
+                @endif
                 @if($reservation->discount > 0)
                     @php
                         $base = (float)$reservation->total_price;
@@ -150,18 +178,21 @@
                         <span>- Rp {{ number_format($reservation->discount, 0, ',', '.') }}</span>
                     </div>
                 @endif
+                @php
+                    $finalBill = max(0, ((float)$reservation->total_price + (float)$reservation->other_fee) - (float)$reservation->discount);
+                @endphp
                 <div class="flex justify-between text-sm font-black text-gray-900 pt-2 border-t border-gray-200">
                     <span>Total Pembayaran:</span>
-                    <span class="text-blue-700">Rp {{ number_format(max(0, $reservation->total_price - $reservation->discount), 0, ',', '.') }}</span>
+                    <span class="text-blue-700">Rp {{ number_format($finalBill, 0, ',', '.') }}</span>
                 </div>
                 <div class="flex justify-between text-gray-600 pt-1">
                     <span>Nominal Diterima:</span>
                     <span class="font-bold">Rp {{ number_format($reservation->paid_amount, 0, ',', '.') }}</span>
                 </div>
-                @if($reservation->paid_amount > max(0, $reservation->total_price - $reservation->discount))
+                @if($reservation->paid_amount > $finalBill)
                     <div class="flex justify-between text-emerald-700 font-bold">
                         <span>Kembalian:</span>
-                        <span>Rp {{ number_format($reservation->paid_amount - max(0, $reservation->total_price - $reservation->discount), 0, ',', '.') }}</span>
+                        <span>Rp {{ number_format($reservation->paid_amount - $finalBill, 0, ',', '.') }}</span>
                     </div>
                 @endif
             </div>

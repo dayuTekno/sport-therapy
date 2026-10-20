@@ -22,8 +22,14 @@ class Reservation extends Model
         'current_stage' => 'integer',
         'total_price' => 'decimal:2',
         'discount' => 'decimal:2',
+        'other_fee' => 'decimal:2',
         'paid_amount' => 'decimal:2',
     ];
+
+    public function getFinalTotalAttribute(): float
+    {
+        return (float) max(0, ((float)$this->total_price + (float)($this->other_fee ?? 0)) - (float)($this->discount ?? 0));
+    }
 
     public function patient()
     {
@@ -55,6 +61,10 @@ class Reservation extends Model
      */
     public function calculateTotalPrice(): float
     {
+        if ($this->sessions->isEmpty()) {
+            return (float) ($this->total_price ?? 0);
+        }
+
         $sum = 0;
         foreach ($this->sessions as $session) {
             $sessionPrice = $session->total_price > 0 ? (float)$session->total_price : (float)($session->therapyType?->price ?? 0);

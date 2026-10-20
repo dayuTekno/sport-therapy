@@ -435,12 +435,50 @@
                     @endforeach
                 </tbody>
                 <tfoot class="bg-gray-50 border-t border-gray-200">
-                    <tr>
+                    @if($reservation->other_fee > 0 || $reservation->discount > 0)
+                        <tr>
+                            <td colspan="5" class="px-5 py-2 text-right text-gray-500 text-xs">
+                                Subtotal Tindakan Terapi:
+                            </td>
+                            <td class="px-5 py-2 text-right font-semibold text-gray-700 text-xs whitespace-nowrap">
+                                Rp {{ number_format($reservation->total_price > 0 ? $reservation->total_price : $therapySessions->sum('total_price'), 0, ',', '.') }}
+                            </td>
+                            <td colspan="2"></td>
+                        </tr>
+                        @if($reservation->other_fee > 0)
+                            <tr>
+                                <td colspan="5" class="px-5 py-1 text-right text-emerald-700 text-xs font-medium">
+                                    Biaya Lain-lain ({{ $reservation->other_fee_description ?: 'Luar Penanganan' }}):
+                                </td>
+                                <td class="px-5 py-1 text-right font-semibold text-emerald-700 text-xs whitespace-nowrap">
+                                    + Rp {{ number_format($reservation->other_fee, 0, ',', '.') }}
+                                </td>
+                                <td colspan="2"></td>
+                            </tr>
+                        @endif
+                        @if($reservation->discount > 0)
+                            <tr>
+                                <td colspan="5" class="px-5 py-1 text-right text-rose-600 text-xs font-medium">
+                                    Diskon:
+                                </td>
+                                <td class="px-5 py-1 text-right font-semibold text-rose-600 text-xs whitespace-nowrap">
+                                    - Rp {{ number_format($reservation->discount, 0, ',', '.') }}
+                                </td>
+                                <td colspan="2"></td>
+                            </tr>
+                        @endif
+                    @endif
+                    <tr class="border-t border-gray-200">
                         <td colspan="5" class="px-5 py-3.5 text-right font-bold text-gray-700 uppercase tracking-wider text-xs">
                             Total Tagihan Reservasi:
                         </td>
                         <td class="px-5 py-3.5 text-right font-black text-gray-900 text-sm whitespace-nowrap">
-                            Rp {{ number_format($reservation->total_price > 0 ? $reservation->total_price : $therapySessions->sum('total_price'), 0, ',', '.') }}
+                            @php
+                                $displayTotal = $reservation->payment_status === 'paid'
+                                    ? $reservation->final_total
+                                    : (($reservation->total_price > 0 ? $reservation->total_price : $therapySessions->sum('total_price')) + (float)($reservation->other_fee ?? 0) - (float)($reservation->discount ?? 0));
+                            @endphp
+                            Rp {{ number_format(max(0, $displayTotal), 0, ',', '.') }}
                         </td>
                         <td colspan="2" class="px-5 py-3.5 text-right whitespace-nowrap">
                             <div class="flex items-center justify-end gap-2">

@@ -69,12 +69,13 @@ class CashierController extends Controller
                 $q->whereHas('sessions')->orWhere('total_price', '>', 0);
             })
             ->count();
-        $unpaidTotal = Reservation::where('payment_status', 'unpaid')
+        $unpaidTotal = (float) Reservation::where('payment_status', 'unpaid')
             ->where('status', '!=', 'cancelled')
             ->where(function($q) {
                 $q->whereHas('sessions')->orWhere('total_price', '>', 0);
             })
-            ->sum('total_price');
+            ->selectRaw('COALESCE(SUM(total_price + COALESCE(other_fee, 0)), 0) as total')
+            ->value('total');
 
         $todayPaidCount = Reservation::whereDate('paid_at', $today)->where('payment_status', 'paid')->count();
         $todayPaidTotal = Reservation::whereDate('paid_at', $today)->where('payment_status', 'paid')->sum('paid_amount');
@@ -121,6 +122,8 @@ class CashierController extends Controller
         $reservation = Reservation::with(['patient', 'sessions.therapyType'])->findOrFail($id);
 
         $request->validate([
+            'other_fee' => 'nullable|numeric|min:0',
+            'other_fee_description' => 'nullable|string|max:255',
             'discount' => 'nullable|numeric|min:0',
             'discount_type' => 'nullable|string|in:rupiah,percent',
             'discount_value' => 'nullable|numeric|min:0',
@@ -135,15 +138,18 @@ class CashierController extends Controller
             $basePrice = (float) $reservation->total_price;
         }
 
+        $otherFee = max(0, floatval($request->input('other_fee', 0)));
+        $otherFeeDescription = $request->filled('other_fee_description') ? trim($request->input('other_fee_description')) : null;
+
         $discountType = $request->input('discount_type', 'rupiah');
         $discountValue = floatval($request->input('discount_value', 0));
         if ($discountType === 'percent' && $discountValue > 0) {
             $discount = round(($basePrice * min(100, max(0, $discountValue))) / 100, 2);
         } else {
-            $discount = min($basePrice, max(0, floatval($request->input('discount', $discountValue))));
+            $discount = min($basePrice + $otherFee, max(0, floatval($request->input('discount', $discountValue))));
         }
 
-        $finalTotal = max(0, $basePrice - $discount);
+        $finalTotal = max(0, ($basePrice + $otherFee) - $discount);
         $paidAmount = floatval($request->paid_amount);
 
         $invoiceCode = $reservation->invoice_code ?: Reservation::generateInvoiceCode();
@@ -156,6 +162,8 @@ class CashierController extends Controller
         $reservation->update([
             'payment_status' => 'paid',
             'total_price' => $basePrice,
+            'other_fee' => $otherFee,
+            'other_fee_description' => $otherFeeDescription,
             'discount' => $discount,
             'paid_amount' => $paidAmount,
             'payment_method' => $paymentMethod,

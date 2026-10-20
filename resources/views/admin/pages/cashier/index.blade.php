@@ -211,9 +211,33 @@
                                         </span>
                                     </div>
                                 @endforeach
+
+                                @if($res->other_fee > 0)
+                                    <div class="text-[11px] text-amber-800 flex items-center justify-between gap-3 bg-amber-50/90 px-2 py-1 rounded-lg border border-amber-200" title="{{ $res->other_fee_description }}">
+                                        <div class="truncate max-w-[220px]">
+                                            <span class="font-bold text-amber-900">Biaya Lain:</span>
+                                            <span>{{ $res->other_fee_description ?: 'Luar Penanganan' }}</span>
+                                        </div>
+                                        <span class="font-mono text-[10px] text-amber-900 font-bold shrink-0">
+                                            +Rp {{ number_format($res->other_fee, 0, ',', '.') }}
+                                        </span>
+                                    </div>
+                                @endif
                             </div>
                         @else
-                            <span class="text-xs text-gray-400 italic">Belum ada sesi tercatat</span>
+                            @if($res->other_fee > 0)
+                                <div class="text-[11px] text-amber-800 flex items-center justify-between gap-3 bg-amber-50/90 px-2 py-1 rounded-lg border border-amber-200" title="{{ $res->other_fee_description }}">
+                                    <div class="truncate max-w-[220px]">
+                                        <span class="font-bold text-amber-900">Biaya Lain:</span>
+                                        <span>{{ $res->other_fee_description ?: 'Luar Penanganan' }}</span>
+                                    </div>
+                                    <span class="font-mono text-[10px] text-amber-900 font-bold shrink-0">
+                                        +Rp {{ number_format($res->other_fee, 0, ',', '.') }}
+                                    </span>
+                                </div>
+                            @else
+                                <span class="text-xs text-gray-400 italic">Belum ada sesi tercatat</span>
+                            @endif
                         @endif
                     </td>
 
@@ -228,15 +252,25 @@
                             <div class="font-bold text-emerald-700 text-sm">
                                 Rp {{ number_format($res->paid_amount, 0, ',', '.') }}
                             </div>
+                            @if($res->other_fee > 0)
+                                <div class="text-[10px] text-emerald-600 font-medium">
+                                    + Biaya Lain: Rp {{ number_format($res->other_fee, 0, ',', '.') }}
+                                </div>
+                            @endif
                             @if($res->discount > 0)
-                                <div class="text-[10px] text-gray-400">
-                                    Diskon: Rp {{ number_format($res->discount, 0, ',', '.') }}
+                                <div class="text-[10px] text-rose-500">
+                                    - Diskon: Rp {{ number_format($res->discount, 0, ',', '.') }}
                                 </div>
                             @endif
                         @else
                             <div class="font-bold text-gray-900 text-sm">
-                                Rp {{ number_format($calculatedTotal, 0, ',', '.') }}
+                                Rp {{ number_format($calculatedTotal + (float)($res->other_fee ?? 0), 0, ',', '.') }}
                             </div>
+                            @if($res->other_fee > 0)
+                                <div class="text-[10px] text-amber-600 font-medium">
+                                    + Biaya Lain: Rp {{ number_format($res->other_fee, 0, ',', '.') }}
+                                </div>
+                            @endif
                         @endif
                     </td>
 
