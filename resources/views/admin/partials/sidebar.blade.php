@@ -212,6 +212,20 @@
                             </span>
                         </a>
                     </li>
+
+                    <li>
+                        <a href="{{ route('profile.edit') }}"
+                            class="menu-item group flex items-center gap-3
+                            {{ request()->routeIs('profile*') ? 'menu-item-active' : 'menu-item-inactive' }}">
+                            <svg class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                            </svg>
+                            <span class="menu-item-text font-medium text-sm" :class="sidebarToggle ? 'lg:hidden' : ''">
+                                Profil Saya
+                            </span>
+                        </a>
+                    </li>
                 </ul>
 
                 <!-- GROUP: TAUTAN EKSTERNAL -->
@@ -572,6 +586,19 @@
                             </svg>
                             <span class="menu-item-text font-medium text-sm" :class="sidebarToggle ? 'lg:hidden' : ''">
                                 Setting Klinik
+                            </span>
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="{{ route('profile.edit') }}"
+                            class="menu-item group flex items-center gap-3
+                            {{ request()->routeIs('profile*') ? 'menu-item-active' : 'menu-item-inactive' }}">
+                            <svg class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                            </svg>
+                            <span class="menu-item-text font-medium text-sm" :class="sidebarToggle ? 'lg:hidden' : ''">
+                                Profil Saya
                             </span>
                         </a>
                     </li>

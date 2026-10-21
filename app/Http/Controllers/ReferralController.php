@@ -25,7 +25,10 @@ class ReferralController extends Controller
                   ->orWhere('code', 'ilike', "%{$search}%")
                   ->orWhere('agency', 'ilike', "%{$search}%")
                   ->orWhere('phone', 'ilike', "%{$search}%")
-                  ->orWhere('email', 'ilike', "%{$search}%");
+                  ->orWhere('email', 'ilike', "%{$search}%")
+                  ->orWhere('bank_name', 'ilike', "%{$search}%")
+                  ->orWhere('bank_account_number', 'ilike', "%{$search}%")
+                  ->orWhere('bank_account_name', 'ilike', "%{$search}%");
             });
         }
 
@@ -77,6 +80,9 @@ class ReferralController extends Controller
             'phone' => 'nullable|string|max:30',
             'email' => 'nullable|email|max:255',
             'agency' => 'nullable|string|max:255',
+            'bank_name' => 'nullable|string|max:100',
+            'bank_account_number' => 'nullable|string|max:100',
+            'bank_account_name' => 'nullable|string|max:255',
             'commission_amount' => 'nullable|numeric|min:0',
             'notes' => 'nullable|string|max:1000',
             'is_active' => 'nullable',
@@ -131,6 +137,9 @@ class ReferralController extends Controller
             'phone' => 'nullable|string|max:30',
             'email' => 'nullable|email|max:255',
             'agency' => 'nullable|string|max:255',
+            'bank_name' => 'nullable|string|max:100',
+            'bank_account_number' => 'nullable|string|max:100',
+            'bank_account_name' => 'nullable|string|max:255',
             'commission_amount' => 'nullable|numeric|min:0',
             'notes' => 'nullable|string|max:1000',
             'is_active' => 'nullable',

@@ -102,7 +102,7 @@
     <div class="p-4 border-b border-gray-100 bg-gray-50/50">
         <form action="{{ route('referrals.index') }}" method="GET" class="flex gap-2 w-full max-w-md">
             <input type="text" name="search" value="{{ request('search') }}"
-                   placeholder="Cari Nama Referal / Kode / Instansi / No. HP..."
+                   placeholder="Cari Nama Referal / Kode / No. Rekening / DANA..."
                    class="w-full px-3.5 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-xs">
             <button type="submit" class="px-4 py-2 bg-white text-gray-700 border border-gray-200 rounded-xl hover:bg-gray-50 text-xs font-semibold shadow-xs">
                 Cari
@@ -122,7 +122,7 @@
                     <th class="px-5 py-3.5">Kode</th>
                     <th class="px-5 py-3.5">Nama Referal / Perujuk</th>
                     <th class="px-5 py-3.5">Instansi / Asal</th>
-                    <th class="px-5 py-3.5">Kontak</th>
+                    <th class="px-5 py-3.5">Kontak & Rekening / DANA</th>
                     <th class="px-5 py-3.5 text-center">Pasien Terafiliasi</th>
                     <th class="px-5 py-3.5 text-center">Frekuensi Sesi Terapi</th>
                     <th class="px-5 py-3.5">Tarif Komisi / Sesi</th>
@@ -160,10 +160,10 @@
                             </span>
                         </td>
 
-                        {{-- Kontak --}}
-                        <td class="px-5 py-3.5 text-gray-700 font-mono">
+                        {{-- Kontak & Rekening / DANA --}}
+                        <td class="px-5 py-3.5 text-gray-700">
                             @if($ref->phone)
-                                <div class="flex items-center gap-1">
+                                <div class="flex items-center gap-1 font-mono">
                                     <span>📱</span>
                                     <span>{{ $ref->phone }}</span>
                                 </div>
@@ -173,7 +173,17 @@
                                     {{ $ref->email }}
                                 </div>
                             @endif
-                            @if(!$ref->phone && !$ref->email)
+                            @if($ref->bank_account_number)
+                                <div class="mt-1 flex items-center gap-1 text-[10px] bg-blue-50 text-blue-900 border border-blue-200 rounded-md px-1.5 py-0.5 w-fit" title="Rekening Transfer / DANA">
+                                    <span>💳</span>
+                                    <span class="font-bold">{{ $ref->bank_name ?: 'Bank/DANA' }}:</span>
+                                    <span class="font-mono font-semibold">{{ $ref->bank_account_number }}</span>
+                                    @if($ref->bank_account_name)
+                                        <span class="text-blue-600 truncate max-w-[120px]">({{ $ref->bank_account_name }})</span>
+                                    @endif
+                                </div>
+                            @endif
+                            @if(!$ref->phone && !$ref->email && !$ref->bank_account_number)
                                 <span class="text-gray-400">-</span>
                             @endif
                         </td>

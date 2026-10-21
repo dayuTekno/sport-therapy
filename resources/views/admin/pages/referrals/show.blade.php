@@ -31,7 +31,10 @@
         <p class="text-xs text-gray-500 mt-1">
             {{ $referral->agency ? $referral->agency . ' • ' : '' }}
             {{ $referral->phone ? 'Telp: ' . $referral->phone . ' • ' : '' }}
-            {{ $referral->email ?: '' }}
+            {{ $referral->email ? $referral->email . ' • ' : '' }}
+            @if($referral->bank_account_number)
+                <span class="font-semibold text-blue-700">💳 {{ $referral->bank_name ?: 'Rek/DANA' }}: {{ $referral->bank_account_number }}{{ $referral->bank_account_name ? ' (' . $referral->bank_account_name . ')' : '' }}</span>
+            @endif
         </p>
     </div>
 
@@ -108,12 +111,52 @@
     </div>
 </div>
 
-@if($referral->notes)
-    <div class="mb-6 p-4 rounded-xl bg-gray-50 border border-gray-200 text-xs text-gray-700">
-        <strong class="font-bold text-gray-900 block mb-1">📝 Catatan Mitra / Perjanjian Kerja Sama:</strong>
-        {{ $referral->notes }}
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+    {{-- Info Rekening Bank / Nomor DANA --}}
+    <div class="p-4 rounded-xl bg-blue-50/60 border border-blue-200 text-xs text-gray-800">
+        <div class="flex items-center gap-2 mb-2.5 font-bold text-blue-900">
+            <span class="text-base">🏦</span>
+            <span>Rekening Bank / Nomor DANA (Pembayaran Komisi)</span>
+        </div>
+        @if($referral->bank_account_number)
+            <div class="space-y-2">
+                <div class="flex items-center gap-2">
+                    <span class="text-gray-500 w-28 shrink-0">Bank / E-Wallet:</span>
+                    <span class="font-bold text-gray-900 px-2 py-0.5 rounded bg-white border border-blue-200 inline-block">
+                        {{ $referral->bank_name ?: 'DANA / Bank' }}
+                    </span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="text-gray-500 w-28 shrink-0">No. Rekening / DANA:</span>
+                    <span class="font-mono font-bold text-sm text-blue-700 bg-white px-2 py-0.5 rounded border border-blue-200 inline-block">
+                        {{ $referral->bank_account_number }}
+                    </span>
+                </div>
+                @if($referral->bank_account_name)
+                    <div class="flex items-center gap-2">
+                        <span class="text-gray-500 w-28 shrink-0">Atas Nama (A/N):</span>
+                        <span class="font-semibold text-gray-800">{{ $referral->bank_account_name }}</span>
+                    </div>
+                @endif
+            </div>
+        @else
+            <p class="text-gray-400 italic">Belum ada nomor rekening bank atau nomor DANA yang dicatat.</p>
+        @endif
     </div>
-@endif
+
+    {{-- Catatan Mitra --}}
+    <div class="p-4 rounded-xl bg-gray-50 border border-gray-200 text-xs text-gray-700">
+        <div class="flex items-center gap-2 mb-2.5 font-bold text-gray-900">
+            <span class="text-base">📝</span>
+            <span>Catatan Mitra / Perjanjian Kerja Sama</span>
+        </div>
+        @if($referral->notes)
+            <p class="whitespace-pre-line text-gray-800 leading-relaxed">{{ $referral->notes }}</p>
+        @else
+            <p class="text-gray-400 italic">Tidak ada catatan khusus.</p>
+        @endif
+    </div>
+</div>
 
 {{-- Tabel Pasien Terafiliasi --}}
 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">

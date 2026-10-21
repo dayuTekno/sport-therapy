@@ -99,6 +99,68 @@
             </div>
         </div>
 
+        {{-- REKENING BANK / NOMOR DANA --}}
+        <div>
+            <div class="flex items-center gap-2 mb-4 pb-2 border-b border-gray-100">
+                <span class="text-lg">🏦</span>
+                <h2 class="text-sm font-bold uppercase tracking-wide text-gray-900">Rekening Bank / Nomor DANA (Pembayaran Komisi)</h2>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                {{-- Bank / E-Wallet --}}
+                <div>
+                    <label class="{{ $label }}">Bank / E-Wallet</label>
+                    <div class="relative">
+                        <input list="bank_options" name="bank_name" id="bank_name" 
+                               value="{{ old('bank_name', $referral->bank_name) }}" 
+                               class="{{ $input }} @error('bank_name'){{ $fieldErr }}@enderror" 
+                               placeholder="Contoh: DANA, BCA, BRI, Mandiri">
+                        <datalist id="bank_options">
+                            <option value="DANA">DANA (E-Wallet)</option>
+                            <option value="BCA">Bank BCA</option>
+                            <option value="BRI">Bank BRI</option>
+                            <option value="Mandiri">Bank Mandiri</option>
+                            <option value="BNI">Bank BNI</option>
+                            <option value="BSI">Bank Syariah Indonesia (BSI)</option>
+                            <option value="CIMB Niaga">Bank CIMB Niaga</option>
+                            <option value="Permata">Bank Permata</option>
+                            <option value="OVO">OVO</option>
+                            <option value="GoPay">GoPay</option>
+                            <option value="ShopeePay">ShopeePay</option>
+                        </datalist>
+                    </div>
+                    <p class="text-[11px] text-gray-500 mt-1">Pilih dari list atau ketik bank/e-wallet.</p>
+                    @error('bank_name') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+                </div>
+
+                {{-- No. Rekening / No. DANA --}}
+                <div>
+                    <label class="{{ $label }}">Nomor Rekening / No. DANA</label>
+                    <div class="relative">
+                        <input type="text" name="bank_account_number" id="bank_account_number" 
+                               value="{{ old('bank_account_number', $referral->bank_account_number) }}" 
+                               class="{{ $input }} font-mono @error('bank_account_number'){{ $fieldErr }}@enderror" 
+                               placeholder="Contoh: 08123456789 / 8830123456">
+                    </div>
+                    <p class="text-[11px] text-gray-500 mt-1">Nomor rekening bank atau nomor HP akun DANA.</p>
+                    @error('bank_account_number') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+                </div>
+
+                {{-- Atas Nama (A/N) --}}
+                <div>
+                    <label class="{{ $label }}">Atas Nama (A/N)</label>
+                    <div class="relative">
+                        <input type="text" name="bank_account_name" id="bank_account_name" 
+                               value="{{ old('bank_account_name', $referral->bank_account_name) }}" 
+                               class="{{ $input }} @error('bank_account_name'){{ $fieldErr }}@enderror" 
+                               placeholder="Contoh: dr. Bambang / Rian">
+                    </div>
+                    <p class="text-[11px] text-gray-500 mt-1">Nama pemilik rekening / akun DANA.</p>
+                    @error('bank_account_name') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+                </div>
+            </div>
+        </div>
+
         {{-- PENGATURAN KOMISI & PERJANJIAN --}}
         <div>
             <div class="flex items-center gap-2 mb-4 pb-2 border-b border-gray-100">

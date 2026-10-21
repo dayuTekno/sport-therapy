@@ -48,6 +48,11 @@ Route::get('antrian/ticket/{id}', [AntrianController::class, 'ticket'])->name('a
 
 
 Route::middleware(['auth'])->group(function () {
+    // Profil Pengguna (Edit Foto Profil, Nama, Email & Password)
+    Route::get('profile', [\App\Http\Controllers\ProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('profile', [\App\Http\Controllers\ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('profile/avatar', [\App\Http\Controllers\ProfileController::class, 'destroyAvatar'])->name('profile.avatar.destroy');
+
     Route::resource('roles', RoleController::class);
     Route::resource('users', UserController::class);
     Route::resource('news', NewsController::class);

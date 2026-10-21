@@ -171,7 +171,9 @@
             <div class="relative">
                 <button @click="dropdownOpen = !dropdownOpen" class="flex items-center gap-3">
                     <img class="h-9 w-9 rounded-full object-cover border border-gray-200 dark:border-gray-700"
-                        src="{{ Auth::user()->avatar ?? asset('admin/images/user/user-37.jpg') }}">
+                        src="{{ Auth::user()->avatar_url }}"
+                        onerror="this.src='{{ asset('admin/images/user/user-37.jpg') }}'"
+                        alt="{{ Auth::user()->name }}">
 
                     <div class="hidden text-left sm:block">
                         <span class="block text-xs font-bold text-gray-800 dark:text-gray-200 leading-tight">
@@ -201,12 +203,26 @@
                            dark:border-gray-800 dark:bg-gray-900 z-50">
 
                     <div class="px-3 py-2 border-b border-gray-100 dark:border-gray-800 mb-1">
-                        <p class="text-xs font-bold text-gray-900 dark:text-white">{{ Auth::user()->name }}</p>
-                        <p class="text-[11px] text-gray-500 truncate">{{ Auth::user()->email }}</p>
-                        <p class="text-[10px] mt-1 font-semibold text-blue-600 dark:text-blue-400">
+                        <div class="flex items-center gap-2 mb-1.5">
+                            <img class="h-8 w-8 rounded-full object-cover border border-gray-200 dark:border-gray-700 shrink-0"
+                                src="{{ Auth::user()->avatar_url }}"
+                                onerror="this.src='{{ asset('admin/images/user/user-37.jpg') }}'"
+                                alt="{{ Auth::user()->name }}">
+                            <div class="min-w-0 flex-1">
+                                <p class="text-xs font-bold text-gray-900 dark:text-white truncate">{{ Auth::user()->name }}</p>
+                                <p class="text-[10px] text-gray-500 truncate">{{ Auth::user()->email }}</p>
+                            </div>
+                        </div>
+                        <p class="text-[10px] font-semibold text-blue-600 dark:text-blue-400">
                             {{ Auth::user()->role_display }}
                         </p>
                     </div>
+
+                    <a href="{{ route('profile.edit') }}"
+                       class="flex items-center gap-2 w-full rounded-lg px-3 py-2 text-left text-xs font-semibold text-gray-700 hover:bg-blue-50 hover:text-blue-600 dark:text-gray-300 dark:hover:bg-blue-900/20 dark:hover:text-blue-400 transition">
+                        <span>👤</span>
+                        <span>Edit Profil & Foto</span>
+                    </a>
 
                     @if(Auth::user()->isSaasAdmin())
                         <a href="{{ route('saas.dashboard') }}"

@@ -23,6 +23,7 @@ class User extends Authenticatable
         'email',
         'password',
         'clinic_id',
+        'avatar',
     ];
 
     /**
@@ -82,5 +83,22 @@ class User extends Authenticatable
             return 'Administrator Klinik';
         }
         return 'Operator Klinik';
+    }
+
+    public function getAvatarUrlAttribute(): string
+    {
+        $raw = $this->getRawOriginal('avatar');
+        if ($raw && \Illuminate\Support\Facades\Storage::disk('public')->exists($raw)) {
+            return asset('storage/' . $raw);
+        }
+        return asset('admin/images/user/user-37.jpg');
+    }
+
+    public function getAvatarAttribute($value): ?string
+    {
+        if ($value && \Illuminate\Support\Facades\Storage::disk('public')->exists($value)) {
+            return asset('storage/' . $value);
+        }
+        return $value ? asset('storage/' . $value) : null;
     }
 }
