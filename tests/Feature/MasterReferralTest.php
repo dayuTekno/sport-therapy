@@ -129,4 +129,50 @@ class MasterReferralTest extends TestCase
         $patient->delete();
         $referral->delete();
     }
+
+    public function test_reservation_show_displays_referral_name()
+    {
+        $this->actingAs($this->user);
+
+        $referral = MasterReferral::create([
+            'clinic_id' => $this->clinic->id,
+            'code' => 'REF-T03',
+            'name' => 'Klub Sepakbola Persik',
+            'agency' => 'Official Club',
+            'commission_amount' => 50000,
+            'is_active' => true,
+        ]);
+
+        $patient = MasterPatients::create([
+            'clinic_id' => $this->clinic->id,
+            'patient_code' => 'RM-TEST-002',
+            'full_name' => 'Bintang Lapangan',
+            'phone_number' => '081122334455',
+            'age' => 22,
+            'gender' => 'male',
+            'occupation' => 'Pemain Bola',
+            'address' => 'Jl. Stadion No. 1',
+            'referral_id' => $referral->id,
+        ]);
+
+        $reservation = \App\Models\Reservation::create([
+            'clinic_id' => $this->clinic->id,
+            'patient_id' => $patient->id,
+            'reservation_code' => 'RES-TEST-REF-99',
+            'chief_complaint' => 'Cedera Hamstring saat bertanding',
+            'complaint_duration' => '3 hari',
+            'preferred_schedule' => 'Besok Pagi Pukul 09.00',
+            'status' => 'confirmed',
+        ]);
+
+        $response = $this->get(route('reservations.show', $reservation->id));
+        $response->assertStatus(200);
+        $response->assertSee('Klub Sepakbola Persik');
+        $response->assertSee('Official Club');
+
+        // Cleanup
+        $reservation->delete();
+        $patient->delete();
+        $referral->delete();
+    }
 }

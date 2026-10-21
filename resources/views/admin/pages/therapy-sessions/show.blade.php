@@ -104,6 +104,22 @@
                 <span class="font-medium text-gray-800">{{ $session->patient?->occupation ?? '-' }}</span>
             </div>
             <div>
+                <span class="text-[11px] text-gray-400 block font-medium">Mitra Referal / Perujuk</span>
+                @if($session->patient?->referral)
+                    <div class="mt-1 flex items-center gap-2 p-2 bg-blue-50 border border-blue-200 rounded-lg text-xs">
+                        <span class="text-blue-700 font-bold">🤝</span>
+                        <div>
+                            <span class="font-bold text-blue-950 block">{{ $session->patient->referral->name }}</span>
+                            @if($session->patient->referral->agency)
+                                <span class="text-[11px] text-blue-700">{{ $session->patient->referral->agency }}</span>
+                            @endif
+                        </div>
+                    </div>
+                @else
+                    <span class="text-gray-400 text-xs italic">— Tanpa Referal —</span>
+                @endif
+            </div>
+            <div>
                 <span class="text-[11px] text-gray-400 block font-medium">Alamat Domisili</span>
                 <span class="text-gray-700 text-xs">{{ $session->patient?->address ?? '-' }}</span>
             </div>

@@ -176,7 +176,7 @@ class ReservationController extends Controller
 
     public function show($id)
     {
-        $reservation = Reservation::with(['patient', 'therapist'])->findOrFail($id);
+        $reservation = Reservation::with(['patient.referral', 'therapist'])->findOrFail($id);
         $therapists = Therapist::where('is_active', true)->get();
         $therapySessions = TherapySession::where('patient_id', $reservation->patient_id)
             ->with(['therapist', 'therapyType'])

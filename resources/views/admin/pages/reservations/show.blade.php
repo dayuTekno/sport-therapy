@@ -49,6 +49,16 @@
                     <span>⏳</span> Kasir: Menunggu Bayar
                 </span>
             @endif
+
+            {{-- Badge Mitra Referal --}}
+            @if($reservation->patient?->referral)
+                <span class="px-3 py-1 text-xs font-bold rounded-full bg-blue-50 text-blue-800 border border-blue-200 flex items-center gap-1.5 shadow-xs" title="Pasien dirujuk oleh Mitra Referal">
+                    <span>🤝</span> Rujukan: {{ $reservation->patient->referral->name }}
+                    @if($reservation->patient->referral->agency)
+                        <span class="font-normal text-blue-600 text-[11px]">({{ $reservation->patient->referral->agency }})</span>
+                    @endif
+                </span>
+            @endif
         </div>
         <p class="text-xs text-gray-500 mt-1">Booking dibuat pada {{ $reservation->created_at->format('d M Y, H:i') }} WIB</p>
     </div>
@@ -167,6 +177,35 @@
             <div>
                 <span class="text-[11px] text-gray-400 block font-medium">Pekerjaan</span>
                 <span class="font-medium text-gray-800">{{ $reservation->patient?->occupation ?? '-' }}</span>
+            </div>
+            <div>
+                <span class="text-[11px] text-gray-400 block font-medium">Mitra Referal / Perujuk</span>
+                @if($reservation->patient?->referral)
+                    <div class="mt-1 flex items-center justify-between p-2.5 bg-blue-50/80 border border-blue-200 rounded-xl text-xs">
+                        <div class="flex items-center gap-2">
+                            <span class="w-6 h-6 rounded-lg bg-blue-600 text-white flex items-center justify-center font-bold text-xs shrink-0">🤝</span>
+                            <div>
+                                <span class="font-bold text-blue-950 block">{{ $reservation->patient->referral->name }}</span>
+                                <span class="text-[11px] text-blue-700">
+                                    {{ $reservation->patient->referral->agency ?: 'Perseorangan / Mitra Umum' }}
+                                    @if($reservation->patient->referral->code)
+                                        <span class="font-mono text-[10px] bg-blue-100 text-blue-800 px-1 rounded ml-1">{{ $reservation->patient->referral->code }}</span>
+                                    @endif
+                                </span>
+                            </div>
+                        </div>
+                        @can('menu.referral')
+                            <a href="{{ route('referrals.show', $reservation->patient->referral->id) }}" target="_blank" 
+                               class="text-[11px] text-blue-600 hover:text-blue-800 font-bold hover:underline shrink-0 ml-2">
+                                Detail ↗
+                            </a>
+                        @endcan
+                    </div>
+                @else
+                    <span class="text-gray-500 text-xs italic bg-gray-50 px-2.5 py-1 rounded-lg border border-gray-100 inline-block mt-0.5">
+                        — Tanpa Referal (Pasien Umum) —
+                    </span>
+                @endif
             </div>
             <div>
                 <span class="text-[11px] text-gray-400 block font-medium">Alamat Domisili</span>
@@ -315,11 +354,20 @@
 <div class="bg-gradient-to-r from-blue-900 to-indigo-900 rounded-2xl p-6 text-white shadow-lg mb-8">
     <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
         <div class="space-y-2 max-w-2xl">
-            <div class="flex items-center gap-2">
+            <div class="flex flex-wrap items-center gap-2">
                 <span class="px-2.5 py-0.5 bg-blue-500/30 text-blue-200 rounded-full text-[11px] font-semibold border border-blue-400/30">
                     Sesi Terapi Berjenjang
                 </span>
                 <span class="text-blue-200 text-xs">• Mendukung >1 Terapi per Hari</span>
+                @if($reservation->patient?->referral)
+                    <span class="px-2.5 py-0.5 bg-emerald-500/20 text-emerald-200 rounded-full text-[11px] font-semibold border border-emerald-400/30 flex items-center gap-1">
+                        <span>🤝 Mitra Referal:</span>
+                        <strong class="text-white">{{ $reservation->patient->referral->name }}</strong>
+                        @if($reservation->patient->referral->agency)
+                            <span class="text-emerald-300 font-normal">({{ $reservation->patient->referral->agency }})</span>
+                        @endif
+                    </span>
+                @endif
             </div>
             <h2 class="text-xl font-bold tracking-tight">Tindakan Terapi Pasien</h2>
             <p class="text-xs text-blue-100/90 leading-relaxed">

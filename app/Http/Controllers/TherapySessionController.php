@@ -240,7 +240,7 @@ class TherapySessionController extends Controller
      */
     public function show($id)
     {
-        $session = TherapySession::with(['patient', 'therapist', 'therapyType', 'reservation'])->findOrFail($id);
+        $session = TherapySession::with(['patient.referral', 'therapist', 'therapyType', 'reservation'])->findOrFail($id);
 
         // Ambil riwayat lengkap seluruh tahapan terapi pasien ini
         $allSessions = TherapySession::where('patient_id', $session->patient_id)
