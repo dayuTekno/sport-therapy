@@ -197,6 +197,48 @@
                         @endforeach
                       </select>
                     </div>
+
+                    <div class="md:col-span-2">
+                      <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
+                        Referal Terapis (Opsional)
+                      </label>
+                      <div class="relative" id="regReferralComboboxWrapper">
+                        <input type="hidden" name="referral_therapist_id" id="reg_referral_therapist_id" value="{{ old('referral_therapist_id') }}">
+                        <div class="relative">
+                          <input type="text" id="regTherapistSearchInput"
+                            autocomplete="off"
+                            placeholder="🔍 Ketik nama terapis untuk mencari dan memilih referal..."
+                            class="dark:bg-dark-900 shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 pl-10 pr-20 text-sm text-gray-800 placeholder:text-gray-400 focus:ring-3 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
+                          />
+                          <span class="absolute left-3.5 top-3 text-gray-400 pointer-events-none">🩺</span>
+                          <div class="absolute right-3 top-2.5 flex items-center gap-1.5">
+                            <button type="button" id="regBtnClearReferral" class="hidden text-gray-400 hover:text-red-600 p-1 rounded-full transition" title="Hapus">
+                              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                            </button>
+                            <button type="button" id="regBtnToggleDropdown" class="text-gray-400 hover:text-gray-700 p-1 rounded-full transition" title="Buka / Tutup">
+                              <svg id="regReferralChevron" class="w-4 h-4 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                            </button>
+                          </div>
+                        </div>
+
+                        <div id="regReferralDropdownMenu" class="hidden absolute z-30 left-0 right-0 mt-1.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-xl max-h-60 overflow-y-auto divide-y divide-gray-100 dark:divide-gray-700">
+                          <div class="p-2.5 bg-gray-50 dark:bg-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer flex items-center justify-between text-xs text-gray-600 dark:text-gray-300 transition" id="regOptionNoReferral">
+                            <span class="font-medium italic">— Tanpa Referal (Bukan Rujukan) —</span>
+                            <span class="text-[10px] text-gray-400 bg-white dark:bg-gray-800 px-2 py-0.5 rounded border border-gray-200 dark:border-gray-700">Kosongkan</span>
+                          </div>
+                          <div id="regTherapistDropdownList" class="divide-y divide-gray-100 dark:divide-gray-700"></div>
+                        </div>
+                      </div>
+
+                      <div id="regSelectedReferralBadge" class="hidden mt-2 p-2.5 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg flex items-center justify-between text-xs transition">
+                        <div class="flex items-center gap-2">
+                          <span>🩺</span>
+                          <span id="regBadgeTherapistName" class="font-bold text-blue-900 dark:text-blue-200">-</span>
+                          <span id="regBadgeTherapistSpec" class="text-blue-700 dark:text-blue-300 text-[11px]">-</span>
+                        </div>
+                        <button type="button" id="regBtnRemoveBadge" class="text-xs text-red-600 hover:underline font-semibold">✕ Hapus</button>
+                      </div>
+                    </div>
                 </div>
 
                 <div class="flex justify-end pt-4">
@@ -217,6 +259,165 @@
             <!-- ====== Form Elements Section End -->
             </form>
         </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const therapists = @json($therapists ?? []);
+    const initialId = @json(old('referral_therapist_id', null));
+
+    const searchInput = document.getElementById('regTherapistSearchInput');
+    const hiddenInput = document.getElementById('reg_referral_therapist_id');
+    const dropdownMenu = document.getElementById('regReferralDropdownMenu');
+    const dropdownList = document.getElementById('regTherapistDropdownList');
+    const dropdownChevron = document.getElementById('regReferralChevron');
+    const btnClear = document.getElementById('regBtnClearReferral');
+    const btnToggle = document.getElementById('regBtnToggleDropdown');
+    const optionNoReferral = document.getElementById('regOptionNoReferral');
+    const wrapper = document.getElementById('regReferralComboboxWrapper');
+
+    const badge = document.getElementById('regSelectedReferralBadge');
+    const badgeName = document.getElementById('regBadgeTherapistName');
+    const badgeSpec = document.getElementById('regBadgeTherapistSpec');
+    const btnRemoveBadge = document.getElementById('regBtnRemoveBadge');
+
+    let currentSelected = null;
+
+    function escapeHtml(text) {
+        if (!text) return '';
+        const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+        return String(text).replace(/[&<>"']/g, m => map[m]);
+    }
+
+    function openDropdown() {
+        dropdownMenu.classList.remove('hidden');
+        if (dropdownChevron) dropdownChevron.classList.add('rotate-180');
+    }
+
+    function closeDropdown() {
+        dropdownMenu.classList.add('hidden');
+        if (dropdownChevron) dropdownChevron.classList.remove('rotate-180');
+    }
+
+    function selectTherapist(therapist) {
+        if (!therapist) {
+            clearSelection();
+            return;
+        }
+        currentSelected = therapist;
+        hiddenInput.value = therapist.id;
+        searchInput.value = therapist.full_name;
+        btnClear.classList.remove('hidden');
+
+        badgeName.textContent = therapist.full_name;
+        badgeSpec.textContent = (therapist.specialization ? '• ' + therapist.specialization : '') + (therapist.therapist_code ? ' (' + therapist.therapist_code + ')' : '');
+        badge.classList.remove('hidden');
+
+        closeDropdown();
+        renderList(therapists);
+    }
+
+    function clearSelection() {
+        currentSelected = null;
+        hiddenInput.value = '';
+        searchInput.value = '';
+        btnClear.classList.add('hidden');
+        badge.classList.add('hidden');
+        renderList(therapists);
+    }
+
+    function renderList(items) {
+        dropdownList.innerHTML = '';
+        if (!items || items.length === 0) {
+            const query = searchInput.value.trim();
+            dropdownList.innerHTML = `
+                <div class="p-4 text-center text-xs text-gray-500">
+                    <p class="font-bold">Terapis Tidak Ditemukan</p>
+                    <p class="text-[11px] text-gray-400">Tidak ada terapis "${escapeHtml(query)}"</p>
+                </div>
+            `;
+            return;
+        }
+
+        items.forEach(t => {
+            const isSelected = currentSelected && String(currentSelected.id) === String(t.id);
+            const itemEl = document.createElement('div');
+            itemEl.className = `p-2.5 cursor-pointer transition flex items-center justify-between text-xs hover:bg-blue-50 dark:hover:bg-gray-700 ${isSelected ? 'bg-blue-50 dark:bg-gray-700 font-semibold text-blue-900 dark:text-blue-300' : 'text-gray-800 dark:text-gray-200'}`;
+            itemEl.innerHTML = `
+                <div>
+                    <div>${escapeHtml(t.full_name)}</div>
+                    <div class="text-[11px] text-gray-400">${escapeHtml(t.specialization || 'Terapis')} ${t.therapist_code ? '[' + escapeHtml(t.therapist_code) + ']' : ''}</div>
+                </div>
+                ${isSelected ? '<span class="text-blue-600 font-bold">✓</span>' : '<span class="text-gray-400 text-[10px]">Pilih</span>'}
+            `;
+            itemEl.addEventListener('click', function(e) {
+                e.stopPropagation();
+                selectTherapist(t);
+            });
+            dropdownList.appendChild(itemEl);
+        });
+    }
+
+    searchInput.addEventListener('input', function() {
+        const query = this.value.trim().toLowerCase();
+        openDropdown();
+        if (!query) {
+            renderList(therapists);
+            return;
+        }
+        const filtered = therapists.filter(t => (t.full_name || '').toLowerCase().includes(query) || (t.specialization || '').toLowerCase().includes(query));
+        renderList(filtered);
+    });
+
+    searchInput.addEventListener('focus', function() {
+        openDropdown();
+        renderList(therapists);
+    });
+
+    btnToggle.addEventListener('click', function(e) {
+        e.stopPropagation();
+        if (dropdownMenu.classList.contains('hidden')) {
+            openDropdown();
+            renderList(therapists);
+        } else {
+            closeDropdown();
+        }
+    });
+
+    btnClear.addEventListener('click', function(e) {
+        e.stopPropagation();
+        clearSelection();
+    });
+
+    btnRemoveBadge.addEventListener('click', function(e) {
+        e.stopPropagation();
+        clearSelection();
+    });
+
+    optionNoReferral.addEventListener('click', function(e) {
+        e.stopPropagation();
+        clearSelection();
+        closeDropdown();
+    });
+
+    document.addEventListener('click', function(e) {
+        if (!wrapper.contains(e.target)) {
+            closeDropdown();
+            if (currentSelected) {
+                searchInput.value = currentSelected.full_name;
+            } else if (!hiddenInput.value) {
+                searchInput.value = '';
+            }
+        }
+    });
+
+    renderList(therapists);
+
+    if (initialId) {
+        const found = therapists.find(t => String(t.id) === String(initialId));
+        if (found) selectTherapist(found);
+    }
+});
+</script>
 
 
 @endsection

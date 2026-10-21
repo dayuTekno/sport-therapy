@@ -216,14 +216,15 @@
         <thead>
             <tr>
                 <th class="text-center" style="width: 3%;">No</th>
-                <th style="width: 14%;">Kode / No. RM</th>
-                <th style="width: 13%;">NIK</th>
-                <th style="width: 18%;">Nama Pasien</th>
-                <th class="text-center" style="width: 5%;">L/P</th>
-                <th class="text-center" style="width: 6%;">Usia</th>
-                <th style="width: 12%;">No. HP / WA</th>
-                <th style="width: 13%;">Pekerjaan</th>
-                <th style="width: 16%;">Alamat</th>
+                <th style="width: 12%;">Kode / No. RM</th>
+                <th style="width: 12%;">NIK</th>
+                <th style="width: 16%;">Nama Pasien</th>
+                <th class="text-center" style="width: 4%;">L/P</th>
+                <th class="text-center" style="width: 5%;">Usia</th>
+                <th style="width: 11%;">No. HP / WA</th>
+                <th style="width: 11%;">Pekerjaan</th>
+                <th style="width: 13%;">Referal Terapis</th>
+                <th style="width: 13%;">Alamat</th>
             </tr>
         </thead>
         <tbody>
@@ -245,11 +246,12 @@
                     <td class="text-center">{{ $patient->age ? $patient->age . ' Th' : '-' }}</td>
                     <td class="font-mono">{{ $patient->phone_number ?: '-' }}</td>
                     <td>{{ $patient->occupation ?: '-' }}</td>
+                    <td>{{ $patient->referralTherapist?->full_name ?: '-' }}</td>
                     <td>{{ $patient->address ?: '-' }}</td>
                 </tr>
             @empty
                 <tr>
-                    <td colspan="9" class="text-center" style="padding: 20px; color: #64748b;">
+                    <td colspan="10" class="text-center" style="padding: 20px; color: #64748b;">
                         Tidak ada data pasien yang sesuai.
                     </td>
                 </tr>

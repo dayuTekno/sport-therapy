@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\MasterPatients;
 use App\Models\MasterEselon;
 use App\Models\Clinic;
+use App\Models\Therapist;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -13,7 +14,7 @@ class PatientController extends Controller
 {
     public function exportPdf(Request $request)
     {
-        $query = MasterPatients::query();
+        $query = MasterPatients::with('referralTherapist');
 
         if ($request->filled('search')) {
             $search = $request->search;
@@ -22,7 +23,10 @@ class PatientController extends Controller
                   ->orWhere('phone_number', 'ilike', '%' . $search . '%')
                   ->orWhere('occupation', 'ilike', '%' . $search . '%')
                   ->orWhere('nik', 'ilike', '%' . $search . '%')
-                  ->orWhere('patient_code', 'ilike', '%' . $search . '%');
+                  ->orWhere('patient_code', 'ilike', '%' . $search . '%')
+                  ->orWhereHas('referralTherapist', function ($tq) use ($search) {
+                      $tq->where('full_name', 'ilike', '%' . $search . '%');
+                  });
             });
         }
 
@@ -54,7 +58,7 @@ class PatientController extends Controller
 
     public function index(Request $request)
     {
-        $query = MasterPatients::query();
+        $query = MasterPatients::with('referralTherapist');
 
         if ($request->search) {
             $search = $request->search;
@@ -63,7 +67,10 @@ class PatientController extends Controller
                   ->orWhere('phone_number', 'ilike', '%' . $search . '%')
                   ->orWhere('occupation', 'ilike', '%' . $search . '%')
                   ->orWhere('nik', 'ilike', '%' . $search . '%')
-                  ->orWhere('patient_code', 'ilike', '%' . $search . '%');
+                  ->orWhere('patient_code', 'ilike', '%' . $search . '%')
+                  ->orWhereHas('referralTherapist', function ($tq) use ($search) {
+                      $tq->where('full_name', 'ilike', '%' . $search . '%');
+                  });
             });
         }
 
@@ -75,9 +82,13 @@ class PatientController extends Controller
     public function create(Request $request)
     {
         $eselons = MasterEselon::where('is_active', true)->get();
+        $therapists = Therapist::where('is_active', true)->orderBy('full_name')->get();
+        if ($therapists->isEmpty()) {
+            $therapists = Therapist::orderBy('full_name')->get();
+        }
         $phone = $request->get('phone');
         $from = $request->get('from');
-        return view('admin.pages.master-patient.create', compact('eselons', 'phone', 'from'));
+        return view('admin.pages.master-patient.create', compact('eselons', 'phone', 'from', 'therapists'));
     }
 
     public function store(Request $request)
@@ -92,6 +103,7 @@ class PatientController extends Controller
             'nik' => 'nullable|digits:16|unique:master_patients,nik',
             'date_of_birth' => 'nullable|date',
             'eselon_id' => 'nullable|exists:master_eselons,id',
+            'referral_therapist_id' => 'nullable|exists:therapists,id',
         ]);
 
         $patient = MasterPatients::create([
@@ -105,6 +117,7 @@ class PatientController extends Controller
             'nik' => $request->nik,
             'date_of_birth' => $request->date_of_birth,
             'eselon_id' => $request->eselon_id,
+            'referral_therapist_id' => $request->referral_therapist_id,
         ]);
 
         if ($request->get('from') === 'reservation') {
@@ -117,9 +130,19 @@ class PatientController extends Controller
 
     public function edit($id)
     {
-        $patient = MasterPatients::findOrFail($id);
+        $patient = MasterPatients::with('referralTherapist')->findOrFail($id);
         $eselons = MasterEselon::where('is_active', true)->get();
-        return view('admin.pages.master-patient.edit', compact('patient', 'eselons'));
+        $therapists = Therapist::where('is_active', true)->orderBy('full_name')->get();
+        if ($therapists->isEmpty()) {
+            $therapists = Therapist::orderBy('full_name')->get();
+        }
+        if ($patient->referral_therapist_id && !$therapists->contains('id', $patient->referral_therapist_id)) {
+            $currentReferral = Therapist::find($patient->referral_therapist_id);
+            if ($currentReferral) {
+                $therapists->push($currentReferral);
+            }
+        }
+        return view('admin.pages.master-patient.edit', compact('patient', 'eselons', 'therapists'));
     }
 
     public function update(Request $request, $id)
@@ -136,6 +159,7 @@ class PatientController extends Controller
             'nik' => 'nullable|digits:16|unique:master_patients,nik,' . $id,
             'date_of_birth' => 'nullable|date',
             'eselon_id' => 'nullable|exists:master_eselons,id',
+            'referral_therapist_id' => 'nullable|exists:therapists,id',
         ]);
 
         $patient->update([
@@ -148,6 +172,7 @@ class PatientController extends Controller
             'nik' => $request->nik,
             'date_of_birth' => $request->date_of_birth,
             'eselon_id' => $request->eselon_id,
+            'referral_therapist_id' => $request->referral_therapist_id,
         ]);
 
         return redirect()->route('patients.index')->with('success', 'Data Pasien berhasil diperbarui');

@@ -27,6 +27,11 @@ class Therapist extends Model
         return $this->hasMany(TherapySession::class, 'therapist_id');
     }
 
+    public function referredPatients()
+    {
+        return $this->hasMany(MasterPatients::class, 'referral_therapist_id');
+    }
+
     /**
      * Cek apakah terapis memiliki jadwal bentrok pada rentang waktu tertentu.
      *

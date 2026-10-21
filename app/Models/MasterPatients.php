@@ -18,6 +18,11 @@ class MasterPatients extends Model
         return $this->belongsTo(MasterEselon::class, 'eselon_id');
     }
 
+    public function referralTherapist()
+    {
+        return $this->belongsTo(Therapist::class, 'referral_therapist_id');
+    }
+
     public function reservations()
     {
         return $this->hasMany(Reservation::class, 'patient_id');

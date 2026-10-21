@@ -54,7 +54,7 @@
     <div class="p-4 border-b border-gray-100 bg-gray-50/50">
         <form action="{{ route('patients.index') }}" method="GET" class="flex gap-2 w-full max-w-md">
             <input type="text" name="search" value="{{ request('search') }}"
-                   placeholder="Cari Nama / No. HP / Pekerjaan / NIK..."
+                   placeholder="Cari Nama / Referal / No. HP / Pekerjaan / NIK..."
                    class="w-full px-3.5 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-xs">
             <button type="submit" class="px-4 py-2 bg-white text-gray-700 border border-gray-200 rounded-xl hover:bg-gray-50 text-xs font-semibold shadow-sm">
                 Cari
@@ -77,6 +77,7 @@
                 <th class="px-5 py-3.5">Usia</th>
                 <th class="px-5 py-3.5">Gender</th>
                 <th class="px-5 py-3.5">Pekerjaan</th>
+                <th class="px-5 py-3.5">Referal Terapis</th>
                 <th class="px-5 py-3.5">Alamat</th>
                 <th class="px-5 py-3.5 text-right">Aksi</th>
             </tr>
@@ -109,6 +110,21 @@
                     </td>
                     <td class="px-5 py-3.5 text-gray-600">
                         {{ $patient->occupation ?? '-' }}
+                    </td>
+                    <td class="px-5 py-3.5">
+                        @if($patient->referralTherapist)
+                            <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-indigo-50 border border-indigo-100 text-indigo-800 text-[11px] font-medium" title="Rujukan dari: {{ $patient->referralTherapist->full_name }}">
+                                <span class="text-xs">🩺</span>
+                                <div>
+                                    <span class="font-semibold">{{ $patient->referralTherapist->full_name }}</span>
+                                    @if($patient->referralTherapist->therapist_code)
+                                        <span class="text-[9px] font-mono text-indigo-500 block">TRP: {{ $patient->referralTherapist->therapist_code }}</span>
+                                    @endif
+                                </div>
+                            </div>
+                        @else
+                            <span class="text-gray-400 text-[11px] italic">—</span>
+                        @endif
                     </td>
                     <td class="px-5 py-3.5 text-gray-500 max-w-[200px] truncate" title="{{ $patient->address }}">
                         {{ $patient->address ?? '-' }}

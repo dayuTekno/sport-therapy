@@ -56,7 +56,7 @@ class ReservationController extends Controller
     public function create()
     {
         $therapists = Therapist::where('is_active', true)->get();
-        $patients = MasterPatients::orderBy('full_name')->get();
+        $patients = MasterPatients::with('referralTherapist')->orderBy('full_name')->get();
         return view('admin.pages.reservations.create', compact('therapists', 'patients'));
     }
 
@@ -359,7 +359,7 @@ class ReservationController extends Controller
     {
         // 1. Lookup by ID
         if ($request->filled('id')) {
-            $patient = MasterPatients::find($request->id);
+            $patient = MasterPatients::with('referralTherapist')->find($request->id);
             if ($patient) {
                 return response()->json([
                     'found' => true,
@@ -374,6 +374,8 @@ class ReservationController extends Controller
                         'address' => $patient->address,
                         'phone_number' => $patient->phone_number,
                         'nik' => $patient->nik,
+                        'referral_therapist_id' => $patient->referral_therapist_id,
+                        'referral_therapist_name' => $patient->referralTherapist?->full_name,
                     ],
                 ]);
             }
@@ -382,7 +384,7 @@ class ReservationController extends Controller
         // 2. Search by query string (q / name / address / phone / RM)
         if ($request->filled('q')) {
             $q = $request->get('q');
-            $patients = MasterPatients::where(function($query) use ($q) {
+            $patients = MasterPatients::with('referralTherapist')->where(function($query) use ($q) {
                 $query->where('full_name', 'ilike', "%{$q}%")
                       ->orWhere('address', 'ilike', "%{$q}%")
                       ->orWhere('phone_number', 'ilike', "%{$q}%")
@@ -402,6 +404,8 @@ class ReservationController extends Controller
                     'address' => $patient->address,
                     'phone_number' => $patient->phone_number,
                     'nik' => $patient->nik,
+                    'referral_therapist_id' => $patient->referral_therapist_id,
+                    'referral_therapist_name' => $patient->referralTherapist?->full_name,
                 ];
             });
 
@@ -420,7 +424,7 @@ class ReservationController extends Controller
         $cleaned = preg_replace('/\D/', '', $phone);
         $search = str_starts_with($cleaned, '0') ? substr($cleaned, 1) : $cleaned;
 
-        $patient = MasterPatients::where('phone_number', 'ilike', "%{$search}%")
+        $patient = MasterPatients::with('referralTherapist')->where('phone_number', 'ilike', "%{$search}%")
             ->orWhere('phone_number', 'ilike', "%{$cleaned}%")
             ->first();
 
@@ -438,6 +442,8 @@ class ReservationController extends Controller
                     'address' => $patient->address,
                     'phone_number' => $patient->phone_number,
                     'nik' => $patient->nik,
+                    'referral_therapist_id' => $patient->referral_therapist_id,
+                    'referral_therapist_name' => $patient->referralTherapist?->full_name,
                 ],
             ]);
         }

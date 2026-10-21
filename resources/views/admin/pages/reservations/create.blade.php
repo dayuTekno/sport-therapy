@@ -140,6 +140,11 @@
                         <span class="text-gray-400 block text-[10px] uppercase font-semibold">Alamat Domisili</span>
                         <p id="disp_address" class="text-xs text-gray-800 font-medium mt-0.5">-</p>
                     </div>
+
+                    <div class="bg-white/80 p-3 rounded-lg border border-emerald-100 sm:col-span-1 md:col-span-1">
+                        <span class="text-gray-400 block text-[10px] uppercase font-semibold">Referal Terapis</span>
+                        <p id="disp_referral" class="text-xs font-semibold text-indigo-700 mt-0.5">-</p>
+                    </div>
                 </div>
 
                 <div class="mt-3 flex items-center justify-between text-[11px] pt-2 border-t border-emerald-100 text-emerald-800">
@@ -368,6 +373,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const dispGender = document.getElementById('disp_gender');
     const dispOccupation = document.getElementById('disp_occupation');
     const dispAddress = document.getElementById('disp_address');
+    const dispReferral = document.getElementById('disp_referral');
     const linkEditPatient = document.getElementById('linkEditPatient');
 
     // Hidden form inputs
@@ -490,6 +496,10 @@ document.addEventListener('DOMContentLoaded', function() {
         dispGender.textContent = p.gender_label || (p.gender === 'female' ? 'Perempuan' : (p.gender === 'male' ? 'Laki-laki' : '-'));
         dispOccupation.textContent = p.occupation || '-';
         dispAddress.textContent = p.address || '-';
+        if (dispReferral) {
+            const refName = p.referral_therapist?.full_name || p.referral_therapist_name || null;
+            dispReferral.textContent = refName ? `🩺 ${refName}` : 'Tanpa Referal (Umum)';
+        }
 
         // Set form hidden inputs
         inputPatientId.value = p.id || '';
@@ -523,6 +533,7 @@ document.addEventListener('DOMContentLoaded', function() {
         inputGender.value = '';
         inputOccupation.value = '';
         inputAddress.value = '';
+        if (dispReferral) dispReferral.textContent = '-';
 
         cardFound.classList.add('hidden');
         cardInitial.classList.remove('hidden');
