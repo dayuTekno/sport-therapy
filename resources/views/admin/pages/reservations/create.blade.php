@@ -142,7 +142,7 @@
                     </div>
 
                     <div class="bg-white/80 p-3 rounded-lg border border-emerald-100 sm:col-span-1 md:col-span-1">
-                        <span class="text-gray-400 block text-[10px] uppercase font-semibold">Referal Terapis</span>
+                        <span class="text-gray-400 block text-[10px] uppercase font-semibold">Mitra Referal</span>
                         <p id="disp_referral" class="text-xs font-semibold text-indigo-700 mt-0.5">-</p>
                     </div>
                 </div>
@@ -497,8 +497,8 @@ document.addEventListener('DOMContentLoaded', function() {
         dispOccupation.textContent = p.occupation || '-';
         dispAddress.textContent = p.address || '-';
         if (dispReferral) {
-            const refName = p.referral_therapist?.full_name || p.referral_therapist_name || null;
-            dispReferral.textContent = refName ? `🩺 ${refName}` : 'Tanpa Referal (Umum)';
+            const refName = p.referral?.name || p.referral_name || null;
+            dispReferral.textContent = refName ? `🤝 ${refName}` : 'Tanpa Referal (Umum)';
         }
 
         // Set form hidden inputs

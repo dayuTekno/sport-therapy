@@ -61,6 +61,7 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('therapists', \App\Http\Controllers\TherapistController::class);
     Route::resource('therapy-equipments', \App\Http\Controllers\TherapyEquipmentController::class);
     Route::resource('therapy-types', \App\Http\Controllers\TherapyTypeController::class);
+    Route::resource('referrals', \App\Http\Controllers\ReferralController::class);
     Route::get('reservations-history', [\App\Http\Controllers\ReservationController::class, 'history'])->name('reservations.history');
     Route::resource('reservations', \App\Http\Controllers\ReservationController::class);
     Route::post('reservations/{id}/confirm', [\App\Http\Controllers\ReservationController::class, 'confirm'])->name('reservations.confirm');

@@ -77,7 +77,7 @@
                 <th class="px-5 py-3.5">Usia</th>
                 <th class="px-5 py-3.5">Gender</th>
                 <th class="px-5 py-3.5">Pekerjaan</th>
-                <th class="px-5 py-3.5">Referal Terapis</th>
+                <th class="px-5 py-3.5">Mitra Referal</th>
                 <th class="px-5 py-3.5">Alamat</th>
                 <th class="px-5 py-3.5 text-right">Aksi</th>
             </tr>
@@ -112,13 +112,15 @@
                         {{ $patient->occupation ?? '-' }}
                     </td>
                     <td class="px-5 py-3.5">
-                        @if($patient->referralTherapist)
-                            <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-indigo-50 border border-indigo-100 text-indigo-800 text-[11px] font-medium" title="Rujukan dari: {{ $patient->referralTherapist->full_name }}">
-                                <span class="text-xs">🩺</span>
+                        @if($patient->referral)
+                            <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-blue-50 border border-blue-100 text-blue-800 text-[11px] font-medium" title="Mitra Referal: {{ $patient->referral->name }}">
+                                <span class="text-xs">🤝</span>
                                 <div>
-                                    <span class="font-semibold">{{ $patient->referralTherapist->full_name }}</span>
-                                    @if($patient->referralTherapist->therapist_code)
-                                        <span class="text-[9px] font-mono text-indigo-500 block">TRP: {{ $patient->referralTherapist->therapist_code }}</span>
+                                    <span class="font-semibold">{{ $patient->referral->name }}</span>
+                                    @if($patient->referral->agency)
+                                        <span class="text-[9px] text-blue-600 block">{{ $patient->referral->agency }}</span>
+                                    @elseif($patient->referral->code)
+                                        <span class="text-[9px] font-mono text-blue-500 block">{{ $patient->referral->code }}</span>
                                     @endif
                                 </div>
                             </div>

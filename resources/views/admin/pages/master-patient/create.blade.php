@@ -118,33 +118,35 @@
                     @enderror
                 </div>
 
-                {{-- Referal Terapis (Dropdown Search Master Data Terapis) --}}
+                {{-- Referal Pasien (Dropdown Search Master Data Referal) --}}
                 <div class="md:col-span-2">
                     <div class="flex items-center justify-between mb-1.5">
                         <label class="{{ $label }} !mb-0">
-                            Referal Terapis <span class="text-xs font-normal normal-case text-gray-500">(Opsional / Jika ada rujukan)</span>
+                            Referal Pasien <span class="text-xs font-normal normal-case text-gray-500">(Opsional / Jika ada rujukan)</span>
                         </label>
-                        <span class="text-[11px] text-gray-400">Master Data Terapis</span>
+                        <a href="{{ route('referrals.create') }}" target="_blank" class="text-[11px] text-blue-600 hover:text-blue-800 font-semibold flex items-center gap-1">
+                            + Kelola Master Referal
+                        </a>
                     </div>
 
                     <div class="relative" id="referralComboboxWrapper">
                         {{-- Hidden Input yang dikirim ke controller --}}
-                        <input type="hidden" name="referral_therapist_id" id="referral_therapist_id" value="{{ old('referral_therapist_id') }}">
+                        <input type="hidden" name="referral_id" id="referral_id" value="{{ old('referral_id') }}">
 
                         {{-- Input Pencarian --}}
                         <div class="relative">
-                            <input type="text" id="therapistSearchInput"
+                            <input type="text" id="referralSearchInput"
                                    autocomplete="off"
-                                   placeholder="🔍 Ketik nama terapis untuk mencari dan memilih referal..."
-                                   class="{{ $input }} pl-10 pr-24 cursor-pointer @error('referral_therapist_id'){{ $fieldErr }}@enderror">
-                            <span class="absolute left-3.5 top-3 text-gray-400 pointer-events-none text-base">🩺</span>
+                                   placeholder="🔍 Ketik nama referal untuk mencari mitra perujuk..."
+                                   class="{{ $input }} pl-10 pr-24 cursor-pointer @error('referral_id'){{ $fieldErr }}@enderror">
+                            <span class="absolute left-3.5 top-3 text-gray-400 pointer-events-none text-base">🤝</span>
 
                             {{-- Action buttons --}}
                             <div class="absolute right-3 top-2.5 flex items-center gap-1.5">
                                 <button type="button" id="btnClearReferral" class="hidden text-gray-400 hover:text-red-600 p-1 rounded-full hover:bg-gray-100 transition" title="Hapus Referal">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                                 </button>
-                                <button type="button" id="btnToggleReferralDropdown" class="text-gray-400 hover:text-gray-700 p-1 rounded-full hover:bg-gray-100 transition" title="Buka / Tutup Daftar Terapis">
+                                <button type="button" id="btnToggleReferralDropdown" class="text-gray-400 hover:text-gray-700 p-1 rounded-full hover:bg-gray-100 transition" title="Buka / Tutup Daftar Referal">
                                     <svg id="referralChevron" class="w-4 h-4 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                                     </svg>
@@ -161,8 +163,15 @@
                             </div>
                             
                             {{-- Container list hasil pencarian --}}
-                            <div id="therapistDropdownList" class="divide-y divide-gray-100">
+                            <div id="referralDropdownList" class="divide-y divide-gray-100">
                                 {{-- Populated by JS --}}
+                            </div>
+
+                            <div class="p-2.5 bg-gray-50 border-t border-gray-100 flex items-center justify-between text-xs sticky bottom-0">
+                                <span class="text-gray-500">Mitra tidak ditemukan?</span>
+                                <a href="{{ route('referrals.create') }}" target="_blank" class="text-blue-600 hover:text-blue-800 font-bold flex items-center gap-1">
+                                    + Tambah Master Referal
+                                </a>
                             </div>
                         </div>
                     </div>
@@ -170,14 +179,15 @@
                     {{-- Selected Referral Info Banner --}}
                     <div id="selectedReferralBadge" class="hidden mt-2 p-3 bg-blue-50/80 border border-blue-200 rounded-xl flex items-center justify-between text-xs transition">
                         <div class="flex items-center gap-2.5">
-                            <span class="flex-shrink-0 w-7 h-7 rounded-lg bg-blue-600 text-white flex items-center justify-center font-bold text-xs">🩺</span>
+                            <span class="flex-shrink-0 w-7 h-7 rounded-lg bg-blue-600 text-white flex items-center justify-center font-bold text-xs">🤝</span>
                             <div>
                                 <div class="font-bold text-blue-950 flex items-center gap-2">
-                                    <span id="badgeTherapistName">-</span>
-                                    <span id="badgeTherapistCode" class="text-[10px] font-mono bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded"></span>
+                                    <span id="badgeReferralName">-</span>
+                                    <span id="badgeReferralCode" class="text-[10px] font-mono bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded"></span>
                                 </div>
-                                <div class="text-[11px] text-blue-700 mt-0.5">
-                                    <span id="badgeTherapistSpec">-</span>
+                                <div class="text-[11px] text-blue-700 mt-0.5 flex items-center gap-2">
+                                    <span id="badgeReferralAgency">-</span>
+                                    <span id="badgeReferralCommission" class="text-[10px] bg-emerald-50 text-emerald-700 px-1.5 py-0.2 rounded border border-emerald-200"></span>
                                 </div>
                             </div>
                         </div>
@@ -186,8 +196,8 @@
                         </button>
                     </div>
 
-                    <p class="text-[11px] text-gray-500 mt-1">Data referal diambil dari master data terapis klinik. Dapat dicari dengan mengetik nama terapis.</p>
-                    @error('referral_therapist_id')
+                    <p class="text-[11px] text-gray-500 mt-1">Data referal diambil dari Master Data Referal. Ketik nama referal untuk mencari mitra perujuk.</p>
+                    @error('referral_id')
                         <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
                     @enderror
                 </div>
@@ -226,16 +236,16 @@
     </form>
 </div>
 
-{{-- Script Dropdown Search Referal Terapis --}}
+{{-- Script Dropdown Search Referal Pasien (Master Data Referal) --}}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const therapists = @json($therapists ?? []);
-    const initialId = @json(old('referral_therapist_id', null));
+    const referrals = @json($referrals ?? []);
+    const initialId = @json(old('referral_id', null));
 
-    const searchInput = document.getElementById('therapistSearchInput');
-    const hiddenInput = document.getElementById('referral_therapist_id');
+    const searchInput = document.getElementById('referralSearchInput');
+    const hiddenInput = document.getElementById('referral_id');
     const dropdownMenu = document.getElementById('referralDropdownMenu');
-    const dropdownList = document.getElementById('therapistDropdownList');
+    const dropdownList = document.getElementById('referralDropdownList');
     const dropdownChevron = document.getElementById('referralChevron');
     const btnClear = document.getElementById('btnClearReferral');
     const btnToggle = document.getElementById('btnToggleReferralDropdown');
@@ -243,9 +253,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const wrapper = document.getElementById('referralComboboxWrapper');
 
     const badge = document.getElementById('selectedReferralBadge');
-    const badgeName = document.getElementById('badgeTherapistName');
-    const badgeCode = document.getElementById('badgeTherapistCode');
-    const badgeSpec = document.getElementById('badgeTherapistSpec');
+    const badgeName = document.getElementById('badgeReferralName');
+    const badgeCode = document.getElementById('badgeReferralCode');
+    const badgeAgency = document.getElementById('badgeReferralAgency');
+    const badgeCommission = document.getElementById('badgeReferralCommission');
     const btnRemoveBadge = document.getElementById('btnRemoveBadgeReferral');
 
     let currentSelected = null;
@@ -266,24 +277,30 @@ document.addEventListener('DOMContentLoaded', function() {
         if (dropdownChevron) dropdownChevron.classList.remove('rotate-180');
     }
 
-    function selectTherapist(therapist) {
-        if (!therapist) {
+    function selectReferral(referral) {
+        if (!referral) {
             clearSelection();
             return;
         }
-        currentSelected = therapist;
-        hiddenInput.value = therapist.id;
-        searchInput.value = therapist.full_name;
+        currentSelected = referral;
+        hiddenInput.value = referral.id;
+        searchInput.value = referral.name;
         btnClear.classList.remove('hidden');
 
         // Update badge
-        badgeName.textContent = therapist.full_name;
-        badgeCode.textContent = therapist.therapist_code ? 'Kode: ' + therapist.therapist_code : '';
-        badgeSpec.textContent = therapist.specialization || 'Terapis Olahraga';
+        badgeName.textContent = referral.name;
+        badgeCode.textContent = referral.code ? referral.code : ('REF-' + referral.id);
+        badgeAgency.textContent = referral.agency ? ('Instansi: ' + referral.agency) : 'Perseorangan / Umum';
+        if (referral.commission_amount && Number(referral.commission_amount) > 0) {
+            badgeCommission.textContent = 'Komisi: Rp ' + Number(referral.commission_amount).toLocaleString('id-ID') + '/sesi';
+            badgeCommission.classList.remove('hidden');
+        } else {
+            badgeCommission.classList.add('hidden');
+        }
         badge.classList.remove('hidden');
 
         closeDropdown();
-        renderList(therapists);
+        renderList(referrals);
     }
 
     function clearSelection() {
@@ -292,7 +309,7 @@ document.addEventListener('DOMContentLoaded', function() {
         searchInput.value = '';
         btnClear.classList.add('hidden');
         badge.classList.add('hidden');
-        renderList(therapists);
+        renderList(referrals);
     }
 
     function renderList(items) {
@@ -301,27 +318,30 @@ document.addEventListener('DOMContentLoaded', function() {
             const query = searchInput.value.trim();
             dropdownList.innerHTML = `
                 <div class="p-4 text-center text-xs text-gray-500">
-                    <p class="font-bold text-gray-700">Terapis Tidak Ditemukan</p>
+                    <p class="font-bold text-gray-700">Mitra Referal Tidak Ditemukan</p>
                     <p class="text-gray-400 mt-0.5 text-[11px]">
-                        Tidak ada terapis dengan nama "${escapeHtml(query)}" di master data.
+                        Tidak ada mitra referal dengan kata kunci "${escapeHtml(query)}" di Master Data.
                     </p>
                 </div>
             `;
             return;
         }
 
-        items.forEach(t => {
-            const isSelected = currentSelected && String(currentSelected.id) === String(t.id);
+        items.forEach(ref => {
+            const isSelected = currentSelected && String(currentSelected.id) === String(ref.id);
             const itemEl = document.createElement('div');
             itemEl.className = `p-3 cursor-pointer transition flex items-center justify-between text-xs hover:bg-blue-50/70 ${isSelected ? 'bg-blue-50/90 font-semibold text-blue-900' : 'text-gray-800'}`;
             itemEl.innerHTML = `
                 <div class="flex items-center gap-2.5">
-                    <span class="w-6 h-6 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-[10px] font-bold">🩺</span>
+                    <span class="w-7 h-7 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-xs shrink-0 font-bold">🤝</span>
                     <div>
-                        <div class="font-medium text-gray-900">${escapeHtml(t.full_name)}</div>
-                        <div class="text-[11px] text-gray-500 flex items-center gap-1.5 mt-0.5">
-                            <span>${escapeHtml(t.specialization || 'Terapis Olahraga')}</span>
-                            ${t.therapist_code ? `<span class="font-mono text-[10px] bg-gray-100 text-gray-600 px-1 rounded">${escapeHtml(t.therapist_code)}</span>` : ''}
+                        <div class="font-medium text-gray-900 flex items-center gap-1.5">
+                            <span>${escapeHtml(ref.name)}</span>
+                            <span class="font-mono text-[10px] bg-gray-100 text-gray-600 px-1 rounded">${escapeHtml(ref.code || ('REF-' + ref.id))}</span>
+                        </div>
+                        <div class="text-[11px] text-gray-500 flex items-center gap-2 mt-0.5">
+                            <span>${escapeHtml(ref.agency || 'Perseorangan')}</span>
+                            ${ref.phone ? `<span class="text-gray-400 font-mono">• ${escapeHtml(ref.phone)}</span>` : ''}
                         </div>
                     </div>
                 </div>
@@ -329,7 +349,7 @@ document.addEventListener('DOMContentLoaded', function() {
             `;
             itemEl.addEventListener('click', function(e) {
                 e.stopPropagation();
-                selectTherapist(t);
+                selectReferral(ref);
             });
             dropdownList.appendChild(itemEl);
         });
@@ -340,14 +360,15 @@ document.addEventListener('DOMContentLoaded', function() {
         const query = this.value.trim().toLowerCase();
         openDropdown();
         if (!query) {
-            renderList(therapists);
+            renderList(referrals);
             return;
         }
-        const filtered = therapists.filter(t => {
-            const name = (t.full_name || '').toLowerCase();
-            const spec = (t.specialization || '').toLowerCase();
-            const code = (t.therapist_code || '').toLowerCase();
-            return name.includes(query) || spec.includes(query) || code.includes(query);
+        const filtered = referrals.filter(ref => {
+            const name = (ref.name || '').toLowerCase();
+            const agency = (ref.agency || '').toLowerCase();
+            const code = (ref.code || '').toLowerCase();
+            const phone = (ref.phone || '').toLowerCase();
+            return name.includes(query) || agency.includes(query) || code.includes(query) || phone.includes(query);
         });
         renderList(filtered);
     });
@@ -355,11 +376,11 @@ document.addEventListener('DOMContentLoaded', function() {
     searchInput.addEventListener('focus', function() {
         openDropdown();
         const query = this.value.trim().toLowerCase();
-        if (query && (!currentSelected || currentSelected.full_name.toLowerCase() !== query)) {
-            const filtered = therapists.filter(t => (t.full_name || '').toLowerCase().includes(query));
+        if (query && (!currentSelected || currentSelected.name.toLowerCase() !== query)) {
+            const filtered = referrals.filter(ref => (ref.name || '').toLowerCase().includes(query));
             renderList(filtered);
         } else {
-            renderList(therapists);
+            renderList(referrals);
         }
     });
 
@@ -367,7 +388,7 @@ document.addEventListener('DOMContentLoaded', function() {
         e.stopPropagation();
         if (dropdownMenu.classList.contains('hidden')) {
             openDropdown();
-            renderList(therapists);
+            renderList(referrals);
         } else {
             closeDropdown();
         }
@@ -394,9 +415,8 @@ document.addEventListener('DOMContentLoaded', function() {
     document.addEventListener('click', function(e) {
         if (!wrapper.contains(e.target)) {
             closeDropdown();
-            // If text typed doesn't match selected, restore selected full_name or clear
             if (currentSelected) {
-                searchInput.value = currentSelected.full_name;
+                searchInput.value = currentSelected.name;
             } else if (!hiddenInput.value) {
                 searchInput.value = '';
             }
@@ -411,13 +431,13 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Initial render
-    renderList(therapists);
+    renderList(referrals);
 
     // Initial value setup (e.g. from old input)
     if (initialId) {
-        const found = therapists.find(t => String(t.id) === String(initialId));
+        const found = referrals.find(r => String(r.id) === String(initialId));
         if (found) {
-            selectTherapist(found);
+            selectReferral(found);
         }
     }
 });

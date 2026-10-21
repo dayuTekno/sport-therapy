@@ -408,7 +408,7 @@
                     @endcan
                 </ul>
 
-                @if(auth()->user()->can('menu.master-data') || auth()->user()->can('menu.pasien') || auth()->user()->can('menu.terapis') || auth()->user()->can('menu.jenjang-terapi') || auth()->user()->can('menu.peralatan-terapi'))
+                @if(auth()->user()->can('menu.master-data') || auth()->user()->can('menu.pasien') || auth()->user()->can('menu.terapis') || auth()->user()->can('menu.jenjang-terapi') || auth()->user()->can('menu.peralatan-terapi') || auth()->user()->can('menu.referral'))
                 <!-- MASTER DATA -->
                 <h3 class="mb-4 text-xs uppercase text-gray-400 font-semibold tracking-wider">
                     <span :class="sidebarToggle ? 'lg:hidden' : ''">Master Data</span>
@@ -474,6 +474,22 @@
                             </svg>
                             <span class="menu-item-text font-medium text-sm" :class="sidebarToggle ? 'lg:hidden' : ''">
                                 Jenjang Terapi
+                            </span>
+                        </a>
+                    </li>
+                    @endcanany
+
+                    @canany(['menu.referral', 'menu.master-data', 'menu.pasien'])
+                    <li>
+                        <a href="{{ route('referrals.index') }}"
+                            class="menu-item group flex items-center gap-3
+                            {{ request()->routeIs('referrals*') ? 'menu-item-active' : 'menu-item-inactive' }}">
+                            <svg class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                            </svg>
+                            <span class="menu-item-text font-medium text-sm" :class="sidebarToggle ? 'lg:hidden' : ''">
+                                Referal
                             </span>
                         </a>
                     </li>

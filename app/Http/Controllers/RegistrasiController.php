@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\MasterPatients;
 use App\Models\MasterPolyclinic;
 use App\Models\MasterEselon;
-use App\Models\Therapist;
+use App\Models\MasterReferral;
 use App\Models\Antrian;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -44,12 +44,9 @@ class RegistrasiController extends Controller
     {
         $nik = $request->nik;
         $eselons = MasterEselon::where('is_active', true)->get();
-        $therapists = Therapist::where('is_active', true)->orderBy('full_name')->get();
-        if ($therapists->isEmpty()) {
-            $therapists = Therapist::orderBy('full_name')->get();
-        }
+        $referrals = MasterReferral::where('is_active', true)->orderBy('name')->get();
 
-        return view('admin.pages.registrasi.inputform', compact('nik', 'eselons', 'therapists'));
+        return view('admin.pages.registrasi.inputform', compact('nik', 'eselons', 'referrals'));
     }
 
     public function store(Request $request)
@@ -61,7 +58,7 @@ class RegistrasiController extends Controller
             'full_name' => 'required',
             'date_of_birth' => 'required',
             'gender' => 'required',
-            'referral_therapist_id' => 'nullable|exists:therapists,id',
+            'referral_id' => 'nullable|exists:master_referrals,id',
         ]);
 
         $uuid = Str::uuid();
@@ -75,7 +72,7 @@ class RegistrasiController extends Controller
             'phone_number' => $request->phone_number,
             'address' => $request->address,
             'eselon_id' => $request->eselon_id,
-            'referral_therapist_id' => $request->referral_therapist_id,
+            'referral_id' => $request->referral_id,
         ]);
 
         return redirect()->route('registrasi.queue', $patient->id)

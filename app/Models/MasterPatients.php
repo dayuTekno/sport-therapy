@@ -18,9 +18,9 @@ class MasterPatients extends Model
         return $this->belongsTo(MasterEselon::class, 'eselon_id');
     }
 
-    public function referralTherapist()
+    public function referral()
     {
-        return $this->belongsTo(Therapist::class, 'referral_therapist_id');
+        return $this->belongsTo(MasterReferral::class, 'referral_id');
     }
 
     public function reservations()

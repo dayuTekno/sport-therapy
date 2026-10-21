@@ -223,7 +223,7 @@
                 <th class="text-center" style="width: 5%;">Usia</th>
                 <th style="width: 11%;">No. HP / WA</th>
                 <th style="width: 11%;">Pekerjaan</th>
-                <th style="width: 13%;">Referal Terapis</th>
+                <th style="width: 13%;">Mitra Referal</th>
                 <th style="width: 13%;">Alamat</th>
             </tr>
         </thead>
@@ -246,7 +246,7 @@
                     <td class="text-center">{{ $patient->age ? $patient->age . ' Th' : '-' }}</td>
                     <td class="font-mono">{{ $patient->phone_number ?: '-' }}</td>
                     <td>{{ $patient->occupation ?: '-' }}</td>
-                    <td>{{ $patient->referralTherapist?->full_name ?: '-' }}</td>
+                    <td>{{ $patient->referral?->name ? ($patient->referral->name . ($patient->referral->agency ? ' (' . $patient->referral->agency . ')' : '')) : '-' }}</td>
                     <td>{{ $patient->address ?: '-' }}</td>
                 </tr>
             @empty

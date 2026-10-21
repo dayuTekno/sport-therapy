@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\MasterPatients;
 use App\Models\MasterEselon;
 use App\Models\Clinic;
-use App\Models\Therapist;
+use App\Models\MasterReferral;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -14,7 +14,7 @@ class PatientController extends Controller
 {
     public function exportPdf(Request $request)
     {
-        $query = MasterPatients::with('referralTherapist');
+        $query = MasterPatients::with('referral');
 
         if ($request->filled('search')) {
             $search = $request->search;
@@ -24,8 +24,10 @@ class PatientController extends Controller
                   ->orWhere('occupation', 'ilike', '%' . $search . '%')
                   ->orWhere('nik', 'ilike', '%' . $search . '%')
                   ->orWhere('patient_code', 'ilike', '%' . $search . '%')
-                  ->orWhereHas('referralTherapist', function ($tq) use ($search) {
-                      $tq->where('full_name', 'ilike', '%' . $search . '%');
+                  ->orWhereHas('referral', function ($rq) use ($search) {
+                      $rq->where('name', 'ilike', '%' . $search . '%')
+                         ->orWhere('code', 'ilike', '%' . $search . '%')
+                         ->orWhere('agency', 'ilike', '%' . $search . '%');
                   });
             });
         }
@@ -58,7 +60,7 @@ class PatientController extends Controller
 
     public function index(Request $request)
     {
-        $query = MasterPatients::with('referralTherapist');
+        $query = MasterPatients::with('referral');
 
         if ($request->search) {
             $search = $request->search;
@@ -68,8 +70,10 @@ class PatientController extends Controller
                   ->orWhere('occupation', 'ilike', '%' . $search . '%')
                   ->orWhere('nik', 'ilike', '%' . $search . '%')
                   ->orWhere('patient_code', 'ilike', '%' . $search . '%')
-                  ->orWhereHas('referralTherapist', function ($tq) use ($search) {
-                      $tq->where('full_name', 'ilike', '%' . $search . '%');
+                  ->orWhereHas('referral', function ($rq) use ($search) {
+                      $rq->where('name', 'ilike', '%' . $search . '%')
+                         ->orWhere('code', 'ilike', '%' . $search . '%')
+                         ->orWhere('agency', 'ilike', '%' . $search . '%');
                   });
             });
         }
@@ -82,13 +86,10 @@ class PatientController extends Controller
     public function create(Request $request)
     {
         $eselons = MasterEselon::where('is_active', true)->get();
-        $therapists = Therapist::where('is_active', true)->orderBy('full_name')->get();
-        if ($therapists->isEmpty()) {
-            $therapists = Therapist::orderBy('full_name')->get();
-        }
+        $referrals = MasterReferral::where('is_active', true)->orderBy('name')->get();
         $phone = $request->get('phone');
         $from = $request->get('from');
-        return view('admin.pages.master-patient.create', compact('eselons', 'phone', 'from', 'therapists'));
+        return view('admin.pages.master-patient.create', compact('eselons', 'phone', 'from', 'referrals'));
     }
 
     public function store(Request $request)
@@ -103,7 +104,7 @@ class PatientController extends Controller
             'nik' => 'nullable|digits:16|unique:master_patients,nik',
             'date_of_birth' => 'nullable|date',
             'eselon_id' => 'nullable|exists:master_eselons,id',
-            'referral_therapist_id' => 'nullable|exists:therapists,id',
+            'referral_id' => 'nullable|exists:master_referrals,id',
         ]);
 
         $patient = MasterPatients::create([
@@ -117,7 +118,7 @@ class PatientController extends Controller
             'nik' => $request->nik,
             'date_of_birth' => $request->date_of_birth,
             'eselon_id' => $request->eselon_id,
-            'referral_therapist_id' => $request->referral_therapist_id,
+            'referral_id' => $request->referral_id,
         ]);
 
         if ($request->get('from') === 'reservation') {
@@ -130,19 +131,16 @@ class PatientController extends Controller
 
     public function edit($id)
     {
-        $patient = MasterPatients::with('referralTherapist')->findOrFail($id);
+        $patient = MasterPatients::with('referral')->findOrFail($id);
         $eselons = MasterEselon::where('is_active', true)->get();
-        $therapists = Therapist::where('is_active', true)->orderBy('full_name')->get();
-        if ($therapists->isEmpty()) {
-            $therapists = Therapist::orderBy('full_name')->get();
-        }
-        if ($patient->referral_therapist_id && !$therapists->contains('id', $patient->referral_therapist_id)) {
-            $currentReferral = Therapist::find($patient->referral_therapist_id);
+        $referrals = MasterReferral::where('is_active', true)->orderBy('name')->get();
+        if ($patient->referral_id && !$referrals->contains('id', $patient->referral_id)) {
+            $currentReferral = MasterReferral::find($patient->referral_id);
             if ($currentReferral) {
-                $therapists->push($currentReferral);
+                $referrals->push($currentReferral);
             }
         }
-        return view('admin.pages.master-patient.edit', compact('patient', 'eselons', 'therapists'));
+        return view('admin.pages.master-patient.edit', compact('patient', 'eselons', 'referrals'));
     }
 
     public function update(Request $request, $id)
@@ -159,7 +157,7 @@ class PatientController extends Controller
             'nik' => 'nullable|digits:16|unique:master_patients,nik,' . $id,
             'date_of_birth' => 'nullable|date',
             'eselon_id' => 'nullable|exists:master_eselons,id',
-            'referral_therapist_id' => 'nullable|exists:therapists,id',
+            'referral_id' => 'nullable|exists:master_referrals,id',
         ]);
 
         $patient->update([
@@ -172,7 +170,7 @@ class PatientController extends Controller
             'nik' => $request->nik,
             'date_of_birth' => $request->date_of_birth,
             'eselon_id' => $request->eselon_id,
-            'referral_therapist_id' => $request->referral_therapist_id,
+            'referral_id' => $request->referral_id,
         ]);
 
         return redirect()->route('patients.index')->with('success', 'Data Pasien berhasil diperbarui');
