@@ -55,6 +55,33 @@
         formatRupiah(num) {
             return new Intl.NumberFormat('id-ID').format(num);
         },
+        formatInput(num) {
+            return (num === '' || num === null) ? '' : this.formatRupiah(num);
+        },
+        // Format input nominal dengan separator ribuan (titik) sambil menjaga posisi kursor
+        maskRupiah(e) {
+            const el = e.target;
+            const digitsBeforeCaret = el.value.slice(0, el.selectionStart).replace(/\D/g, '').length;
+            const digits = el.value.replace(/\D/g, '').replace(/^0+(?=\d)/, '');
+            const formatted = digits === '' ? '' : this.formatRupiah(parseInt(digits, 10));
+            el.value = formatted;
+            let pos = 0, seen = 0;
+            while (pos < formatted.length && seen < digitsBeforeCaret) {
+                if (/\d/.test(formatted[pos])) seen++;
+                pos++;
+            }
+            el.setSelectionRange(pos, pos);
+            return digits === '' ? '' : parseInt(digits, 10);
+        },
+        maskPercent(e) {
+            let val = e.target.value.replace(',', '.').replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');
+            e.target.value = val;
+            return val;
+        },
+        onDiscountInput(e) {
+            this.discountValue = this.discountType === 'percent' ? this.maskPercent(e) : this.maskRupiah(e);
+            this.onDiscountChange();
+        },
         onPaymentMethodChange() {
             if (this.paymentMethod !== 'Cash') {
                 this.paidInput = this.grandTotal;
@@ -263,13 +290,14 @@
                                 </label>
                                 <div class="relative">
                                     <span class="absolute left-3.5 top-2.5 text-xs text-gray-400 font-bold">Rp</span>
-                                    <input type="number"
-                                           name="other_fee"
-                                           x-model="otherFee"
-                                           @input="onOtherFeeChange()"
-                                           min="0"
+                                    <input type="text"
+                                           inputmode="numeric"
+                                           autocomplete="off"
+                                           :value="formatInput(otherFee)"
+                                           @input="otherFee = maskRupiah($event); onOtherFeeChange()"
                                            placeholder="0"
                                            class="w-full pl-10 pr-4 py-2.5 text-xs border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 font-bold text-gray-800 bg-white shadow-2xs">
+                                    <input type="hidden" name="other_fee" :value="otherFee">
                                 </div>
                             </div>
 
@@ -328,11 +356,11 @@
                             {{-- Prefix Rp jika rupiah --}}
                             <span x-show="discountType === 'rupiah'" class="absolute left-3.5 top-2.5 text-xs text-gray-400 font-bold">Rp</span>
 
-                            <input type="number"
-                                   x-model="discountValue"
-                                   @input="onDiscountChange()"
-                                   :min="0"
-                                   :max="discountType === 'percent' ? 100 : (baseTotal + otherFeeAmount)"
+                            <input type="text"
+                                   :inputmode="discountType === 'percent' ? 'decimal' : 'numeric'"
+                                   autocomplete="off"
+                                   :value="discountType === 'percent' ? discountValue : formatInput(discountValue)"
+                                   @input="onDiscountInput($event)"
                                    :placeholder="discountType === 'percent' ? 'Masukkan persentase (misal: 10)' : '0'"
                                    :class="discountType === 'rupiah' ? 'pl-10 pr-4' : 'pl-4 pr-10'"
                                    class="w-full py-2.5 text-xs border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 font-bold text-gray-800 bg-white shadow-2xs">
@@ -456,8 +484,14 @@
                         </label>
                         <div class="relative">
                             <span class="absolute left-3 top-2.5 text-xs text-gray-400 font-bold">Rp</span>
-                            <input type="number" name="paid_amount" x-model="paidInput" min="0" required
+                            <input type="text"
+                                   inputmode="numeric"
+                                   autocomplete="off"
+                                   :value="formatInput(paidInput)"
+                                   @input="paidInput = maskRupiah($event)"
+                                   required
                                    class="w-full pl-9 pr-3 py-2 text-xs border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 font-bold text-gray-900 text-sm">
+                            <input type="hidden" name="paid_amount" :value="paidInput">
                         </div>
                         <div class="flex gap-1.5 mt-1.5" x-show="paymentMethod === 'Cash'">
                             <button type="button" @click="paidInput = grandTotal" class="px-2 py-0.5 bg-gray-100 hover:bg-gray-200 text-[10px] font-semibold text-gray-600 rounded cursor-pointer">
