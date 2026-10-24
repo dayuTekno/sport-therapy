@@ -98,6 +98,9 @@
     </div>
 </div>
 
+{{-- Statistik Pendapatan Real dengan filter rentang tanggal --}}
+@include('admin.pages.dashboard-revenue')
+
 {{-- Main Grid: Akses Cepat Modul & Ringkasan Alur Layanan --}}
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 

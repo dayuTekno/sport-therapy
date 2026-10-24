@@ -10,6 +10,7 @@ use App\Models\Therapist;
 use App\Models\TherapyEquipment;
 use App\Models\TherapySession;
 use App\Models\TherapyType;
+use App\Support\RevenueStatistics;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -20,7 +21,7 @@ class HomeController extends Controller
         $this->middleware('auth');
     }
 
-    public function index()
+    public function index(Request $request)
     {
         // Jika pengguna adalah Administrator SaaS dan tidak sedang meninjau klinik tertentu
         if (auth()->user()->isSaasAdmin() && !session()->has('active_clinic_id')) {
@@ -97,6 +98,12 @@ class HomeController extends Controller
         $totalTherapyTypes = TherapyType::count();
         $pendingReservations = Reservation::where('status', 'pending_confirmation')->count();
 
+        // 6. Statistik Pendapatan Real per rentang tanggal (filter rev_from / rev_to)
+        $revenueStats = RevenueStatistics::fromInput($request->query('rev_from'), $request->query('rev_to'));
+        $revenueSummary = $revenueStats->summary();
+        $revenueSeries = $revenueStats->series();
+        $revenueByMethod = $revenueStats->byPaymentMethod();
+
         return view('admin.pages.dashboard', compact(
             'totalQueues', 
             'totalCompleted', 
@@ -106,7 +113,11 @@ class HomeController extends Controller
             'totalTherapists',
             'totalEquipments',
             'totalTherapyTypes',
-            'pendingReservations'
+            'pendingReservations',
+            'revenueStats',
+            'revenueSummary',
+            'revenueSeries',
+            'revenueByMethod'
         ));
     }
 }
