@@ -71,7 +71,7 @@ alertType = 'error';
                     {{-- Impersonation Alert Banner --}}
                     @if(session()->has('active_clinic_id'))
                         @php
-                            $activeClinicObj = \App\Models\Clinic::find(session('active_clinic_id'));
+                            $activeClinicObj = app(\App\Support\LayoutContext::class)->impersonatedClinic();
                         @endphp
                         <div class="mb-5 p-4 rounded-2xl bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-lg flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                             <div class="flex items-center gap-3">

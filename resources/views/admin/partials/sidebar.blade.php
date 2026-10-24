@@ -4,9 +4,8 @@
            dark:border-gray-800 dark:bg-black lg:static lg:translate-x-0 transition-transform duration-300 ease-in-out shadow-2xl lg:shadow-none">
     <!-- HEADER LOGO -->
     @php
-        $activeClinic = session()->has('active_clinic_id')
-            ? \App\Models\Clinic::find(session('active_clinic_id'))
-            : (auth()->user()?->clinic ?: \App\Models\Clinic::first());
+        $layout = app(\App\Support\LayoutContext::class);
+        $activeClinic = $layout->activeClinic();
 
         $clinicName = ($activeClinic && !empty(trim($activeClinic->name ?? '')))
             ? $activeClinic->name
@@ -14,19 +13,14 @@
 
         $clinicLogo = $activeClinic?->logo_path;
         $defaultLogo = asset('images/logo-icon.svg');
-        $logoSrc = ($clinicLogo && \Illuminate\Support\Facades\Storage::disk('public')->exists($clinicLogo))
-            ? asset('storage/' . $clinicLogo)
-            : $defaultLogo;
+        $logoSrc = $layout->publicFileUrl($clinicLogo, $defaultLogo);
 
         // Branding untuk SaaS Admin (dari CMS)
-        $saasBranding = \App\Models\LandingPageSetting::getSection('branding');
-        $saasBrandingJson = $saasBranding?->content_json ?? [];
+        $saasBrandingJson = $layout->branding();
         $saasPlatformName    = !empty($saasBrandingJson['platform_name'])    ? $saasBrandingJson['platform_name']    : 'Smart Clinic Therapy';
         $saasPlatformTagline = !empty($saasBrandingJson['platform_tagline']) ? $saasBrandingJson['platform_tagline'] : 'Platform Control Center';
         $saasLogoPath = $saasBrandingJson['logo_path'] ?? null;
-        $saasLogoSrc  = ($saasLogoPath && \Illuminate\Support\Facades\Storage::disk('public')->exists($saasLogoPath))
-            ? asset('storage/' . $saasLogoPath)
-            : $defaultLogo;
+        $saasLogoSrc  = $layout->publicFileUrl($saasLogoPath, $defaultLogo);
 
         // Tentukan data header yang tampil berdasarkan mode
         $isSaasMode = auth()->user()->isSaasAdmin() && !session()->has('active_clinic_id');
@@ -157,6 +151,27 @@
                             <span class="menu-item-text font-medium text-sm" :class="sidebarToggle ? 'lg:hidden' : ''">
                                 Paket Langganan
                             </span>
+                        </a>
+                    </li>
+
+                    <!-- REQUEST PEMBELIAN PAKET -->
+                    <li>
+                        <a href="{{ route('saas.subscription-requests.index') }}"
+                            class="menu-item group flex items-center gap-3
+                            {{ request()->routeIs('saas.subscription-requests*') ? 'menu-item-active' : 'menu-item-inactive' }}">
+                            <svg class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                            </svg>
+                            <span class="menu-item-text font-medium text-sm" :class="sidebarToggle ? 'lg:hidden' : ''">
+                                Request Paket
+                            </span>
+                            @php $pendingSubscriptionCount = \App\Models\ClinicSubscription::where('payment_status', 'pending')->count(); @endphp
+                            @if($pendingSubscriptionCount > 0)
+                                <span class="ml-auto inline-flex px-2 py-0.5 items-center justify-center rounded-full bg-amber-100 text-[10px] font-bold text-amber-700" :class="sidebarToggle ? 'lg:hidden' : ''">
+                                    {{ $pendingSubscriptionCount }}
+                                </span>
+                            @endif
                         </a>
                     </li>
 
@@ -295,6 +310,9 @@
                         <p class="text-[10px] text-gray-500 dark:text-gray-400 mb-3 leading-relaxed">
                             Masa aktif langganan telah habis. Seluruh menu operasional dinonaktifkan.
                         </p>
+                        <a href="{{ route('clinic.subscription') }}" class="block mb-2 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold shadow-sm transition">
+                            Beli / Perpanjang Paket
+                        </a>
                         <a href="{{ route('subscription.expired') }}" class="inline-block px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-bold shadow-sm transition">
                             Lihat Rincian
                         </a>
@@ -350,7 +368,7 @@
                             <span class="menu-item-text font-medium text-sm" :class="sidebarToggle ? 'lg:hidden' : ''">
                                 Reservasi Terapi
                             </span>
-                            @php $pendingResCount = \App\Models\Reservation::where('status', 'pending_confirmation')->count(); @endphp
+                            @php $pendingResCount = $layout->reservationBadges()['pending']; @endphp
                             @if($pendingResCount > 0)
                                 <span class="ml-auto inline-flex h-5 w-5 items-center justify-center rounded-full bg-amber-100 text-[10px] font-bold text-amber-700" :class="sidebarToggle ? 'lg:hidden' : ''">
                                     {{ $pendingResCount }}
@@ -371,7 +389,7 @@
                             <span class="menu-item-text font-medium text-sm" :class="sidebarToggle ? 'lg:hidden' : ''">
                                 Riwayat Terapi
                             </span>
-                            @php $histCount = \App\Models\Reservation::whereIn('status', ['completed', 'cancelled'])->count(); @endphp
+                            @php $histCount = $layout->reservationBadges()['history']; @endphp
                             @if($histCount > 0)
                                 <span class="ml-auto inline-flex px-2 py-0.5 items-center justify-center rounded-full bg-gray-100 text-[10px] font-bold text-gray-600" :class="sidebarToggle ? 'lg:hidden' : ''">
                                     {{ $histCount }}
@@ -607,6 +625,19 @@
                             </svg>
                             <span class="menu-item-text font-medium text-sm" :class="sidebarToggle ? 'lg:hidden' : ''">
                                 Setting Klinik
+                            </span>
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="{{ route('clinic.subscription') }}"
+                            class="menu-item group flex items-center gap-3
+                            {{ request()->routeIs('clinic.subscription*') ? 'menu-item-active' : 'menu-item-inactive' }}">
+                            <svg class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                            </svg>
+                            <span class="menu-item-text font-medium text-sm" :class="sidebarToggle ? 'lg:hidden' : ''">
+                                Langganan Paket
                             </span>
                         </a>
                     </li>

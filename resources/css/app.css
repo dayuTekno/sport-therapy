@@ -1,4 +1,9 @@
-@import "tailwindcss";
+@import "tailwindcss" source(none);
+
+/* Optimasi: batasi scan class Tailwind ke source aplikasi saja (bukan public/build, vendor, dsb.) */
+@source "../views";
+@source "../js";
+@source "../../app";
 
 @layer base {
   body {

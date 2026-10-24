@@ -52,9 +52,14 @@ class TherapySessionController extends Controller
 
         // Statistik Hari Ini
         $today = Carbon::today()->toDateString();
-        $todayTotal = TherapySession::whereDate('scheduled_at', $today)->count();
-        $todayCompleted = TherapySession::whereDate('scheduled_at', $today)->where('status', 'completed')->count();
-        $todayScheduled = TherapySession::whereDate('scheduled_at', $today)->whereIn('status', ['scheduled', 'in_progress', 'pending'])->count();
+        $todayStats = TherapySession::whereDate('scheduled_at', $today)
+            ->selectRaw('COUNT(*) as total_count')
+            ->selectRaw("COUNT(*) FILTER (WHERE status = 'completed') as completed_count")
+            ->selectRaw("COUNT(*) FILTER (WHERE status IN ('scheduled', 'in_progress', 'pending')) as scheduled_count")
+            ->first();
+        $todayTotal = (int) $todayStats->total_count;
+        $todayCompleted = (int) $todayStats->completed_count;
+        $todayScheduled = (int) $todayStats->scheduled_count;
 
         // Deteksi pasien yang memiliki lebih dari 1 sesi dalam 1 hari
         $multiSessionPatientIds = TherapySession::whereDate('scheduled_at', $today)

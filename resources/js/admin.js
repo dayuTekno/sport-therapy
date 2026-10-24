@@ -1,20 +1,13 @@
-import "jsvectormap/dist/jsvectormap.min.css";
 import "flatpickr/dist/flatpickr.min.css";
-import "dropzone/dist/dropzone.css";
 import "../css/admin.css";
 
 import Alpine from "alpinejs";
 import persist from "@alpinejs/persist";
 import flatpickr from "flatpickr";
 window.flatpickr = flatpickr;
-import Dropzone from "dropzone";
 
-import chart01 from "./components/charts/chart-01";
-import chart02 from "./components/charts/chart-02";
-import chart03 from "./components/charts/chart-03";
-import map01 from "./components/map-01";
-import "./components/calendar-init.js";
-import "./components/image-resize";
+// Catatan optimasi: chart ApexCharts, FullCalendar, peta jsvectormap, Dropzone & image-resize
+// bawaan template tidak dipakai di halaman aplikasi, sehingga tidak lagi dibundel (bundle ~1 MB lebih kecil).
 
 Alpine.plugin(persist);
 window.Alpine = Alpine;
@@ -41,21 +34,6 @@ flatpickr(".datepicker", {
     // eslint-disable-next-line no-param-reassign
     instance.element.value = dateStr.replace("to", "-");
   },
-});
-
-// Init Dropzone
-const dropzoneArea = document.querySelectorAll("#demo-upload");
-
-if (dropzoneArea.length) {
-  let myDropzone = new Dropzone("#demo-upload", { url: "/file/post" });
-}
-
-// Document Loaded
-document.addEventListener("DOMContentLoaded", () => {
-  chart01();
-  chart02();
-  chart03();
-  map01();
 });
 
 // Get the current year

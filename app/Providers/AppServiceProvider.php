@@ -12,7 +12,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // Data layout admin di-memoize per request (lihat App\Support\LayoutContext)
+        $this->app->scoped(\App\Support\LayoutContext::class);
     }
 
     /**

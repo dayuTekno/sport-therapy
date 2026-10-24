@@ -37,11 +37,19 @@ class ReservationController extends Controller
         $reservations = $query->orderBy('created_at', 'desc')->paginate(10);
 
         // Counter untuk Tabs dan Badges
-        $activeCount = Reservation::whereIn('status', ['pending_confirmation', 'confirmed', 'in_progress'])->count();
-        $historyCount = Reservation::whereIn('status', ['completed', 'cancelled'])->count();
-        $pendingCount = Reservation::where('status', 'pending_confirmation')->count();
-        $confirmedCount = Reservation::where('status', 'confirmed')->count();
-        $inProgressCount = Reservation::where('status', 'in_progress')->count();
+        // (dihitung dalam satu query agregat)
+        $counts = Reservation::query()
+            ->selectRaw("COUNT(*) FILTER (WHERE status IN ('pending_confirmation', 'confirmed', 'in_progress')) as active_count")
+            ->selectRaw("COUNT(*) FILTER (WHERE status IN ('completed', 'cancelled')) as history_count")
+            ->selectRaw("COUNT(*) FILTER (WHERE status = 'pending_confirmation') as pending_count")
+            ->selectRaw("COUNT(*) FILTER (WHERE status = 'confirmed') as confirmed_count")
+            ->selectRaw("COUNT(*) FILTER (WHERE status = 'in_progress') as in_progress_count")
+            ->first();
+        $activeCount = (int) $counts->active_count;
+        $historyCount = (int) $counts->history_count;
+        $pendingCount = (int) $counts->pending_count;
+        $confirmedCount = (int) $counts->confirmed_count;
+        $inProgressCount = (int) $counts->in_progress_count;
 
         return view('admin.pages.reservations.index', compact(
             'reservations',
@@ -487,9 +495,13 @@ class ReservationController extends Controller
 
         $reservations = $query->orderBy('updated_at', 'desc')->paginate(10);
 
-        $totalHistoryCount = Reservation::whereIn('status', ['completed', 'cancelled'])->count();
-        $completedCount = Reservation::where('status', 'completed')->count();
-        $cancelledCount = Reservation::where('status', 'cancelled')->count();
+        $counts = Reservation::query()
+            ->selectRaw("COUNT(*) FILTER (WHERE status = 'completed') as completed_count")
+            ->selectRaw("COUNT(*) FILTER (WHERE status = 'cancelled') as cancelled_count")
+            ->first();
+        $completedCount = (int) $counts->completed_count;
+        $cancelledCount = (int) $counts->cancelled_count;
+        $totalHistoryCount = $completedCount + $cancelledCount;
 
         return view('admin.pages.reservations.history', compact(
             'reservations',

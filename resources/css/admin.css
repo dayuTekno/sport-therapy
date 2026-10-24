@@ -1,7 +1,12 @@
 @import url("https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap")
 layer(base);
 
-@import "tailwindcss";
+@import "tailwindcss" source(none);
+
+/* Optimasi: batasi scan class Tailwind ke source aplikasi saja (bukan public/build, vendor, dsb.) */
+@source "../views";
+@source "../js";
+@source "../../app";
 
 @custom-variant dark (&:is(.dark *));
 

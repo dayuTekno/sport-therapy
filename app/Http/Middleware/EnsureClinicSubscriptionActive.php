@@ -38,8 +38,9 @@ class EnsureClinicSubscriptionActive
 
         // 4. Periksa apakah masa langganan klinik telah habis
         if ($clinic->isSubscriptionExpired()) {
-            // Rute yang diizinkan saat langganan habis (Logout dan halaman pemberitahuan expired)
-            if ($request->routeIs('subscription.expired') || 
+            // Rute yang diizinkan saat langganan habis (Logout, halaman pemberitahuan expired & beli/perpanjang paket)
+            if ($request->routeIs('subscription.expired') ||
+                $request->routeIs('clinic.subscription*') ||
                 $request->routeIs('logout') || 
                 $request->is('logout')) {
                 return $next($request);

@@ -19,25 +19,19 @@
 
             <!-- Logo (Mobile) -->
             @php
-                $headerClinic = session()->has('active_clinic_id')
-                    ? \App\Models\Clinic::find(session('active_clinic_id'))
-                    : (auth()->user()?->clinic ?: \App\Models\Clinic::first());
+                $layout = app(\App\Support\LayoutContext::class);
+                $headerClinic = $layout->activeClinic();
                 $headerClinicName = ($headerClinic && !empty(trim($headerClinic->name ?? '')))
                     ? $headerClinic->name
                     : 'Sistem Klinik';
                 $headerClinicLogo = $headerClinic?->logo_path;
                 $headerDefaultLogo = asset('images/logo-icon.svg');
-                $mobileLogo = ($headerClinicLogo && \Illuminate\Support\Facades\Storage::disk('public')->exists($headerClinicLogo))
-                    ? asset('storage/' . $headerClinicLogo)
-                    : $headerDefaultLogo;
+                $mobileLogo = $layout->publicFileUrl($headerClinicLogo, $headerDefaultLogo);
 
-                $headerSaasBranding = \App\Models\LandingPageSetting::getSection('branding');
-                $headerSaasJson = $headerSaasBranding?->content_json ?? [];
+                $headerSaasJson = $layout->branding();
                 $headerSaasName = !empty($headerSaasJson['platform_name']) ? $headerSaasJson['platform_name'] : 'Smart Clinic Therapy';
                 $headerSaasLogoPath = $headerSaasJson['logo_path'] ?? null;
-                $headerSaasLogoSrc = ($headerSaasLogoPath && \Illuminate\Support\Facades\Storage::disk('public')->exists($headerSaasLogoPath))
-                    ? asset('storage/' . $headerSaasLogoPath)
-                    : $headerDefaultLogo;
+                $headerSaasLogoSrc = $layout->publicFileUrl($headerSaasLogoPath, $headerDefaultLogo);
 
                 $isSaasHeader = auth()->user()->isSaasAdmin() && !session()->has('active_clinic_id');
                 $mobileDisplayName = $isSaasHeader ? $headerSaasName : $headerClinicName;

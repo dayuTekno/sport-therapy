@@ -15,22 +15,26 @@ class SaasDashboardController extends Controller
     public function index()
     {
         // Metrik Platform Global SaaS
-        $totalClinics = Clinic::count();
-        $activeClinics = Clinic::where('status', 'active')->count();
-        $trialClinics = Clinic::where('status', 'trial')->count();
-        $suspendedClinics = Clinic::where('status', 'suspended')->count();
+        $clinicStats = Clinic::query()
+            ->selectRaw('COUNT(*) as total_count')
+            ->selectRaw("COUNT(*) FILTER (WHERE status = 'active') as active_count")
+            ->selectRaw("COUNT(*) FILTER (WHERE status = 'trial') as trial_count")
+            ->selectRaw("COUNT(*) FILTER (WHERE status = 'suspended') as suspended_count")
+            ->first();
+        $totalClinics = (int) $clinicStats->total_count;
+        $activeClinics = (int) $clinicStats->active_count;
+        $trialClinics = (int) $clinicStats->trial_count;
+        $suspendedClinics = (int) $clinicStats->suspended_count;
 
         $totalTherapists = Therapist::withoutGlobalScopes()->count();
         $totalPatients = MasterPatients::withoutGlobalScopes()->count();
         $totalSessions = TherapySession::withoutGlobalScopes()->count();
 
         // Estimasi Pendapatan Langganan SaaS Bulanan (MRR)
-        $mrr = Clinic::where('status', 'active')
-            ->with('plan')
-            ->get()
-            ->sum(function($c) {
-                return $c->plan?->price ?? 0;
-            });
+        // (dijumlahkan di database, tanpa memuat seluruh klinik ke memori)
+        $mrr = (float) Clinic::where('clinics.status', 'active')
+            ->leftJoin('subscription_plans', 'subscription_plans.id', '=', 'clinics.subscription_plan_id')
+            ->sum('subscription_plans.price');
 
         // 5 Klinik Terbaru
         $recentClinics = Clinic::with('plan')->orderBy('created_at', 'desc')->take(5)->get();

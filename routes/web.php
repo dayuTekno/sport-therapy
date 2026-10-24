@@ -89,6 +89,13 @@ Route::middleware(['auth'])->group(function () {
     Route::post('clinic/settings', [\App\Http\Controllers\ClinicSettingController::class, 'update'])->name('clinic.settings.update');
     Route::get('clinic/referral', [\App\Http\Controllers\ClinicReferralController::class, 'index'])->name('clinic.referral');
 
+    // Langganan Paket Klinik (request pembelian, approval manual oleh SaaS admin)
+    Route::get('clinic/subscription', [\App\Http\Controllers\ClinicSubscriptionController::class, 'index'])->name('clinic.subscription');
+    Route::post('clinic/subscription', [\App\Http\Controllers\ClinicSubscriptionController::class, 'store'])->name('clinic.subscription.store');
+    Route::post('clinic/subscription/{id}/proof', [\App\Http\Controllers\ClinicSubscriptionController::class, 'uploadProof'])->name('clinic.subscription.upload-proof');
+    Route::post('clinic/subscription/{id}/cancel', [\App\Http\Controllers\ClinicSubscriptionController::class, 'cancel'])->name('clinic.subscription.cancel');
+    Route::get('clinic/subscription/{id}/proof', [\App\Http\Controllers\ClinicSubscriptionController::class, 'proof'])->name('clinic.subscription.proof');
+
     // Route::resource('icds', IcdController::class);
     // Route::post('icds.import', [IcdController::class, 'import'])->name('icds.import');
 
@@ -265,6 +272,12 @@ Route::middleware(['auth'])->group(function () {
         Route::post('referrals/settings', [\App\Http\Controllers\SaasReferralController::class, 'updateSettings'])->name('referrals.settings');
         Route::post('referrals/{id}/paid', [\App\Http\Controllers\SaasReferralController::class, 'markPaid'])->name('referrals.paid');
         Route::post('referrals/{id}/cancel', [\App\Http\Controllers\SaasReferralController::class, 'cancel'])->name('referrals.cancel');
+
+        // Monitoring Request Pembelian Paket (approval manual)
+        Route::get('subscription-requests', [\App\Http\Controllers\SaasSubscriptionRequestController::class, 'index'])->name('subscription-requests.index');
+        Route::post('subscription-requests/instructions', [\App\Http\Controllers\SaasSubscriptionRequestController::class, 'updateInstructions'])->name('subscription-requests.instructions');
+        Route::post('subscription-requests/{id}/approve', [\App\Http\Controllers\SaasSubscriptionRequestController::class, 'approve'])->name('subscription-requests.approve');
+        Route::post('subscription-requests/{id}/reject', [\App\Http\Controllers\SaasSubscriptionRequestController::class, 'reject'])->name('subscription-requests.reject');
 
         // CMS Landing Page (Bagian Luar Website)
         Route::get('landing-page', [\App\Http\Controllers\SaasCmsController::class, 'index'])->name('cms.index');

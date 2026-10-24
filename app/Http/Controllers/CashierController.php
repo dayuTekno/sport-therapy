@@ -63,22 +63,22 @@ class CashierController extends Controller
 
         // Counter Metrics
         $today = now()->toDateString();
-        $unpaidCount = Reservation::where('payment_status', 'unpaid')
+        // (jumlah & total dihitung dalam satu query agregat per kelompok)
+        $unpaidStats = Reservation::where('payment_status', 'unpaid')
             ->where('status', '!=', 'cancelled')
             ->where(function($q) {
                 $q->whereHas('sessions')->orWhere('total_price', '>', 0);
             })
-            ->count();
-        $unpaidTotal = (float) Reservation::where('payment_status', 'unpaid')
-            ->where('status', '!=', 'cancelled')
-            ->where(function($q) {
-                $q->whereHas('sessions')->orWhere('total_price', '>', 0);
-            })
-            ->selectRaw('COALESCE(SUM(total_price + COALESCE(other_fee, 0)), 0) as total')
-            ->value('total');
+            ->selectRaw('COUNT(*) as unpaid_count, COALESCE(SUM(total_price + COALESCE(other_fee, 0)), 0) as unpaid_total')
+            ->first();
+        $unpaidCount = (int) $unpaidStats->unpaid_count;
+        $unpaidTotal = (float) $unpaidStats->unpaid_total;
 
-        $todayPaidCount = Reservation::whereDate('paid_at', $today)->where('payment_status', 'paid')->count();
-        $todayPaidTotal = Reservation::whereDate('paid_at', $today)->where('payment_status', 'paid')->sum('paid_amount');
+        $todayPaidStats = Reservation::whereDate('paid_at', $today)->where('payment_status', 'paid')
+            ->selectRaw('COUNT(*) as paid_count, COALESCE(SUM(paid_amount), 0) as paid_total')
+            ->first();
+        $todayPaidCount = (int) $todayPaidStats->paid_count;
+        $todayPaidTotal = $todayPaidStats->paid_total;
 
         // Rekapitulasi Pembayaran per Metode (QRIS, Transfer Bank, Cash, Debit, dll)
         $paymentMethodsRecap = Reservation::where('payment_status', 'paid')

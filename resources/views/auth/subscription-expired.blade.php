@@ -59,6 +59,11 @@
         </p>
 
         {{-- Action Buttons --}}
+        <a href="{{ route('clinic.subscription') }}"
+           class="w-full mb-3 inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-md shadow-blue-500/20 transition">
+            <span>💳</span> Beli / Perpanjang Paket Langganan
+        </a>
+
         <div class="flex flex-col sm:flex-row gap-3 justify-center items-center">
             @php
                 $waText = urlencode("Halo Admin SaaS, saya ingin memperpanjang masa aktif langganan subscribe untuk klinik {$clinic?->name} ({$clinic?->clinic_code}). Mohon bantuannya.");
