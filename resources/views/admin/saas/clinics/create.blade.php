@@ -99,6 +99,17 @@
                           class="w-full px-3.5 py-2.5 text-xs border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500">{{ old('address') }}</textarea>
             </div>
 
+            <div>
+                <label class="block font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+                    Kode Referal Klinik Perujuk (Opsional)
+                </label>
+                <input type="text" name="referral_code" value="{{ old('referral_code') }}" maxlength="20"
+                       autocomplete="off" oninput="this.value = this.value.toUpperCase()"
+                       placeholder="Contoh: PRIMA-7K2Q"
+                       class="w-full px-3.5 py-2.5 text-xs border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 font-mono font-bold tracking-wider">
+                <p class="text-[10px] text-gray-400 mt-1">Isi jika klinik ini diundang oleh klinik mitra lain. Komisi dicatat saat status klinik Aktif (berlangganan).</p>
+            </div>
+
             <div class="border-t border-gray-100 pt-4">
                 <h4 class="font-bold text-gray-800 uppercase tracking-wider mb-3">Akun Administrator Klinik Baru</h4>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">

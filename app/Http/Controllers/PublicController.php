@@ -28,12 +28,16 @@ class PublicController extends Controller
     /**
      * Halaman Pendaftaran Mitra Klinik Baru (Free Trial)
      */
-    public function registerClinicForm()
+    public function registerClinicForm(Request $request)
     {
         $plans = SubscriptionPlan::where('is_active', true)->orderBy('sort_order')->get();
         $trialDays = LandingPageSetting::getTrialDays();
 
-        return view('public.register-clinic', compact('plans', 'trialDays'));
+        // Link undangan: /register-clinic?ref=KODE
+        $referralCode = strtoupper(trim((string) old('referral_code', $request->query('ref', ''))));
+        $referrer = Clinic::findByReferralCode($referralCode);
+
+        return view('public.register-clinic', compact('plans', 'trialDays', 'referralCode', 'referrer'));
     }
 
     /**
@@ -49,7 +53,19 @@ class PublicController extends Controller
             'phone_number' => 'required|string|max:20',
             'address' => 'nullable|string|max:500',
             'subscription_plan_id' => 'required|exists:subscription_plans,id',
+            'referral_code' => [
+                'nullable',
+                'string',
+                'max:20',
+                function ($attribute, $value, $fail) {
+                    if (!Clinic::findByReferralCode($value)) {
+                        $fail('Kode referal tidak ditemukan atau klinik pemilik kode sudah tidak aktif.');
+                    }
+                },
+            ],
         ]);
+
+        $referrer = Clinic::findByReferralCode($request->referral_code);
 
         $slug = Str::slug($request->clinic_name);
         $countSlug = Clinic::where('slug', 'like', "{$slug}%")->count();
@@ -75,7 +91,8 @@ class PublicController extends Controller
             'max_therapists' => $plan->max_therapists,
             'max_patients' => $plan->max_patients,
             'is_active' => true,
-            'notes' => 'Pendaftaran online via landing page publik.',
+            'referred_by_clinic_id' => $referrer?->id,
+            'notes' => 'Pendaftaran online via landing page publik.' . ($referrer ? " Referal dari {$referrer->name} ({$referrer->referral_code})." : ''),
         ]);
 
         // Buat Akun Admin Klinik

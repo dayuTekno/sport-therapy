@@ -12,7 +12,7 @@ class SaasClinicController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Clinic::with(['plan', 'users']);
+        $query = Clinic::with(['plan', 'users', 'referrer']);
 
         if ($request->filled('status')) {
             $query->where('status', $request->status);
@@ -23,6 +23,7 @@ class SaasClinicController extends Controller
             $query->where(function($q) use ($s) {
                 $q->where('name', 'ilike', "%{$s}%")
                   ->orWhere('clinic_code', 'ilike', "%{$s}%")
+                  ->orWhere('referral_code', 'ilike', "%{$s}%")
                   ->orWhere('email', 'ilike', "%{$s}%")
                   ->orWhere('phone_number', 'ilike', "%{$s}%");
             });
@@ -42,6 +43,8 @@ class SaasClinicController extends Controller
 
     public function store(Request $request)
     {
+        $referrer = null;
+
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:clinics,email',
@@ -52,6 +55,7 @@ class SaasClinicController extends Controller
             'status' => 'required|in:active,trial,suspended',
             'admin_name' => 'required|string|max:255',
             'admin_password' => 'required|string|min:8',
+            'referral_code' => $this->referralCodeRules($referrer),
         ]);
 
         $slug = Str::slug($request->name);
@@ -75,7 +79,11 @@ class SaasClinicController extends Controller
             'max_therapists' => $plan->max_therapists,
             'max_patients' => $plan->max_patients,
             'is_active' => true,
+            'referred_by_clinic_id' => $referrer?->id,
         ]);
+
+        // Klinik langsung didaftarkan sebagai berlangganan aktif → catat komisi klinik perujuk
+        $clinic->recordReferralCommission();
 
         // Buat User Admin Klinik
         $adminUser = User::create([
@@ -99,6 +107,7 @@ class SaasClinicController extends Controller
     public function update(Request $request, $id)
     {
         $clinic = Clinic::findOrFail($id);
+        $referrer = null;
 
         $request->validate([
             'name' => 'required|string|max:255',
@@ -110,6 +119,7 @@ class SaasClinicController extends Controller
             'status' => 'required|in:active,trial,suspended,expired',
             'max_therapists' => 'required|integer|min:1',
             'max_patients' => 'required|integer|min:1',
+            'referral_code' => $this->referralCodeRules($referrer, $clinic),
         ]);
 
         $status = $request->status;
@@ -143,6 +153,14 @@ class SaasClinicController extends Controller
             'notes' => $request->notes,
         ]);
 
+        // Klinik perujuk hanya bisa diubah selama komisi referal belum tercatat
+        if (!$clinic->referralCommission()->exists()) {
+            $clinic->update(['referred_by_clinic_id' => $referrer?->id]);
+        }
+
+        // Klinik terundang mulai berlangganan (status aktif) → catat komisi klinik perujuk (sekali saja)
+        $clinic->recordReferralCommission();
+
         return redirect()->route('saas.clinics.index')->with('success', "Data klinik {$clinic->name} berhasil diperbarui!");
     }
 
@@ -155,6 +173,31 @@ class SaasClinicController extends Controller
 
         $clinic->update(['status' => 'suspended', 'is_active' => false]);
         return redirect()->route('saas.clinics.index')->with('success', "Klinik {$clinic->name} berhasil di-suspend.");
+    }
+
+    /**
+     * Aturan validasi kode referal klinik perujuk. Klinik pemilik kode ditampung ke $referrer.
+     */
+    protected function referralCodeRules(?Clinic &$referrer, ?Clinic $clinic = null): array
+    {
+        return [
+            'nullable',
+            'string',
+            'max:20',
+            function ($attribute, $value, $fail) use (&$referrer, $clinic) {
+                // Perujuk yang sudah tersimpan tetap diterima walau kliniknya kini nonaktif
+                $current = $clinic?->referrer;
+                $referrer = ($current && strtoupper(trim($value)) === $current->referral_code)
+                    ? $current
+                    : Clinic::findByReferralCode($value);
+
+                if (!$referrer) {
+                    $fail('Kode referal tidak ditemukan atau klinik pemilik kode sudah tidak aktif.');
+                } elseif ($clinic && $referrer->id === $clinic->id) {
+                    $fail('Klinik tidak dapat menggunakan kode referalnya sendiri.');
+                }
+            },
+        ];
     }
 
     /**

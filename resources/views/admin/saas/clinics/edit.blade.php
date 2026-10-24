@@ -40,6 +40,33 @@
                     <span class="text-[10px] text-gray-400 font-bold uppercase block">Slug:</span>
                     <span class="font-mono text-gray-700 text-xs">{{ $clinic->slug }}</span>
                 </div>
+                <div>
+                    <span class="text-[10px] text-gray-400 font-bold uppercase block">Kode Referal:</span>
+                    <span class="font-mono font-bold text-blue-700 text-xs">{{ $clinic->referral_code ?? '-' }}</span>
+                </div>
+            </div>
+
+            @php $referralCommission = $clinic->referralCommission; @endphp
+            <div>
+                <label class="block font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+                    Kode Referal Klinik Perujuk (Opsional)
+                </label>
+                <input type="text" name="referral_code" maxlength="20" autocomplete="off"
+                       value="{{ old('referral_code', $clinic->referrer?->referral_code) }}"
+                       oninput="this.value = this.value.toUpperCase()"
+                       placeholder="Kosongkan jika tidak melalui referal"
+                       @disabled($referralCommission)
+                       class="w-full px-3.5 py-2.5 text-xs border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 font-mono font-bold tracking-wider disabled:bg-gray-100 disabled:text-gray-500">
+                @if($referralCommission)
+                    <p class="text-[10px] text-gray-500 mt-1">
+                        Diundang oleh <strong>{{ $clinic->referrer?->name ?? 'klinik terhapus' }}</strong>. Komisi
+                        Rp {{ number_format($referralCommission->commission_amount, 0, ',', '.') }} sudah tercatat ({{ $referralCommission->status_label }}), sehingga perujuk tidak dapat diubah.
+                    </p>
+                @elseif($clinic->referrer)
+                    <p class="text-[10px] text-gray-500 mt-1">Diundang oleh <strong>{{ $clinic->referrer->name }}</strong>. Komisi dicatat otomatis saat status klinik diubah menjadi Aktif.</p>
+                @else
+                    <p class="text-[10px] text-gray-400 mt-1">Komisi untuk klinik perujuk dicatat otomatis saat status klinik diubah menjadi Aktif.</p>
+                @endif
             </div>
 
             <div>

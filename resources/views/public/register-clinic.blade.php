@@ -156,6 +156,28 @@
                           class="w-full px-3.5 py-2.5 text-xs border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500">{{ old('address') }}</textarea>
             </div>
 
+            {{-- Kode Referal Klinik --}}
+            <div>
+                <label class="block font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+                    Kode Referal (Opsional)
+                </label>
+                <input type="text" name="referral_code" value="{{ $referralCode ?? '' }}"
+                       maxlength="20" autocomplete="off" autocapitalize="characters" spellcheck="false"
+                       oninput="this.value = this.value.toUpperCase()"
+                       placeholder="Contoh: PRIMA-7K2Q"
+                       class="w-full px-3.5 py-2.5 text-xs border rounded-xl focus:ring-2 focus:ring-blue-500 font-mono font-bold tracking-wider {{ $errors->has('referral_code') ? 'border-rose-400 bg-rose-50' : 'border-gray-300' }}">
+                @if(!empty($referrer))
+                    <p class="text-[11px] text-emerald-700 mt-1 font-semibold">✓ Anda diundang oleh {{ $referrer->name }}</p>
+                @elseif(!empty($referralCode) && !$errors->has('referral_code'))
+                    <p class="text-[11px] text-rose-600 mt-1 font-semibold">Kode referal tidak ditemukan. Periksa kembali atau kosongkan.</p>
+                @else
+                    <p class="text-[10px] text-gray-400 mt-1">Isi jika Anda mendapatkan kode undangan dari klinik mitra lain.</p>
+                @endif
+                @error('referral_code')
+                    <p class="text-[11px] text-rose-600 mt-1 font-semibold">{{ $message }}</p>
+                @enderror
+            </div>
+
             {{-- Tombol Submit --}}
             <div class="pt-4">
                 <button type="submit" 

@@ -87,6 +87,7 @@ Route::middleware(['auth'])->group(function () {
     // Pengaturan Klinik (Logo, Cap/Stempel, Tanda Tangan, Profil)
     Route::get('clinic/settings', [\App\Http\Controllers\ClinicSettingController::class, 'index'])->name('clinic.settings');
     Route::post('clinic/settings', [\App\Http\Controllers\ClinicSettingController::class, 'update'])->name('clinic.settings.update');
+    Route::get('clinic/referral', [\App\Http\Controllers\ClinicReferralController::class, 'index'])->name('clinic.referral');
 
     // Route::resource('icds', IcdController::class);
     // Route::post('icds.import', [IcdController::class, 'import'])->name('icds.import');
@@ -258,6 +259,12 @@ Route::middleware(['auth'])->group(function () {
         Route::get('plans', [\App\Http\Controllers\SaasPlanController::class, 'index'])->name('plans.index');
         Route::post('plans', [\App\Http\Controllers\SaasPlanController::class, 'store'])->name('plans.store');
         Route::put('plans/{id}', [\App\Http\Controllers\SaasPlanController::class, 'update'])->name('plans.update');
+
+        // Program Referal Antar Klinik Mitra
+        Route::get('referrals', [\App\Http\Controllers\SaasReferralController::class, 'index'])->name('referrals.index');
+        Route::post('referrals/settings', [\App\Http\Controllers\SaasReferralController::class, 'updateSettings'])->name('referrals.settings');
+        Route::post('referrals/{id}/paid', [\App\Http\Controllers\SaasReferralController::class, 'markPaid'])->name('referrals.paid');
+        Route::post('referrals/{id}/cancel', [\App\Http\Controllers\SaasReferralController::class, 'cancel'])->name('referrals.cancel');
 
         // CMS Landing Page (Bagian Luar Website)
         Route::get('landing-page', [\App\Http\Controllers\SaasCmsController::class, 'index'])->name('cms.index');

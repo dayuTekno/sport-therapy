@@ -160,6 +160,27 @@
                         </a>
                     </li>
 
+                    <!-- REFERAL KLINIK -->
+                    <li>
+                        <a href="{{ route('saas.referrals.index') }}"
+                            class="menu-item group flex items-center gap-3
+                            {{ request()->routeIs('saas.referrals*') ? 'menu-item-active' : 'menu-item-inactive' }}">
+                            <svg class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                            </svg>
+                            <span class="menu-item-text font-medium text-sm" :class="sidebarToggle ? 'lg:hidden' : ''">
+                                Referal Klinik
+                            </span>
+                            @php $pendingReferralCount = \App\Models\ClinicReferralCommission::where('status', 'pending')->count(); @endphp
+                            @if($pendingReferralCount > 0)
+                                <span class="ml-auto inline-flex px-2 py-0.5 items-center justify-center rounded-full bg-amber-100 text-[10px] font-bold text-amber-700" :class="sidebarToggle ? 'lg:hidden' : ''">
+                                    {{ $pendingReferralCount }}
+                                </span>
+                            @endif
+                        </a>
+                    </li>
+
                     <!-- CMS LANDING PAGE -->
                     <li>
                         <a href="{{ route('saas.cms.index') }}"
@@ -586,6 +607,19 @@
                             </svg>
                             <span class="menu-item-text font-medium text-sm" :class="sidebarToggle ? 'lg:hidden' : ''">
                                 Setting Klinik
+                            </span>
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="{{ route('clinic.referral') }}"
+                            class="menu-item group flex items-center gap-3
+                            {{ request()->routeIs('clinic.referral*') ? 'menu-item-active' : 'menu-item-inactive' }}">
+                            <svg class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                            </svg>
+                            <span class="menu-item-text font-medium text-sm" :class="sidebarToggle ? 'lg:hidden' : ''">
+                                Referal Klinik
                             </span>
                         </a>
                     </li>

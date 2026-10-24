@@ -115,6 +115,12 @@
                                     @if($c->subdomain)
                                         <p class="text-[10px] text-blue-500 truncate max-w-[180px]">{{ $c->subdomain }}.smartclinictherapy.com</p>
                                     @endif
+                                    @if($c->referral_code)
+                                        <p class="text-[10px] text-gray-500">Ref: <span class="font-mono font-bold text-indigo-600">{{ $c->referral_code }}</span></p>
+                                    @endif
+                                    @if($c->referrer)
+                                        <p class="text-[10px] text-emerald-600 truncate max-w-[180px]" title="Diundang oleh {{ $c->referrer->name }}">↳ via {{ $c->referrer->name }}</p>
+                                    @endif
                                 </div>
                             </div>
                         </td>
