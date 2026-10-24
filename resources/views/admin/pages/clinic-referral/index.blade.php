@@ -21,7 +21,7 @@
         <span>🤝</span> Referal Klinik
     </h1>
     <p class="text-xs text-gray-500 mt-1">
-        Bagikan kode referal klinik Anda ke klinik lain. Saat klinik yang Anda undang mulai berlangganan, Anda mendapatkan komisi.
+        Bagikan kode referal klinik Anda ke klinik lain. Komisi Anda dapatkan saat klinik yang Anda undang berlangganan paket — bukan saat mendaftar atau selama masa uji coba gratis.
     </p>
 </div>
 
@@ -79,8 +79,17 @@
         <h3 class="text-xs font-bold uppercase tracking-wider text-gray-500 mb-3">Komisi Referal</h3>
         @if($settings['is_enabled'])
             <div class="p-3 bg-emerald-50 border border-emerald-200 rounded-xl mb-4">
-                <span class="text-[11px] text-emerald-700 block">Anda mendapatkan</span>
-                <span class="text-lg font-black text-emerald-700">{{ \App\Models\ClinicReferralCommission::formatSetting($settings) }}</span>
+                <span class="text-[11px] text-emerald-700 block mb-1.5">Komisi per klinik sesuai paket yang dilanggan:</span>
+                <ul class="space-y-1">
+                    @forelse($plans as $plan)
+                        <li class="flex items-center justify-between gap-2 text-[11px]">
+                            <span class="text-gray-700 font-semibold">{{ $plan->name }}</span>
+                            <span class="font-black text-emerald-700 font-mono whitespace-nowrap">{{ $plan->formatted_referral_commission }}</span>
+                        </li>
+                    @empty
+                        <li class="text-[11px] text-gray-500">Belum ada paket langganan.</li>
+                    @endforelse
+                </ul>
             </div>
         @else
             <div class="p-3 bg-gray-50 border border-gray-200 rounded-xl mb-4 text-[11px] text-gray-500">
@@ -90,7 +99,7 @@
         <ol class="space-y-2 text-[11px] text-gray-600 list-decimal list-inside">
             <li>Bagikan kode atau link undangan ke klinik lain.</li>
             <li>Klinik tersebut mendaftar dengan kode referal Anda.</li>
-            <li>Komisi tercatat saat klinik itu mulai berlangganan (status aktif).</li>
+            <li>Selama masa uji coba gratis belum ada komisi. Komisi tercatat saat klinik itu berlangganan paket.</li>
             <li>Admin platform membayarkan komisi ke klinik Anda.</li>
         </ol>
     </div>

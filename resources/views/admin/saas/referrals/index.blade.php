@@ -13,108 +13,139 @@
     <h1 class="text-xl font-bold text-gray-800 flex items-center gap-2">
         <span>🤝</span> Program Referal Klinik
     </h1>
-    <p class="text-xs text-gray-500 mt-1">Setiap klinik otomatis memiliki kode referal. Komisi dicatat sekali saat klinik yang diundang pertama kali berstatus Aktif (berlangganan).</p>
+    <p class="text-xs text-gray-500 mt-1">Setiap klinik otomatis memiliki kode referal. Komisi <strong>tidak</strong> diberikan saat klinik mendaftar / masa trial, melainkan dicatat sekali saat klinik yang diundang mulai berlangganan paket (status Trial/Expired → Aktif).</p>
 </div>
 
 @include('admin.partials.alert')
 
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-    {{-- SETTING KOMISI --}}
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6"
-         x-data="{
-            commissionType: @js(old('commission_type', $settings['commission_type'])),
-            commissionValue: @js((float) old('commission_value', $settings['commission_value'])),
-            sampleBase: 1000000,
-            formatRupiah(num) {
-                return new Intl.NumberFormat('id-ID').format(num);
-            },
-            get preview() {
-                let val = parseFloat(this.commissionValue) || 0;
-                if (this.commissionType === 'percent') {
-                    return Math.round(this.sampleBase * Math.min(100, val) / 100);
-                }
-                return Math.round(val);
-            },
-            setType(type) {
-                this.commissionType = type;
-                this.commissionValue = '';
-            },
-            onInput(e) {
-                if (this.commissionType === 'percent') {
-                    let val = e.target.value.replace(',', '.').replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');
-                    e.target.value = val;
-                    this.commissionValue = val;
-                    return;
-                }
-                let digits = e.target.value.replace(/\D/g, '').replace(/^0+(?=\d)/, '');
-                this.commissionValue = digits === '' ? '' : parseInt(digits, 10);
-                e.target.value = digits === '' ? '' : this.formatRupiah(this.commissionValue);
-            }
-         }">
-        <h3 class="text-xs font-bold uppercase tracking-wider text-gray-500 mb-4 pb-2 border-b border-gray-100">Setting Komisi</h3>
+{{-- SETTING KOMISI PER PAKET --}}
+<div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
+    <form action="{{ route('saas.referrals.settings') }}" method="POST" class="text-xs">
+        @csrf
 
-        <form action="{{ route('saas.referrals.settings') }}" method="POST" class="space-y-4 text-xs">
-            @csrf
-
-            <label class="flex items-center justify-between gap-3 p-3 bg-gray-50 rounded-xl border border-gray-200 cursor-pointer">
-                <span>
-                    <span class="font-bold text-gray-800 block">Program Komisi Aktif</span>
-                    <span class="text-[10px] text-gray-500">Nonaktifkan untuk berhenti mencatat komisi baru</span>
-                </span>
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pb-3 border-b border-gray-100">
+            <div>
+                <h3 class="text-sm font-bold text-gray-800">Setting Komisi per Paket Langganan</h3>
+                <p class="text-[11px] text-gray-500 mt-0.5">Besaran komisi mengikuti paket yang dilanggan klinik terundang. Isi 0 jika paket tidak memberikan komisi.</p>
+            </div>
+            <label class="flex items-center gap-2.5 px-3 py-2 bg-gray-50 rounded-xl border border-gray-200 cursor-pointer shrink-0">
                 <input type="checkbox" name="is_enabled" value="1" @checked(old('is_enabled', $settings['is_enabled']))
                        class="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                <span class="font-bold text-gray-800">Program Komisi Aktif</span>
             </label>
+        </div>
 
-            <div>
-                <div class="flex items-center justify-between mb-2">
-                    <label class="block font-bold text-gray-700 uppercase tracking-wider">Jenis Komisi</label>
-                    <div class="inline-flex p-0.5 bg-gray-200/80 rounded-lg font-semibold">
-                        <button type="button" @click="setType('rupiah')"
-                                :class="commissionType === 'rupiah' ? 'bg-white text-blue-700 shadow-xs' : 'text-gray-600 hover:text-gray-900'"
-                                class="px-2.5 py-1 rounded-md transition text-[11px] cursor-pointer font-bold">
-                            Rp (Nominal)
-                        </button>
-                        <button type="button" @click="setType('percent')"
-                                :class="commissionType === 'percent' ? 'bg-white text-blue-700 shadow-xs' : 'text-gray-600 hover:text-gray-900'"
-                                class="px-2.5 py-1 rounded-md transition text-[11px] cursor-pointer font-bold">
-                            % (Persen)
-                        </button>
-                    </div>
-                </div>
-                <input type="hidden" name="commission_type" :value="commissionType">
+        <div class="overflow-x-auto">
+            <table class="min-w-full text-xs">
+                <thead>
+                    <tr class="text-left text-[11px] font-semibold text-gray-500 uppercase tracking-wider">
+                        <th class="py-2 pr-4">Paket</th>
+                        <th class="py-2 pr-4 text-right">Harga Paket</th>
+                        <th class="py-2 pr-4">Jenis Komisi</th>
+                        <th class="py-2 pr-4">Nilai Komisi</th>
+                        <th class="py-2 text-right">Komisi Diterima Perujuk</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100">
+                    @forelse($plans as $plan)
+                        <tr x-data="{
+                                type: @js(old('plans.' . $plan->id . '.type', $plan->referral_commission_type ?: 'rupiah')),
+                                value: @js((float) old('plans.' . $plan->id . '.value', (float) $plan->referral_commission_value)),
+                                price: {{ (float) $plan->price }},
+                                formatRupiah(num) {
+                                    return new Intl.NumberFormat('id-ID').format(num);
+                                },
+                                get commission() {
+                                    let val = parseFloat(this.value) || 0;
+                                    if (this.type === 'percent') {
+                                        return Math.round(this.price * Math.min(100, val) / 100);
+                                    }
+                                    return Math.round(val);
+                                },
+                                setType(type) {
+                                    this.type = type;
+                                    this.value = 0;
+                                },
+                                onInput(e) {
+                                    if (this.type === 'percent') {
+                                        let val = e.target.value.replace(',', '.').replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');
+                                        e.target.value = val;
+                                        this.value = val;
+                                        return;
+                                    }
+                                    let digits = e.target.value.replace(/\D/g, '').replace(/^0+(?=\d)/, '');
+                                    this.value = digits === '' ? '' : parseInt(digits, 10);
+                                    e.target.value = digits === '' ? '' : this.formatRupiah(this.value);
+                                }
+                            }">
+                            <td class="py-3 pr-4">
+                                <span class="font-bold text-gray-900 block">{{ $plan->name }}</span>
+                                @unless($plan->is_active)
+                                    <span class="text-[10px] font-semibold text-gray-400">Paket nonaktif</span>
+                                @endunless
+                            </td>
+                            <td class="py-3 pr-4 text-right font-mono text-gray-700 whitespace-nowrap">Rp {{ number_format($plan->price, 0, ',', '.') }}</td>
+                            <td class="py-3 pr-4">
+                                <input type="hidden" name="plans[{{ $plan->id }}][type]" :value="type">
+                                <div class="inline-flex p-0.5 bg-gray-200/80 rounded-lg font-semibold">
+                                    <button type="button" @click="setType('rupiah')"
+                                            :class="type === 'rupiah' ? 'bg-white text-blue-700 shadow-xs' : 'text-gray-600 hover:text-gray-900'"
+                                            class="px-2.5 py-1 rounded-md transition text-[11px] cursor-pointer font-bold whitespace-nowrap">
+                                        Rp (Nominal)
+                                    </button>
+                                    <button type="button" @click="setType('percent')"
+                                            :class="type === 'percent' ? 'bg-white text-blue-700 shadow-xs' : 'text-gray-600 hover:text-gray-900'"
+                                            class="px-2.5 py-1 rounded-md transition text-[11px] cursor-pointer font-bold whitespace-nowrap">
+                                        % (Persen)
+                                    </button>
+                                </div>
+                            </td>
+                            <td class="py-3 pr-4">
+                                <div class="relative w-40">
+                                    <span x-show="type === 'rupiah'" class="absolute left-3 top-2 text-xs text-gray-400 font-bold">Rp</span>
+                                    <input type="text"
+                                           :inputmode="type === 'percent' ? 'decimal' : 'numeric'"
+                                           autocomplete="off"
+                                           :value="type === 'percent' ? value : (value === '' ? '' : formatRupiah(value))"
+                                           @input="onInput($event)"
+                                           required
+                                           :placeholder="type === 'percent' ? 'Misal: 10' : 'Misal: 1.000'"
+                                           :class="type === 'rupiah' ? 'pl-9 pr-3' : 'pl-3 pr-8'"
+                                           class="w-full py-2 text-xs border rounded-xl focus:ring-2 focus:ring-blue-500 font-bold text-gray-800 bg-white shadow-2xs {{ $errors->has('plans.' . $plan->id . '.value') ? 'border-rose-400' : 'border-gray-300' }}">
+                                    <span x-show="type === 'percent'" class="absolute right-3 top-2 text-xs text-blue-600 font-bold">%</span>
+                                    <input type="hidden" name="plans[{{ $plan->id }}][value]" :value="value">
+                                </div>
+                                @error('plans.' . $plan->id . '.value')
+                                    <p class="text-[10px] text-rose-600 mt-1 font-semibold">{{ $message }}</p>
+                                @enderror
+                            </td>
+                            <td class="py-3 text-right whitespace-nowrap">
+                                <span class="font-mono font-black text-emerald-700" x-text="'Rp ' + formatRupiah(commission)"></span>
+                                <span class="block text-[10px] text-gray-400" x-show="type === 'percent'" x-text="(parseFloat(value) || 0) + '% dari harga paket'"></span>
+                                <span class="block text-[10px] text-gray-400" x-show="type === 'rupiah'">Nominal tetap</span>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="5" class="py-6 text-center text-gray-400">Belum ada paket langganan. Tambahkan paket di menu Paket Langganan.</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
 
-                <div class="relative">
-                    <span x-show="commissionType === 'rupiah'" class="absolute left-3.5 top-2.5 text-xs text-gray-400 font-bold">Rp</span>
-                    <input type="text"
-                           :inputmode="commissionType === 'percent' ? 'decimal' : 'numeric'"
-                           autocomplete="off"
-                           :value="commissionType === 'percent' ? commissionValue : (commissionValue === '' ? '' : formatRupiah(commissionValue))"
-                           @input="onInput($event)"
-                           required
-                           :placeholder="commissionType === 'percent' ? 'Misal: 10' : 'Misal: 100.000'"
-                           :class="commissionType === 'rupiah' ? 'pl-10 pr-4' : 'pl-4 pr-10'"
-                           class="w-full py-2.5 text-xs border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 font-bold text-gray-800 bg-white shadow-2xs">
-                    <span x-show="commissionType === 'percent'" class="absolute right-3.5 top-2.5 text-xs text-blue-600 font-bold">%</span>
-                    <input type="hidden" name="commission_value" :value="commissionValue">
-                </div>
-                <p class="text-[10px] text-gray-500 mt-1.5" x-show="commissionType === 'percent'">Persentase dari harga paket langganan klinik yang diundang.</p>
-                <p class="text-[10px] text-gray-500 mt-1.5" x-show="commissionType === 'rupiah'">Nominal tetap per klinik yang diundang, berapa pun harga paketnya.</p>
-            </div>
-
-            <div class="p-3 bg-blue-50/70 border border-blue-200 rounded-xl text-[11px] text-blue-900">
-                Contoh: paket Rp <span x-text="formatRupiah(sampleBase)"></span> → komisi
-                <strong class="font-mono" x-text="'Rp ' + formatRupiah(preview)"></strong>
-            </div>
-
-            <button type="submit" class="w-full px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl shadow-md transition cursor-pointer">
+        <div class="mt-4 pt-4 border-t border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <p class="text-[10px] text-gray-400">Perubahan setting tidak mengubah komisi yang sudah tercatat.</p>
+            <button type="submit" class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl shadow-md transition cursor-pointer">
                 Simpan Setting Komisi
             </button>
-            <p class="text-[10px] text-gray-400">Perubahan setting tidak mengubah komisi yang sudah tercatat.</p>
-        </form>
-    </div>
+        </div>
+    </form>
+</div>
 
+<div class="mb-6">
     {{-- RINGKASAN & TOP REFERRER --}}
-    <div class="lg:col-span-2 space-y-6">
+    <div class="space-y-6">
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
                 <span class="text-[11px] text-gray-500 font-semibold block">Klinik via Referal</span>
@@ -166,7 +197,7 @@
                         <li class="py-6 text-center text-gray-400">Tidak ada klinik referal yang menunggu.</li>
                     @endforelse
                 </ul>
-                <p class="text-[10px] text-gray-400 mt-2">Komisi tercatat otomatis saat status klinik diubah menjadi Aktif di menu Mitra Klinik.</p>
+                <p class="text-[10px] text-gray-400 mt-2">Komisi tercatat otomatis saat klinik mulai berlangganan paket, yaitu saat statusnya diubah dari Trial/Expired menjadi Aktif di menu Mitra Klinik.</p>
             </div>
         </div>
     </div>
@@ -223,7 +254,7 @@
                         <td class="px-4 py-3 text-right">
                             <span class="font-mono font-bold text-gray-900">Rp {{ number_format($cm->commission_amount, 0, ',', '.') }}</span>
                             <span class="block text-[10px] text-gray-400">
-                                {{ $cm->commission_type === 'percent' ? rtrim(rtrim(number_format($cm->commission_value, 2, ',', '.'), '0'), ',') . '%' : 'Nominal tetap' }}
+                                {{ $cm->commission_type === 'percent' ? \App\Models\ClinicReferralCommission::formatPercent($cm->commission_value) . ' dari paket' : 'Nominal tetap' }}
                             </span>
                         </td>
                         <td class="px-4 py-3 text-center">

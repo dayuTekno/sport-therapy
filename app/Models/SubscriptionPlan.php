@@ -13,6 +13,7 @@ class SubscriptionPlan extends Model
     protected $casts = [
         'price' => 'decimal:2',
         'monthly_rate' => 'decimal:2',
+        'referral_commission_value' => 'decimal:2',
         'duration_in_months' => 'integer',
         'is_active' => 'boolean',
         'features_json' => 'array',
@@ -25,6 +26,30 @@ class SubscriptionPlan extends Model
     public function clinics()
     {
         return $this->hasMany(Clinic::class, 'subscription_plan_id');
+    }
+
+    /**
+     * Nominal komisi referal untuk klinik perujuk saat klinik terundang berlangganan paket ini
+     */
+    public function calculateReferralCommission(): float
+    {
+        $value = max(0, (float) $this->referral_commission_value);
+
+        if ($this->referral_commission_type === 'percent') {
+            return round((float) $this->price * min(100, $value) / 100);
+        }
+
+        return round($value);
+    }
+
+    public function getFormattedReferralCommissionAttribute(): string
+    {
+        if ($this->referral_commission_type === 'percent') {
+            return ClinicReferralCommission::formatPercent($this->referral_commission_value)
+                . ' (Rp ' . number_format($this->calculateReferralCommission(), 0, ',', '.') . ')';
+        }
+
+        return 'Rp ' . number_format($this->calculateReferralCommission(), 0, ',', '.');
     }
 
     public function getFormattedMonthlyRateAttribute(): string

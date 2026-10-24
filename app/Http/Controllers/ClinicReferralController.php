@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Clinic;
 use App\Models\ClinicReferralCommission;
+use App\Models\SubscriptionPlan;
 
 class ClinicReferralController extends Controller
 {
@@ -33,6 +34,7 @@ class ClinicReferralController extends Controller
         $totalPaid = $commissions->where('status', 'paid')->sum('commission_amount');
 
         $settings = ClinicReferralCommission::settings();
+        $plans = SubscriptionPlan::where('is_active', true)->orderBy('sort_order')->get();
         $shareLink = route('register.clinic', ['ref' => $clinic->referral_code]);
 
         return view('admin.pages.clinic-referral.index', compact(
@@ -41,6 +43,7 @@ class ClinicReferralController extends Controller
             'totalPending',
             'totalPaid',
             'settings',
+            'plans',
             'shareLink'
         ));
     }

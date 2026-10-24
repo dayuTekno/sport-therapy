@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Clinic;
 use App\Models\ClinicReferralCommission;
+use App\Models\SubscriptionPlan;
 use Illuminate\Http\Request;
 
 class SaasReferralController extends Controller
@@ -22,6 +23,7 @@ class SaasReferralController extends Controller
     public function index(Request $request)
     {
         $settings = ClinicReferralCommission::settings();
+        $plans = SubscriptionPlan::orderBy('sort_order')->orderBy('id')->get();
 
         $query = ClinicReferralCommission::with(['referrer', 'referred', 'plan']);
 
@@ -60,6 +62,7 @@ class SaasReferralController extends Controller
 
         return view('admin.saas.referrals.index', compact(
             'settings',
+            'plans',
             'commissions',
             'totalPending',
             'totalPaid',
@@ -71,20 +74,35 @@ class SaasReferralController extends Controller
 
     public function updateSettings(Request $request)
     {
+        $plans = SubscriptionPlan::all()->keyBy('id');
+
         $request->validate([
-            'commission_type' => 'required|in:rupiah,percent',
-            'commission_value' => 'required|numeric|min:0' . ($request->commission_type === 'percent' ? '|max:100' : ''),
+            'plans' => 'required|array',
+            'plans.*.type' => 'required|in:rupiah,percent',
+            'plans.*.value' => 'required|numeric|min:0',
         ], [
-            'commission_value.max' => 'Komisi persentase maksimal 100%.',
+            'plans.*.value.required' => 'Nilai komisi setiap paket wajib diisi (isi 0 jika tanpa komisi).',
         ]);
+
+        foreach ($request->input('plans') as $planId => $row) {
+            if ($row['type'] === 'percent' && (float) $row['value'] > 100) {
+                $name = $plans->get($planId)?->name ?? "#{$planId}";
+                return back()->withInput()->withErrors(["plans.{$planId}.value" => "Komisi persentase paket {$name} maksimal 100%."]);
+            }
+        }
+
+        foreach ($request->input('plans') as $planId => $row) {
+            $plans->get($planId)?->update([
+                'referral_commission_type' => $row['type'],
+                'referral_commission_value' => (float) $row['value'],
+            ]);
+        }
 
         ClinicReferralCommission::saveSettings([
             'is_enabled' => $request->boolean('is_enabled'),
-            'commission_type' => $request->commission_type,
-            'commission_value' => (float) $request->commission_value,
         ]);
 
-        return redirect()->route('saas.referrals.index')->with('success', 'Setting komisi referal klinik berhasil disimpan. Berlaku untuk komisi yang dicatat berikutnya.');
+        return redirect()->route('saas.referrals.index')->with('success', 'Setting komisi referal per paket berhasil disimpan. Berlaku untuk komisi yang dicatat berikutnya.');
     }
 
     public function markPaid(Request $request, $id)

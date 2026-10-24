@@ -82,8 +82,7 @@ class SaasClinicController extends Controller
             'referred_by_clinic_id' => $referrer?->id,
         ]);
 
-        // Klinik langsung didaftarkan sebagai berlangganan aktif → catat komisi klinik perujuk
-        $clinic->recordReferralCommission();
+        // Komisi referal TIDAK dicatat saat pendaftaran, hanya saat klinik mulai berlangganan paket (lihat update())
 
         // Buat User Admin Klinik
         $adminUser = User::create([
@@ -108,6 +107,7 @@ class SaasClinicController extends Controller
     {
         $clinic = Clinic::findOrFail($id);
         $referrer = null;
+        $wasSubscribed = $clinic->isSubscribed();
 
         $request->validate([
             'name' => 'required|string|max:255',
@@ -158,8 +158,10 @@ class SaasClinicController extends Controller
             $clinic->update(['referred_by_clinic_id' => $referrer?->id]);
         }
 
-        // Klinik terundang mulai berlangganan (status aktif) → catat komisi klinik perujuk (sekali saja)
-        $clinic->recordReferralCommission();
+        // Komisi hanya dicatat saat klinik berpindah dari belum berlangganan (trial/expired) menjadi berlangganan paket
+        if (!$wasSubscribed && $clinic->isSubscribed()) {
+            $clinic->recordReferralCommission();
+        }
 
         return redirect()->route('saas.clinics.index')->with('success', "Data klinik {$clinic->name} berhasil diperbarui!");
     }

@@ -41,7 +41,8 @@ class ClinicReferralCommission extends Model
     }
 
     /**
-     * Setting program referal klinik (disimpan di landing_page_settings, section 'clinic_referral')
+     * Setting global program referal klinik (disimpan di landing_page_settings, section 'clinic_referral').
+     * Besaran komisi diatur per paket langganan (lihat SubscriptionPlan::calculateReferralCommission()).
      */
     public static function settings(): array
     {
@@ -50,8 +51,6 @@ class ClinicReferralCommission extends Model
 
         return [
             'is_enabled' => (bool) ($content['is_enabled'] ?? true),
-            'commission_type' => in_array($content['commission_type'] ?? null, ['rupiah', 'percent']) ? $content['commission_type'] : 'percent',
-            'commission_value' => (float) ($content['commission_value'] ?? 10),
         ];
     }
 
@@ -61,30 +60,9 @@ class ClinicReferralCommission extends Model
         $setting->update(['content_json' => $settings]);
     }
 
-    /**
-     * Hitung nominal komisi dari harga paket berdasarkan setting aktif
-     */
-    public static function calculate(float $baseAmount, ?array $settings = null): float
+    public static function formatPercent($value): string
     {
-        $settings = $settings ?? self::settings();
-        $value = max(0, $settings['commission_value']);
-
-        if ($settings['commission_type'] === 'percent') {
-            return round($baseAmount * min(100, $value) / 100);
-        }
-
-        return round($value);
-    }
-
-    public static function formatSetting(?array $settings = null): string
-    {
-        $settings = $settings ?? self::settings();
-
-        if ($settings['commission_type'] === 'percent') {
-            return rtrim(rtrim(number_format($settings['commission_value'], 2, ',', '.'), '0'), ',') . '% dari harga paket';
-        }
-
-        return 'Rp ' . number_format($settings['commission_value'], 0, ',', '.') . ' per klinik';
+        return rtrim(rtrim(number_format((float) $value, 2, ',', '.'), '0'), ',') . '%';
     }
 
     public function getStatusLabelAttribute(): string

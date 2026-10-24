@@ -140,12 +140,20 @@ class Clinic extends Model
     }
 
     /**
-     * Catat komisi untuk klinik perujuk saat klinik ini pertama kali berlangganan (status aktif).
+     * Klinik sedang berlangganan paket berbayar (bukan trial, tidak suspended, belum lewat masa aktif)
+     */
+    public function isSubscribed(): bool
+    {
+        return $this->status === 'active' && $this->is_active && !$this->isSubscriptionExpired();
+    }
+
+    /**
+     * Catat komisi untuk klinik perujuk saat klinik ini berlangganan paket (bukan saat mendaftar / trial).
      * Aman dipanggil berulang: komisi hanya dicatat satu kali per klinik terundang.
      */
     public function recordReferralCommission(): ?ClinicReferralCommission
     {
-        if (!$this->referred_by_clinic_id || $this->status !== 'active') {
+        if (!$this->referred_by_clinic_id || !$this->isSubscribed()) {
             return null;
         }
 
@@ -153,13 +161,13 @@ class Clinic extends Model
             return $existing;
         }
 
-        $settings = ClinicReferralCommission::settings();
-        if (!$settings['is_enabled']) {
+        if (!ClinicReferralCommission::settings()['is_enabled']) {
             return null;
         }
 
-        $baseAmount = (float) (SubscriptionPlan::find($this->subscription_plan_id)?->price ?? 0);
-        $amount = ClinicReferralCommission::calculate($baseAmount, $settings);
+        // Besaran komisi mengikuti setting paket yang dilanggan klinik terundang
+        $plan = SubscriptionPlan::find($this->subscription_plan_id);
+        $amount = $plan?->calculateReferralCommission() ?? 0;
         if ($amount <= 0) {
             return null;
         }
@@ -167,10 +175,10 @@ class Clinic extends Model
         return ClinicReferralCommission::create([
             'referrer_clinic_id' => $this->referred_by_clinic_id,
             'referred_clinic_id' => $this->id,
-            'subscription_plan_id' => $this->subscription_plan_id,
-            'base_amount' => $baseAmount,
-            'commission_type' => $settings['commission_type'],
-            'commission_value' => $settings['commission_value'],
+            'subscription_plan_id' => $plan->id,
+            'base_amount' => (float) $plan->price,
+            'commission_type' => $plan->referral_commission_type,
+            'commission_value' => $plan->referral_commission_value,
             'commission_amount' => $amount,
             'status' => 'pending',
         ]);

@@ -107,7 +107,7 @@
                        autocomplete="off" oninput="this.value = this.value.toUpperCase()"
                        placeholder="Contoh: PRIMA-7K2Q"
                        class="w-full px-3.5 py-2.5 text-xs border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 font-mono font-bold tracking-wider">
-                <p class="text-[10px] text-gray-400 mt-1">Isi jika klinik ini diundang oleh klinik mitra lain. Komisi dicatat saat status klinik Aktif (berlangganan).</p>
+                <p class="text-[10px] text-gray-400 mt-1">Isi jika klinik ini diundang oleh klinik mitra lain. Komisi tidak diberikan saat pendaftaran — baru dicatat saat klinik mulai berlangganan paket (status diubah dari Trial menjadi Aktif).</p>
             </div>
 
             <div class="border-t border-gray-100 pt-4">

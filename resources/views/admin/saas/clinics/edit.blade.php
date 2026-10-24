@@ -63,9 +63,9 @@
                         Rp {{ number_format($referralCommission->commission_amount, 0, ',', '.') }} sudah tercatat ({{ $referralCommission->status_label }}), sehingga perujuk tidak dapat diubah.
                     </p>
                 @elseif($clinic->referrer)
-                    <p class="text-[10px] text-gray-500 mt-1">Diundang oleh <strong>{{ $clinic->referrer->name }}</strong>. Komisi dicatat otomatis saat status klinik diubah menjadi Aktif.</p>
+                    <p class="text-[10px] text-gray-500 mt-1">Diundang oleh <strong>{{ $clinic->referrer->name }}</strong>. Komisi dicatat otomatis saat klinik mulai berlangganan paket (status Trial/Expired diubah menjadi Aktif).</p>
                 @else
-                    <p class="text-[10px] text-gray-400 mt-1">Komisi untuk klinik perujuk dicatat otomatis saat status klinik diubah menjadi Aktif.</p>
+                    <p class="text-[10px] text-gray-400 mt-1">Komisi untuk klinik perujuk dicatat otomatis saat klinik mulai berlangganan paket (status Trial/Expired diubah menjadi Aktif).</p>
                 @endif
             </div>
 
