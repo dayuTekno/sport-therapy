@@ -1042,7 +1042,7 @@
             {{-- Bottom Copyright Strip --}}
             <div class="pt-8 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-4">
                 <div>
-                    &copy; {{ date('Y') }} Smart Clinic Therapy — Dikembangkan oleh <strong>Darma Ayu Tekno</strong>. Seluruh Hak Cipta Dilindungi.
+                    &copy; {{ date('Y') }} Smart Clinic Therapy — Developed by <strong class="text-slate-300">CV Darma Ayu Tekno</strong>. Seluruh Hak Cipta Dilindungi.
                 </div>
                 <div class="font-mono text-[11px] text-slate-600">
                     Platform as a Service (PaaS) • Multi-Tenancy Architecture

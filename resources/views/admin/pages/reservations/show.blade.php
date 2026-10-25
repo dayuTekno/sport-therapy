@@ -411,7 +411,7 @@
                     <tr>
                         <th class="px-5 py-3 text-left">Waktu Sesi</th>
                         <th class="px-5 py-3 text-left">Sesi Ke- (Harian)</th>
-                        <th class="px-5 py-3 text-left">Jenjang / Tahapan</th>
+                        <th class="px-5 py-3 text-left">Tindakan / Tahapan</th>
                         <th class="px-5 py-3 text-left">Terapis</th>
                         <th class="px-5 py-3 text-left">Status</th>
                         <th class="px-5 py-3 text-right">Tarif Sesi</th>

@@ -33,7 +33,7 @@ class TherapyTypeController extends Controller
 
         TherapyType::create($validated);
 
-        return redirect()->route('therapy-types.index')->with('success', 'Jenis jenjang terapi berhasil ditambahkan.');
+        return redirect()->route('therapy-types.index')->with('success', 'Tindakan berhasil ditambahkan.');
     }
 
     public function edit($id)

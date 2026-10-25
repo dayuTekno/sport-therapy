@@ -64,7 +64,7 @@ class ResetTestDataCommand extends Command
             'roles & permissions' => 'Hak Akses & Role Spatie',
             'master_clinics / clinics' => 'Profil Klinik Tenant',
             'therapists' => 'Daftar Terapis Olahraga',
-            'therapy_types' => 'Katalog Jenjang Terapi (Stage A - D)',
+            'therapy_types' => 'Katalog Tindakan (Stage A - D)',
             'therapy_equipments' => 'Inventaris Peralatan Terapi',
             'master_eselons' => 'Kategori Jaminan (Umum/BPJS/Klub)',
             'master_polyclinics' => 'Daftar Poliklinik',

@@ -173,14 +173,14 @@
             </h3>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {{-- Master Jenjang Terapi --}}
+                {{-- Master Tindakan --}}
                 <div>
                     <label class="block text-xs font-bold uppercase text-gray-700 mb-1">
-                        Pilih Jenjang Terapi *
+                        Pilih Tindakan *
                     </label>
                     <select name="therapy_type_id" id="therapy_type_id" required 
                             class="w-full text-sm border border-gray-300 rounded-xl px-3.5 py-2.5 focus:ring-2 focus:ring-blue-500 bg-white">
-                        <option value="">-- Pilih Jenjang Terapi --</option>
+                        <option value="">-- Pilih Tindakan --</option>
                         @foreach($therapyTypes as $type)
                             <option value="{{ $type->id }}" 
                                     data-stage="{{ $type->stage_order }}"

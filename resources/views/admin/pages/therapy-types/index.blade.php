@@ -1,24 +1,24 @@
 @extends('admin.layouts.app')
 
-@section('title', 'Katalog Jenjang Terapi')
+@section('title', 'Katalog Tindakan')
 
 @section('content')
 
 <x-breadcrumb :items="[
     ['label' => 'Master Data'],
-    ['label' => 'Katalog Jenjang Terapi'],
+    ['label' => 'Katalog Tindakan'],
 ]" />
 
 <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
     <div>
-        <h1 class="text-xl font-bold text-gray-800">Katalog Jenjang Terapi</h1>
+        <h1 class="text-xl font-bold text-gray-800">Katalog Tindakan</h1>
         <p class="text-xs text-gray-500 mt-1">Tahapan terapi berjenjang untuk pemulihan cedera fisik & olahraga</p>
     </div>
 
     <div class="flex items-center gap-3">
         <a href="{{ route('therapy-types.create') }}"
            class="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 shadow-sm transition">
-            + Tambah Jenjang Terapi
+            + Tambah Tindakan
         </a>
     </div>
 </div>
@@ -67,7 +67,7 @@
                     </td>
                     <td class="px-6 py-4 text-right space-x-2">
                         <a href="{{ route('therapy-types.edit', $type->id) }}" class="text-blue-600 hover:text-blue-800 font-medium text-xs">Edit</a>
-                        <form action="{{ route('therapy-types.destroy', $type->id) }}" method="POST" class="inline-block" onsubmit="return confirm('Hapus jenjang terapi ini?')">
+                        <form action="{{ route('therapy-types.destroy', $type->id) }}" method="POST" class="inline-block" onsubmit="return confirm('Hapus tindakan ini?')">
                             @csrf
                             @method('DELETE')
                             <button type="submit" class="text-red-600 hover:text-red-800 font-medium text-xs">Hapus</button>
@@ -76,7 +76,7 @@
                 </tr>
             @empty
                 <tr>
-                    <td colspan="7" class="px-6 py-8 text-center text-gray-400">Belum ada katalog jenjang terapi.</td>
+                    <td colspan="7" class="px-6 py-8 text-center text-gray-400">Belum ada katalog tindakan.</td>
                 </tr>
             @endforelse
         </tbody>

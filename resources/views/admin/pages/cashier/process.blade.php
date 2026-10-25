@@ -198,7 +198,7 @@
                         <thead class="bg-gray-50 text-gray-600 font-semibold uppercase text-[11px]">
                             <tr>
                                 <th class="p-3.5">No</th>
-                                <th class="p-3.5">Jenjang / Tahap Terapi</th>
+                                <th class="p-3.5">Tindakan / Tahap Terapi</th>
                                 <th class="p-3.5">Terapis</th>
                                 <th class="p-3.5 text-center">Durasi</th>
                                 <th class="p-3.5 text-center">Status</th>

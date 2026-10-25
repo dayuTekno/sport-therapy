@@ -133,7 +133,7 @@
         </h3>
         <div class="space-y-3 text-sm">
             <div>
-                <span class="text-[11px] text-gray-400 block font-medium">Jenjang & Nama Tahap</span>
+                <span class="text-[11px] text-gray-400 block font-medium">Tindakan & Nama Tahap</span>
                 <div class="font-bold text-indigo-900 text-sm mt-0.5">
                     Tahap {{ $session->stage_number }}: {{ $session->stage_name }}
                 </div>
@@ -342,7 +342,7 @@
             {{-- 3. Rekomendasi Terapi Lanjutan --}}
             <div>
                 <label class="block text-xs font-bold uppercase text-gray-700 mb-1">
-                    3. Rekomendasi Program / Jenjang Terapi Berikutnya (Opsional)
+                    3. Rekomendasi Program / Tindakan Berikutnya (Opsional)
                 </label>
                 <input type="text" name="recommended_next_stage" 
                        value="{{ old('recommended_next_stage', 'Lanjut ke Tahap ' . chr(64 + $session->stage_number + 1) . ': Latihan Penguatan & Mobilitas') }}"
@@ -369,7 +369,7 @@
                         <div>
                             <label class="block text-[11px] font-bold uppercase text-gray-700 mb-1">Pilih Tahap Berikutnya</label>
                             <select name="next_therapy_type_id" class="w-full text-xs border border-gray-300 rounded-lg p-2 bg-white">
-                                <option value="">-- Otomatis Jenjang Berikutnya --</option>
+                                <option value="">-- Otomatis Tindakan Berikutnya --</option>
                                 @foreach($therapyTypes as $tt)
                                     <option value="{{ $tt->id }}" {{ $session->stage_number + 1 == $tt->stage_order ? 'selected' : '' }}>
                                         Tahap {{ $tt->stage_order }}: {{ $tt->name }}

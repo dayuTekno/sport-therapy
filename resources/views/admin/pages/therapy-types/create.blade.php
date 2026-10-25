@@ -1,16 +1,16 @@
 @extends('admin.layouts.app')
 
-@section('title', 'Tambah Jenjang Terapi')
+@section('title', 'Tambah Tindakan')
 
 @section('content')
 
 <x-breadcrumb :items="[
     ['label' => 'Master Data', 'url' => route('therapy-types.index')],
-    ['label' => 'Tambah Jenjang Terapi'],
+    ['label' => 'Tambah Tindakan'],
 ]" />
 
 <div class="max-w-2xl bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-    <h2 class="text-lg font-bold text-gray-800 mb-6">Tambah Jenjang Terapi Baru</h2>
+    <h2 class="text-lg font-bold text-gray-800 mb-6">Tambah Tindakan Baru</h2>
 
     <form action="{{ route('therapy-types.store') }}" method="POST" class="space-y-4">
         @csrf
@@ -60,12 +60,12 @@
         <div class="flex items-center gap-2 pt-2">
             <input type="checkbox" name="is_active" id="is_active" value="1" {{ old('is_active', '1') == '1' ? 'checked' : '' }}
                    class="rounded border-gray-300 text-blue-600 focus:ring-blue-500 h-4 w-4">
-            <label for="is_active" class="text-sm font-medium text-gray-700">Aktifkan Jenjang Terapi Ini (Dapat dipilih pada Sesi Terapi)</label>
+            <label for="is_active" class="text-sm font-medium text-gray-700">Aktifkan Tindakan Ini (Dapat dipilih pada Sesi Terapi)</label>
         </div>
 
         <div class="flex items-center justify-end gap-3 pt-4 border-t border-gray-100">
             <a href="{{ route('therapy-types.index') }}" class="px-4 py-2 text-sm text-gray-600 hover:text-gray-800">Batal</a>
-            <button type="submit" class="px-5 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700">Simpan Jenjang</button>
+            <button type="submit" class="px-5 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700">Simpan Tindakan</button>
         </div>
     </form>
 </div>

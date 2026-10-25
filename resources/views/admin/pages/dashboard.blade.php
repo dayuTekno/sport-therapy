@@ -263,7 +263,7 @@
                 <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
                     <div class="flex items-center gap-2.5">
                         <span class="w-2 h-2 rounded-full bg-purple-500"></span>
-                        <span class="text-xs font-semibold text-gray-700">Jenjang Terapi</span>
+                        <span class="text-xs font-semibold text-gray-700">Tindakan</span>
                     </div>
                     <span class="px-2.5 py-0.5 bg-white rounded-lg shadow-xs text-xs font-bold text-purple-600">
                         {{ $totalTherapyTypes }} Tahap (A - D)

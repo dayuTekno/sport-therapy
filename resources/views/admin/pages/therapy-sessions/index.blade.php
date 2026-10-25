@@ -135,7 +135,7 @@
                     <th class="p-4">Waktu Sesi</th>
                     <th class="p-4">Sesi Harian</th>
                     <th class="p-4">Data Pasien</th>
-                    <th class="p-4">Jenjang / Tahapan Terapi</th>
+                    <th class="p-4">Tindakan / Tahapan Terapi</th>
                     <th class="p-4">Terapis Penanggung Jawab</th>
                     <th class="p-4">Status</th>
                     <th class="p-4">Evaluasi / Tindakan</th>
@@ -182,7 +182,7 @@
                             </div>
                         </td>
 
-                        {{-- Jenjang / Tahapan Terapi --}}
+                        {{-- Tindakan / Tahapan Terapi --}}
                         <td class="p-4">
                             <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-indigo-50 border border-indigo-200 text-indigo-800 font-bold text-xs">
                                 <span>Tahap {{ $session->stage_number }} ({{ chr(64 + $session->stage_number) }})</span>

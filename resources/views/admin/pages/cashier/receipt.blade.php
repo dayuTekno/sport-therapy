@@ -78,7 +78,7 @@
                 <thead>
                     <tr class="border-b border-gray-200 text-gray-500 uppercase text-[10px]">
                         <th class="py-2.5 w-8">No</th>
-                        <th class="py-2.5">Deskripsi Tindakan & Jenjang Terapi</th>
+                        <th class="py-2.5">Deskripsi Tindakan</th>
                         <th class="py-2.5 text-center">Durasi</th>
                         <th class="py-2.5 text-right">Tarif</th>
                         <th class="py-2.5 text-right">Subtotal</th>

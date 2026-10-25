@@ -96,7 +96,7 @@ class TherapySessionController extends Controller
     }
 
     /**
-     * Form Tambah Sesi Terapi Pasien (Bisa >1 sesi dalam 1 hari & pilih jenjang)
+     * Form Tambah Sesi Terapi Pasien (Bisa >1 sesi dalam 1 hari & pilih tindakan)
      */
     public function create(Request $request)
     {
@@ -187,7 +187,7 @@ class TherapySessionController extends Controller
             $dailyOrder = $existingCount + 1;
         }
 
-        // Tentukan nama tahap dari Master Jenjang Terapi jika tersedia
+        // Tentukan nama tahap dari Master Tindakan jika tersedia
         $stageName = $request->stage_name;
         if ($request->therapy_type_id) {
             $tType = TherapyType::find($request->therapy_type_id);

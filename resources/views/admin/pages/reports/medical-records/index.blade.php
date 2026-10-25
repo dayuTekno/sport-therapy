@@ -84,9 +84,9 @@
             </div>
 
             <div>
-                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Jenjang Terapi</label>
+                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Tindakan</label>
                 <select name="therapy_type_id" class="w-full rounded-xl border-gray-200 focus:ring-blue-500 focus:border-blue-500 text-sm">
-                    <option value="">Semua Jenjang</option>
+                    <option value="">Semua Tindakan</option>
                     @foreach($therapyTypes as $tt)
                         <option value="{{ $tt->id }}" {{ request('therapy_type_id') == $tt->id ? 'selected' : '' }}>
                             {{ $tt->name }}
@@ -141,7 +141,7 @@
                     <th class="p-4">Jadwal & Sesi</th>
                     <th class="p-4">Pasien</th>
                     <th class="p-4">Terapis Penanggung Jawab</th>
-                    <th class="p-4">Tahapan & Jenjang Terapi</th>
+                    <th class="p-4">Tahapan & Tindakan</th>
                     <th class="p-4">Evaluasi / Hasil Terapi</th>
                     <th class="p-4 text-center">Status</th>
                     <th class="p-4 text-right">Aksi</th>
@@ -191,7 +191,7 @@
                             </div>
                         </td>
 
-                        {{-- Tahapan & Jenjang Terapi --}}
+                        {{-- Tahapan & Tindakan --}}
                         <td class="p-4">
                             <div class="font-medium text-gray-800">
                                 {{ $s->stage_name ?: ($s->therapyType?->name ?? 'Sesi Terapi') }}
