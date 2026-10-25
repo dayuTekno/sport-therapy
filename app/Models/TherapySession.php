@@ -55,4 +55,36 @@ class TherapySession extends Model
         $nextNumber = str_pad($countToday + 1, 3, '0', STR_PAD_LEFT);
         return "{$prefix}-{$nextNumber}";
     }
+
+    /**
+     * Cek apakah pasien sudah punya sesi aktif yang waktunya tumpang tindih (terapis mana pun).
+     * Mengembalikan pesan bentrok, atau null bila aman.
+     */
+    public static function patientScheduleConflict(int $patientId, $dateTime, int $durationMinutes = 60, ?int $excludeSessionId = null): ?string
+    {
+        $start = $dateTime instanceof \Carbon\Carbon ? $dateTime->copy() : \Carbon\Carbon::parse($dateTime);
+        $end = $start->copy()->addMinutes($durationMinutes > 0 ? $durationMinutes : 60);
+
+        $sessions = self::with(['therapyType', 'patient'])
+            ->where('patient_id', $patientId)
+            ->whereIn('status', ['pending', 'scheduled', 'in_progress'])
+            ->whereNotNull('scheduled_at')
+            ->whereDate('scheduled_at', $start->toDateString())
+            ->when($excludeSessionId, fn ($q) => $q->where('id', '!=', $excludeSessionId))
+            ->get();
+
+        foreach ($sessions as $session) {
+            $sessStart = \Carbon\Carbon::parse($session->scheduled_at);
+            $sessEnd = $sessStart->copy()->addMinutes($session->therapyType?->duration_minutes ?: 60);
+
+            if ($start < $sessEnd && $end > $sessStart) {
+                $patientName = $session->patient?->full_name ?? 'Pasien';
+                return "Pasien {$patientName} sudah memiliki sesi terapi ({$session->stage_name}) pada "
+                    . $sessStart->locale('id')->isoFormat('D MMMM Y') . " pukul {$sessStart->format('H:i')}–{$sessEnd->format('H:i')} WIB. "
+                    . 'Silakan pilih jam lain yang tidak tumpang tindih.';
+            }
+        }
+
+        return null;
+    }
 }

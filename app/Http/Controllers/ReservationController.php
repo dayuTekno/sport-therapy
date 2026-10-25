@@ -152,6 +152,14 @@ class ReservationController extends Controller
             $preferredSchedule = now()->locale('id')->isoFormat('dddd, D MMMM Y - [Pukul] HH:mm [WIB]');
         }
 
+        // VALIDASI: Tolak jika pasien yang sama sudah punya reservasi aktif pada jam yang sama
+        if ($targetDateTime && ($patientConflict = Reservation::patientScheduleConflict($patient->id, $targetDateTime))) {
+            return redirect()->back()
+                ->withInput()
+                ->withErrors(['preferred_time' => $patientConflict])
+                ->with('error', $patientConflict);
+        }
+
         // VALIDASI: Tolak jika terapis yang sama sudah memiliki jadwal pada jam yang sama
         if ($request->filled('therapist_id') && $targetDateTime) {
             $therapist = Therapist::find($request->therapist_id);

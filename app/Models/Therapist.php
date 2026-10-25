@@ -36,7 +36,7 @@ class Therapist extends Model
      * @param int|null $excludeSessionId ID sesi yang dikecualikan (misal saat update sesi)
      * @return array|null Mengembalikan info konflik atau null jika tersedia
      */
-    public function getScheduleConflict($dateTime, int $durationMinutes = 60, ?int $excludeReservationId = null, ?int $excludeSessionId = null): ?array
+    public function getScheduleConflict($dateTime, int $durationMinutes = 60, ?int $excludeReservationId = null, ?int $excludeSessionId = null, bool $excludeReservationSessions = true): ?array
     {
         if (!$dateTime) {
             return null;
@@ -61,7 +61,9 @@ class Therapist extends Model
         if ($excludeSessionId) {
             $sessionQuery->where('id', '!=', $excludeSessionId);
         }
-        if ($excludeReservationId) {
+        // Sesi milik reservasi yang dikecualikan ikut diabaikan (mis. saat reschedule reservasi),
+        // kecuali saat membuat sesi baru: sesi lain di reservasi yang sama tetap harus dicek.
+        if ($excludeReservationId && $excludeReservationSessions) {
             $sessionQuery->where(function ($q) use ($excludeReservationId) {
                 $q->whereNull('reservation_id')->orWhere('reservation_id', '!=', $excludeReservationId);
             });

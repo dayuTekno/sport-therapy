@@ -127,4 +127,31 @@ class Reservation extends Model
 
         return $code;
     }
+
+    /**
+     * Cek apakah pasien sudah punya reservasi aktif pada jam yang sama (slot 60 menit).
+     * Mengembalikan pesan bentrok, atau null bila aman.
+     */
+    public static function patientScheduleConflict(int $patientId, $dateTime, ?int $excludeReservationId = null): ?string
+    {
+        $start = $dateTime instanceof \Carbon\Carbon ? $dateTime->copy() : \Carbon\Carbon::parse($dateTime);
+        $end = $start->copy()->addMinutes(60);
+
+        $reservations = self::where('patient_id', $patientId)
+            ->whereIn('status', ['pending_confirmation', 'confirmed', 'in_progress'])
+            ->whereDate('preferred_datetime', $start->toDateString())
+            ->when($excludeReservationId, fn ($q) => $q->where('id', '!=', $excludeReservationId))
+            ->get();
+
+        foreach ($reservations as $res) {
+            $resStart = \Carbon\Carbon::parse($res->preferred_datetime);
+            if ($start < $resStart->copy()->addMinutes(60) && $end > $resStart) {
+                return "Pasien ini sudah memiliki reservasi aktif ({$res->reservation_code}) pada "
+                    . $resStart->locale('id')->isoFormat('D MMMM Y') . " pukul {$resStart->format('H:i')} WIB. "
+                    . 'Buka reservasi tersebut atau pilih jam lain.';
+            }
+        }
+
+        return null;
+    }
 }

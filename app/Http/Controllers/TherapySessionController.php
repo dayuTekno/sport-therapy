@@ -196,18 +196,28 @@ class TherapySessionController extends Controller
             }
         }
 
+        $duration = 60;
+        if ($request->filled('therapy_type_id')) {
+            $tTypeCheck = TherapyType::find($request->therapy_type_id);
+            if ($tTypeCheck && $tTypeCheck->duration_minutes > 0) {
+                $duration = $tTypeCheck->duration_minutes;
+            }
+        }
+
+        // VALIDASI: Tolak jika pasien sudah punya sesi lain yang waktunya tumpang tindih
+        if ($patientConflict = TherapySession::patientScheduleConflict((int) $request->patient_id, $scheduledAt, $duration)) {
+            return redirect()->back()
+                ->withInput()
+                ->withErrors(['scheduled_at' => $patientConflict])
+                ->with('error', $patientConflict);
+        }
+
         // VALIDASI: Tolak jika terapis yang sama sudah memiliki jadwal pada jam yang sama
+        // (sesi lain di reservasi yang sama tetap dicek; hanya slot reservasinya sendiri yang diabaikan)
         if ($request->filled('therapist_id')) {
             $therapist = Therapist::find($request->therapist_id);
             if ($therapist) {
-                $duration = 60;
-                if ($request->filled('therapy_type_id')) {
-                    $tTypeCheck = TherapyType::find($request->therapy_type_id);
-                    if ($tTypeCheck && $tTypeCheck->duration_minutes > 0) {
-                        $duration = $tTypeCheck->duration_minutes;
-                    }
-                }
-                $conflict = $therapist->getScheduleConflict($scheduledAt, $duration, $request->reservation_id);
+                $conflict = $therapist->getScheduleConflict($scheduledAt, $duration, $request->reservation_id, null, false);
                 if ($conflict) {
                     return redirect()->back()
                         ->withInput()
@@ -337,12 +347,21 @@ class TherapySessionController extends Controller
                 ->count();
             $dailyOrder = $existingCount + 1;
 
+            $duration = $nextType?->duration_minutes ?: 60;
+
+            // VALIDASI: Tolak jika pasien sudah punya sesi lain yang waktunya tumpang tindih dengan sesi lanjutan
+            if ($patientConflict = TherapySession::patientScheduleConflict($session->patient_id, $nextScheduledAt, $duration, $session->id)) {
+                return redirect()->back()
+                    ->withInput()
+                    ->withErrors(['next_scheduled_at' => $patientConflict])
+                    ->with('error', $patientConflict);
+            }
+
             $nextTherapistId = $request->next_therapist_id ?: $session->therapist_id;
             if ($nextTherapistId) {
                 $therapist = Therapist::find($nextTherapistId);
                 if ($therapist) {
-                    $duration = $nextType?->duration_minutes ?: 60;
-                    $conflict = $therapist->getScheduleConflict($nextScheduledAt, $duration, $session->reservation_id, $session->id);
+                    $conflict = $therapist->getScheduleConflict($nextScheduledAt, $duration, $session->reservation_id, $session->id, false);
                     if ($conflict) {
                         return redirect()->back()
                             ->withInput()
