@@ -105,7 +105,7 @@ alertType = 'error';
             <footer class="border-t border-gray-200 dark:border-gray-800 px-3 sm:px-4 md:px-6 py-4">
                 <div class="mx-auto max-w-7xl flex flex-col sm:flex-row items-center justify-between gap-1 text-xs text-gray-500 dark:text-gray-400">
                     <span>&copy; {{ date('Y') }} Smart Clinic Therapy</span>
-                    <span>Developed by <strong class="font-semibold text-gray-700 dark:text-gray-300">CV Darma Ayu Tekno</strong></span>
+                    <span>Developed by <a href="https://dayutekno.com" target="_blank" rel="noopener" class="font-semibold text-gray-700 dark:text-gray-300 hover:text-blue-600 hover:underline">CV Darma Ayu Tekno</a>, Indramayu, Jawa Barat</span>
                 </div>
             </footer>
         </div>
