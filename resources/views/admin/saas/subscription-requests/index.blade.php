@@ -178,7 +178,7 @@
     <p class="text-[11px] text-gray-500 mb-3">Ditampilkan di halaman Langganan Paket klinik, misalnya nomor rekening tujuan, a.n., atau QRIS.</p>
     <form action="{{ route('saas.subscription-requests.instructions') }}" method="POST" class="space-y-3 text-xs">
         @csrf
-        <textarea name="instructions" rows="4" placeholder="Transfer ke BCA 1234567890 a.n. PT Smart Clinic Therapy&#10;Konfirmasi via WhatsApp 08xxxx"
+        <textarea name="instructions" rows="4" placeholder="Contoh: Transfer ke [nama bank] [nomor rekening] a.n. [nama pemilik rekening]&#10;Konfirmasi via WhatsApp [nomor admin]"
                   class="w-full px-3 py-2 text-xs border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500">{{ old('instructions', $paymentInstructions) }}</textarea>
         <button type="submit" class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-md transition cursor-pointer">Simpan Instruksi</button>
     </form>
