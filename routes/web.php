@@ -89,6 +89,9 @@ Route::middleware(['auth'])->group(function () {
     Route::post('clinic/settings', [\App\Http\Controllers\ClinicSettingController::class, 'update'])->name('clinic.settings.update');
     Route::get('clinic/referral', [\App\Http\Controllers\ClinicReferralController::class, 'index'])->name('clinic.referral');
 
+    // Panduan Penggunaan (dokumentasi alur aplikasi dengan screenshot)
+    Route::get('panduan', [\App\Http\Controllers\GuideController::class, 'index'])->name('guide.index');
+
     // Langganan Paket Klinik (request pembelian, approval manual oleh SaaS admin)
     Route::get('clinic/subscription', [\App\Http\Controllers\ClinicSubscriptionController::class, 'index'])->name('clinic.subscription');
     Route::post('clinic/subscription', [\App\Http\Controllers\ClinicSubscriptionController::class, 'store'])->name('clinic.subscription.store');

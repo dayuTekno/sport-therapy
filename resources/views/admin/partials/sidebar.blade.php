@@ -264,6 +264,26 @@
                     </li>
                 </ul>
 
+                <!-- GROUP: BANTUAN -->
+                <h3 class="mb-3 text-[11px] font-bold uppercase tracking-wider text-gray-400">
+                    <span :class="sidebarToggle ? 'lg:hidden' : ''">Bantuan</span>
+                </h3>
+
+                <ul class="flex flex-col gap-2 mb-6">
+                    <li>
+                        <a href="{{ route('guide.index') }}"
+                            class="menu-item group flex items-center gap-3
+                            {{ request()->routeIs('guide.*') ? 'menu-item-active' : 'menu-item-inactive' }}">
+                            <svg class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                            </svg>
+                            <span class="menu-item-text font-medium text-sm" :class="sidebarToggle ? 'lg:hidden' : ''">
+                                Panduan Penggunaan
+                            </span>
+                        </a>
+                    </li>
+                </ul>
+
                 <!-- GROUP: TAUTAN EKSTERNAL -->
                 <h3 class="mb-3 text-[11px] font-bold uppercase tracking-wider text-gray-400">
                     <span :class="sidebarToggle ? 'lg:hidden' : ''">Pratinjau Publik</span>
@@ -669,6 +689,26 @@
                     </li>
                 </ul>
                 @endif
+
+                <!-- BANTUAN -->
+                <h3 class="mb-4 text-xs uppercase text-gray-400 font-semibold tracking-wider">
+                    <span :class="sidebarToggle ? 'lg:hidden' : ''">Bantuan</span>
+                </h3>
+
+                <ul class="flex flex-col gap-3 mb-6">
+                    <li>
+                        <a href="{{ route('guide.index') }}"
+                            class="menu-item group flex items-center gap-3
+                            {{ request()->routeIs('guide.*') ? 'menu-item-active' : 'menu-item-inactive' }}">
+                            <svg class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                            </svg>
+                            <span class="menu-item-text font-medium text-sm" :class="sidebarToggle ? 'lg:hidden' : ''">
+                                Panduan Penggunaan
+                            </span>
+                        </a>
+                    </li>
+                </ul>
 
             @endif
             @endif
