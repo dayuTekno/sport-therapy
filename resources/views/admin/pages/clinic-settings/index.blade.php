@@ -109,7 +109,7 @@
                             <label class="block font-bold text-gray-700 uppercase tracking-wider mb-1.5">
                                 Nama Lengkap & Gelar Tertanda
                             </label>
-                            <input type="text" name="signer_name" value="{{ old('signer_name', $clinic->signer_name ?? 'Iyon Pramulo, S.Or, M.Pd, AIFO') }}"
+                            <input type="text" name="signer_name" value="{{ old('signer_name', $clinic->signer_name) }}"
                                    placeholder="Contoh: Iyon Pramulo, S.Or, M.Pd, AIFO"
                                    class="w-full px-3.5 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 text-xs font-bold text-gray-900">
                             <p class="text-[10px] text-gray-400 mt-1">Nama terapis/dokter pemeriksa yang tercetak di bawah tanda tangan</p>
@@ -237,30 +237,34 @@
             <div class="bg-gradient-to-br from-slate-50 to-blue-50/30 rounded-2xl border border-blue-100 p-5">
                 <h4 class="text-xs font-bold text-blue-900 uppercase tracking-wider mb-2">Pratinjau Pengesahan Surat:</h4>
                 <div class="bg-white rounded-xl p-4 border border-gray-200 shadow-sm text-right text-xs">
-                    <div class="text-[11px] text-gray-600">{{ $clinic->city ?? 'Indramayu' }}, {{ now()->translatedFormat('d F Y') }}</div>
-                    <div class="text-[11px] font-semibold text-gray-800 mb-2">{{ $clinic->signer_title ?? 'Sport Therapis Pemeriksa' }}</div>
+                    <div class="text-[11px] text-gray-600">@if(filled($clinic->city)){{ $clinic->city }}@else<span class="italic font-normal text-gray-400">belum diatur</span>@endif, {{ now()->translatedFormat('d F Y') }}</div>
+                    <div class="text-[11px] font-semibold text-gray-800 mb-2">@if(filled($clinic->signer_title)){{ $clinic->signer_title }}@else<span class="italic font-normal text-gray-400">belum diatur</span>@endif</div>
 
                     {{-- Stacking Cap & TTD --}}
                     <div class="relative h-20 w-48 ml-auto my-1 flex items-center justify-center">
                         @if($clinic->stamp_path)
                             <img src="{{ asset('storage/' . $clinic->stamp_path) }}" class="absolute left-2 w-20 h-20 object-contain opacity-85 z-0" alt="Cap">
                         @else
-                            <div class="absolute left-2 text-purple-700 font-extrabold text-[11px] uppercase border-2 border-purple-600 rounded px-2 py-1 transform -rotate-12 opacity-80 z-0">
-                                RSTBDI TERAPIS OLAHRAGA
+                            <div class="absolute left-0 text-[10px] italic text-gray-400 border border-dashed border-gray-300 rounded px-2 py-1 z-0">
+                                Cap: belum diatur
                             </div>
                         @endif
 
                         @if($clinic->signature_path)
                             <img src="{{ asset('storage/' . $clinic->signature_path) }}" class="absolute inset-0 w-full h-full object-contain z-10" alt="TTD">
                         @else
-                            <div class="z-10 font-serif italic text-xl text-gray-800 tracking-wider">
-                                ~ {{ Str::limit($clinic->signer_name ?? 'Iyon Pramulo', 12) }} ~
+                            <div class="absolute right-0 text-[10px] italic text-gray-400 border border-dashed border-gray-300 rounded px-2 py-1 z-10">
+                                TTD: belum diatur
                             </div>
                         @endif
                     </div>
 
-                    <div class="font-bold text-gray-900 text-xs underline mt-1">
-                        {{ $clinic->signer_name ?? 'Iyon Pramulo, S.Or, M.Pd, AIFO' }}
+                    <div class="font-bold text-gray-900 text-xs mt-1">
+                        @if(filled($clinic->signer_name))
+                            <span class="underline">{{ $clinic->signer_name }}</span>
+                        @else
+                            <span class="italic font-normal text-gray-400">belum diatur</span>
+                        @endif
                     </div>
                 </div>
             </div>

@@ -134,7 +134,14 @@
                     @if($paymentInstructions)
                         <div class="p-3 bg-blue-50/70 border border-blue-200 rounded-xl text-blue-950 whitespace-pre-line leading-relaxed">{{ $paymentInstructions }}</div>
                     @else
-                        <div class="p-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-600">Hubungi admin platform untuk informasi rekening / metode pembayaran.</div>
+                        <div class="p-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-600">
+                            Hubungi admin platform untuk informasi rekening / metode pembayaran:
+                            <a href="https://wa.me/6285183036722?text={{ rawurlencode('Halo Admin, saya ingin informasi rekening / metode pembayaran paket langganan untuk klinik ' . $clinic->name . '.') }}"
+                               target="_blank" rel="noopener"
+                               class="inline-flex items-center gap-1 font-bold text-emerald-600 hover:text-emerald-700 hover:underline whitespace-nowrap">
+                                💬 0851-8303-6722 (WhatsApp)
+                            </a>
+                        </div>
                     @endif
                     <p class="text-[10px] text-gray-400 mt-2">Jika masa langganan masih berjalan, masa aktif paket baru disambung dari tanggal berakhir saat ini.</p>
                 </div>
