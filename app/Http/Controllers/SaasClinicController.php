@@ -73,8 +73,12 @@ class SaasClinicController extends Controller
             'phone_number' => $request->phone_number,
             'address' => $request->address,
             'status' => $request->status,
-            'trial_ends_at' => $request->status === 'trial' ? now()->addDays($plan->trial_days ?: \App\Models\LandingPageSetting::getTrialDays()) : null,
-            'subscription_ends_at' => $request->subscription_ends_at,
+            'trial_ends_at' => $request->status === 'trial'
+                ? ($request->filled('subscription_ends_at')
+                    ? \Carbon\Carbon::parse($request->subscription_ends_at)->endOfDay()
+                    : now()->addDays($plan->trial_days ?: \App\Models\LandingPageSetting::getTrialDays()))
+                : null,
+            'subscription_ends_at' => $request->filled('subscription_ends_at') ? \Carbon\Carbon::parse($request->subscription_ends_at)->endOfDay() : null,
             'subscription_plan_id' => $plan->id,
             'max_therapists' => $plan->max_therapists,
             'max_patients' => $plan->max_patients,
@@ -123,12 +127,15 @@ class SaasClinicController extends Controller
         ]);
 
         $status = $request->status;
-        $subscriptionEndsAt = $request->subscription_ends_at;
+        // Tanggal dari form berlaku sampai akhir hari tersebut (bukan pukul 00:00)
+        $subscriptionEndsAt = $request->filled('subscription_ends_at')
+            ? \Carbon\Carbon::parse($request->subscription_ends_at)->endOfDay()
+            : null;
 
         // Auto-correct hanya untuk mismatch 'expired' ↔ 'active' vs tanggal.
         // Pilihan 'trial' dan 'suspended' dari admin SELALU direspect tanpa override.
         if ($subscriptionEndsAt && in_array($status, ['active', 'expired'])) {
-            $endDate = \Carbon\Carbon::parse($subscriptionEndsAt);
+            $endDate = $subscriptionEndsAt;
 
             if ($endDate->isFuture() && $status === 'expired') {
                 // Admin set expired tapi tanggal belum lewat → koreksi ke active
@@ -146,6 +153,8 @@ class SaasClinicController extends Controller
             'address' => $request->address,
             'subscription_plan_id' => $request->subscription_plan_id,
             'subscription_ends_at' => $subscriptionEndsAt,
+            // Klinik trial: akhir masa trial disamakan dengan tanggal di form agar tidak ada dua tanggal yang berbeda
+            'trial_ends_at' => ($status === 'trial' && $subscriptionEndsAt) ? $subscriptionEndsAt : $clinic->trial_ends_at,
             'status' => $status,
             'max_therapists' => $request->max_therapists,
             'max_patients' => $request->max_patients,

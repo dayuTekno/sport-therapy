@@ -18,7 +18,7 @@
         $clinic->status === 'active' => 'Berlangganan Aktif',
         default => ucfirst($clinic->status),
     };
-    $endDate = $clinic->subscription_ends_at ?? ($clinic->status === 'trial' ? $clinic->trial_ends_at : null);
+    $endDate = $clinic->effectiveEndDate();
 @endphp
 
 <div class="mb-6">

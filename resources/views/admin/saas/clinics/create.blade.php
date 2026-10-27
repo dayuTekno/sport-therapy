@@ -87,7 +87,7 @@
                     </label>
                     <input type="date" name="subscription_ends_at" value="{{ old('subscription_ends_at') }}"
                            class="w-full px-3.5 py-2.5 text-xs border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 font-medium">
-                    <p class="text-[10px] text-gray-400 mt-1">Opsional: Tanggal batas akhir langganan</p>
+                    <p class="text-[10px] text-gray-400 mt-1">Opsional. Untuk status <b>Trial</b>, tanggal ini menjadi akhir masa trial.</p>
                 </div>
             </div>
 

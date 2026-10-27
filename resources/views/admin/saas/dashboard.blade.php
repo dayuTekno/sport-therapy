@@ -165,7 +165,7 @@
                         <td class="p-4 text-center">
                         @php
                             // Tentukan tanggal end yang relevan
-                            $endDate = $c->subscription_ends_at ?? ($c->status === 'trial' ? $c->trial_ends_at : null);
+                            $endDate = $c->effectiveEndDate();
                             $remaining = $endDate ? (int) now()->diffInDays($endDate, false) : null;
                         @endphp
                         @if($c->status === 'active')

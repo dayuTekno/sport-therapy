@@ -121,18 +121,19 @@
                 <div>
                     <label class="block font-bold text-gray-700 uppercase tracking-wider mb-1.5 flex items-center justify-between">
                         <span>End Date Subscribe</span>
-                        @if($clinic->subscription_ends_at)
-                            @if($clinic->subscription_ends_at->isPast())
+                        @php $effectiveEnd = $clinic->effectiveEndDate(); @endphp
+                        @if($effectiveEnd)
+                            @if($clinic->isSubscriptionExpired())
                                 <span class="text-rose-600 font-bold text-[10px] bg-rose-50 px-1.5 py-0.5 rounded">Habis</span>
                             @else
-                                <span class="text-emerald-600 font-bold text-[10px] bg-emerald-50 px-1.5 py-0.5 rounded">{{ now()->diffInDays($clinic->subscription_ends_at) }} hari lagi</span>
+                                <span class="text-emerald-600 font-bold text-[10px] bg-emerald-50 px-1.5 py-0.5 rounded">{{ $clinic->daysRemaining() }} hari lagi</span>
                             @endif
                         @endif
                     </label>
                     <input type="date" name="subscription_ends_at" 
-                           value="{{ old('subscription_ends_at', $clinic->subscription_ends_at?->format('Y-m-d')) }}"
+                           value="{{ old('subscription_ends_at', $clinic->effectiveEndDate()?->format('Y-m-d')) }}"
                            class="w-full px-3.5 py-2.5 text-xs border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 font-medium">
-                    <p class="text-[10px] text-gray-400 mt-1">Batas tanggal aktif langganan operasional klinik</p>
+                    <p class="text-[10px] text-gray-400 mt-1">Berlaku sampai akhir hari tanggal ini. Untuk status <b>Trial</b>, tanggal ini menjadi akhir masa trial.</p>
                 </div>
             </div>
 

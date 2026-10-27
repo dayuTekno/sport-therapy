@@ -76,7 +76,7 @@
                 @forelse($clinics as $i => $c)
                     @php
                         // Hitung sisa hari — gunakan subscription_ends_at lebih dulu, fallback ke trial_ends_at
-                        $endDate   = $c->subscription_ends_at ?? ($c->status === 'trial' ? $c->trial_ends_at : null);
+                        $endDate   = $c->effectiveEndDate();
                         $remaining = $endDate ? (int) now()->diffInDays($endDate, false) : null;
                         $isExpiredDate = $endDate && $endDate->isPast();
 

@@ -184,26 +184,36 @@ class Clinic extends Model
         ]);
     }
 
+    /**
+     * Tanggal berakhir masa aktif yang berlaku: tanggal "End Date Subscribe" (subscription_ends_at),
+     * atau akhir masa trial bila tanggal tersebut kosong. Dipakai bersama oleh pengecekan kunci menu
+     * dan seluruh tampilan sisa hari, agar keduanya selalu sinkron.
+     * Tanggal yang diisi dari form (pukul 00:00) berlaku sampai akhir hari tersebut.
+     */
+    public function effectiveEndDate(): ?\Carbon\Carbon
+    {
+        $end = $this->subscription_ends_at ?? ($this->status === 'trial' ? $this->trial_ends_at : null);
+        if (!$end) {
+            return null;
+        }
+
+        return $end->format('H:i:s') === '00:00:00' ? $end->copy()->endOfDay() : $end->copy();
+    }
+
     public function isSubscriptionExpired(): bool
     {
         if ($this->status === 'expired' || $this->status === 'suspended') {
             return true;
         }
 
-        if ($this->subscription_ends_at && $this->subscription_ends_at->isPast()) {
-            return true;
-        }
+        $end = $this->effectiveEndDate();
 
-        if ($this->status === 'trial' && $this->trial_ends_at && $this->trial_ends_at->isPast()) {
-            return true;
-        }
-
-        return false;
+        return $end !== null && $end->isPast();
     }
 
     public function daysRemaining(): ?int
     {
-        $target = $this->subscription_ends_at ?? ($this->status === 'trial' ? $this->trial_ends_at : null);
+        $target = $this->effectiveEndDate();
         if (!$target) {
             return null;
         }
